@@ -1,0 +1,14 @@
+{
+	"required": true,
+	"package": "xyz.nibblz.islandeconomist.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"mixins": [
+      "ClientPacketMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"overwrites": {
+		"requireAnnotations": true
+	}
+}
