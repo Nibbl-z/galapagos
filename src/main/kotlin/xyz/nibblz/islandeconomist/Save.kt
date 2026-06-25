@@ -33,9 +33,7 @@ object Save {
     }
 
     fun save() {
-        IslandEconomist.logger.info("hi im save")
         val saved = json.encodeToString(IslandEconomist.save)
-        IslandEconomist.logger.info("hi im save 2")
         IslandEconomist.logger.info(saved)
         IslandEconomist.logger.info(path.toString())
 
