@@ -8,7 +8,7 @@ import java.nio.file.Files
 @Serializable
 data class CoinChange(
     var amount: Int = 0,
-    var timestamp: Int = 0,
+    var timestamp: Long = 0,
     var source: String = "Unknown"
 )
 

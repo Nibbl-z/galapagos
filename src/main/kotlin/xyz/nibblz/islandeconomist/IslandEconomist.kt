@@ -28,8 +28,6 @@ object IslandEconomist : ModInitializer {
 
 		logger.info("Hello Fabric world!")
 
-		Save.save()
-
 		ClientLifecycleEvents.CLIENT_STOPPING.register {onShutdown()}
 	}
 
