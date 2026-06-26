@@ -1,16 +1,21 @@
 package xyz.nibblz.galapagos.mixin;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import xyz.nibblz.galapagos.UtilKt;
+import xyz.nibblz.galapagos.events.ContainerCloseEvent;
 import xyz.nibblz.galapagos.features.CoinTracking;
 
 @Mixin(Player.class)
 public class PlayerMixin {
     @Inject(method = "closeContainer", at = @At("TAIL"))
     private void closeContainer(CallbackInfo ci) {
-        CoinTracking.INSTANCE.handleContainerClose();
+        if (!UtilKt.onIsland()) return;
+
+        ContainerCloseEvent.INSTANCE.getEVENT().invoker().invoke();
     }
 }

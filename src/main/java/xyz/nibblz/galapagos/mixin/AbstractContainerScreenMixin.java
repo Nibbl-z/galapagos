@@ -9,6 +9,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import xyz.nibblz.galapagos.UtilKt;
+import xyz.nibblz.galapagos.events.ContainerOpenEvent;
+import xyz.nibblz.galapagos.events.SlotClickEvent;
 import xyz.nibblz.galapagos.features.CoinTracking;
 
 @Mixin(AbstractContainerScreen.class)
@@ -16,7 +19,9 @@ public class AbstractContainerScreenMixin {
     @Inject(method = "slotClicked", at = @At("HEAD"))
     private void slotClicked(Slot slot, int slotId, int buttonNum, ContainerInput containerInput, CallbackInfo ci) {
         ContainerScreen screen = Minecraft.getInstance().screen instanceof ContainerScreen s ? s : null;
+        if (!UtilKt.onIsland()) return;
         if (screen == null) return;
-        CoinTracking.INSTANCE.mouseClicked(screen, containerInput);
+
+        SlotClickEvent.INSTANCE.getEVENT().invoker().invoke(screen, containerInput);
     }
 }

@@ -27,3 +27,19 @@ fun ItemStack.findLore(regex: Regex): MatchGroupCollection? {
 
     return null
 }
+
+fun ItemStack.findLore(string: String): Boolean {
+    val lore = this.getTooltipLines(
+        Item.TooltipContext.EMPTY,
+        Minecraft.getInstance().player,
+        TooltipFlag.Default.NORMAL
+    )
+
+    lore.forEach {
+        if (it.string.contains(string)) {
+            return@findLore true
+        }
+    }
+
+    return false
+}

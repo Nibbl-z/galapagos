@@ -6,6 +6,7 @@
 		"ClientPacketMixin",
 		"PlayerMixin",
 		"AbstractContainerScreenMixin",
+		"BitmapProviderMixin",
 		"accessor.HoveredSlotAccessor"
 	],
 	"injectors": {

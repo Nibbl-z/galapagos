@@ -1,13 +1,16 @@
 package xyz.nibblz.galapagos.features
 
+import kotlinx.serialization.Serializable
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.screens.inventory.ContainerScreen
 import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
 import net.minecraft.world.inventory.ContainerInput
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
-import xyz.nibblz.galapagos.CoinChange
 import xyz.nibblz.galapagos.Galapagos
+import xyz.nibblz.galapagos.events.ContainerCloseEvent
+import xyz.nibblz.galapagos.events.ContainerOpenEvent
+import xyz.nibblz.galapagos.events.SlotClickEvent
 import xyz.nibblz.galapagos.findLore
 import xyz.nibblz.galapagos.mixin.accessor.HoveredSlotAccessor
 import kotlin.time.Clock
@@ -16,7 +19,11 @@ object CoinTracking : Feature {
     override val id = "coin_tracking"
     override val name = "Coin Tracking"
 
-    override fun init() {}
+    override fun init() {
+        ContainerOpenEvent.EVENT.register { packet -> handleContainerContent(packet) }
+        ContainerCloseEvent.EVENT.register { handleContainerClose() }
+        SlotClickEvent.EVENT.register { screen, input -> slotClick(screen, input) }
+    }
 
     var price = 0
     var shiftClickAmount = 0
@@ -99,7 +106,7 @@ object CoinTracking : Feature {
         shiftClickAmount = cleanedPriceString.toInt()
     }
 
-    fun mouseClicked(screen: ContainerScreen, type: ContainerInput) {
+    fun slotClick(screen: ContainerScreen, type: ContainerInput) {
         val item = (screen as HoveredSlotAccessor).`galapagos$hoveredSlot`() ?: return
 
         if (price == 0 && rewardCrate == null) {
@@ -148,4 +155,11 @@ object CoinTracking : Feature {
         source = "Unknown"
         Galapagos.logger.info("this ui has apparently been closed! (which is probably any ui)")
     }
+
+    @Serializable
+    data class CoinChange(
+        var amount: Int = 0,
+        var timestamp: Long = 0,
+        var source: String = "Unknown"
+    )
 }

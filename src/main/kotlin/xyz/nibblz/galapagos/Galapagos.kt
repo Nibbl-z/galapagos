@@ -6,6 +6,7 @@ import net.minecraft.resources.Identifier
 import org.slf4j.LoggerFactory
 import org.slf4j.Logger
 import xyz.nibblz.galapagos.features.CoinTracking
+import xyz.nibblz.galapagos.features.QuestTracking
 
 object Galapagos : ModInitializer {
 	const val MOD_ID: String = "galapagos"
@@ -13,22 +14,18 @@ object Galapagos : ModInitializer {
 	val logger: Logger = LoggerFactory.getLogger(MOD_ID)
 	var save: PlayerSave = PlayerSave()
 
-
-
 	fun registerFeatures() {
 		CoinTracking.init()
+		QuestTracking.init()
 	}
 
 	override fun onInitialize() {
-		// This code runs as soon as Minecraft is in a mod-load-ready state.
-		// However, some things (like resources) may still be uninitialized.
-		// Proceed with mild caution.
-
 		Save.load()
-
-		logger.info("Hello Fabric world!")
+		registerFeatures()
 
 		ClientLifecycleEvents.CLIENT_STOPPING.register {onShutdown()}
+
+		logger.info("Galapagos initialized!")
 	}
 
 	private fun onShutdown() {

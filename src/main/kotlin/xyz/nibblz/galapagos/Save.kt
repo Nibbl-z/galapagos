@@ -3,18 +3,14 @@ package xyz.nibblz.galapagos
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import net.fabricmc.loader.api.FabricLoader
+import xyz.nibblz.galapagos.features.CoinTracking
+import xyz.nibblz.galapagos.features.QuestTracking
 import java.nio.file.Files
 
 @Serializable
-data class CoinChange(
-    var amount: Int = 0,
-    var timestamp: Long = 0,
-    var source: String = "Unknown"
-)
-
-@Serializable
 data class PlayerSave(
-    var coinChanges: MutableList<CoinChange> = mutableListOf()
+    var coinChanges: MutableList<CoinTracking.CoinChange> = mutableListOf(),
+    var questHistory: MutableList<QuestTracking.QuestingReward> = mutableListOf()
 )
 
 object Save {
