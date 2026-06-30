@@ -33,6 +33,8 @@ object Galapagos : ModInitializer {
 
 		ClientLifecycleEvents.CLIENT_STOPPING.register {onShutdown()}
 
+		PlayerData.fetchAPI()
+
 		logger.info("Galapagos initialized!")
 	}
 

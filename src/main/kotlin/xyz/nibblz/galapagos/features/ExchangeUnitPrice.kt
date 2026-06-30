@@ -65,8 +65,6 @@ object ExchangeUnitPrice : Feature {
             }
         }
 
-
-
         if (item.findLore("Chroma Set:")) { // all weapon skins have this lore so its easier to detect that
             var stars = 0
             if (item.findLore("Elimination Effect:")) stars = 1
@@ -102,6 +100,10 @@ object ExchangeUnitPrice : Feature {
                     else -> 1
                 }
             }
+        }
+
+        if (item.itemName.string.contains("Elimination Effect") or item.itemName.string.contains("Chroma Set")) {
+            wispEquivalent[item] = 2
         }
     }
 
@@ -157,7 +159,7 @@ object ExchangeUnitPrice : Feature {
             list.add(listedPriceIndex + 1,
                 Component.literal("Soul Equivalent: ").withColor(ChatFormatting.GRAY.color!!)
                     .append(Component.literal("\uE001").withColor(0xffffff).withStyle(Style.EMPTY.withFont(Galapagos.font)))
-                    .append(Component.literal(soulEquivalent[item].toString()).withColor(0xffffff))
+                    .append(Component.literal((soulEquivalent[item] !! * item.count).toString()).withColor(0xffffff))
                     .append(Component.literal(", "))
                     .append(Glyphs.getGlyphComponent("_fonts/icon/coin.png"))
                     .append(Component.literal("%,d".format(soulUnitPrice) + " per").withColor(0xffffff))
@@ -170,7 +172,7 @@ object ExchangeUnitPrice : Feature {
             list.add(listedPriceIndex + 1,
                 Component.literal("Wisp Equivalent: ").withColor(ChatFormatting.GRAY.color!!)
                     .append(Component.literal("\uE002").withColor(0xffffff).withStyle(Style.EMPTY.withFont(Galapagos.font)))
-                    .append(Component.literal(wispEquivalent[item].toString()).withColor(0xffffff))
+                    .append(Component.literal((wispEquivalent[item]!! * item.count).toString()).withColor(0xffffff))
                     .append(Component.literal(", "))
                     .append(Glyphs.getGlyphComponent("_fonts/icon/coin.png"))
                     .append(Component.literal("%,d".format(wispUnitPrice) + " per").withColor(0xffffff))

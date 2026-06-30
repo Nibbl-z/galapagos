@@ -3,9 +3,10 @@
 	"id": "galapagos",
 	"version": "${version}",
 	"name": "Galapagos",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"description": "Client mod to show more info, statistics, and chances related to MCC Island's economy and progression.",
 	"authors": [
-		"Me!"
+		"Nibbl_z",
+		"DevCmb"
 	],
 	"contact": {
 		"homepage": "https://fabricmc.net/",
