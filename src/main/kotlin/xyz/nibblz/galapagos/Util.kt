@@ -53,7 +53,7 @@ fun ItemStack.findLore(string: String): Boolean {
 fun ItemStack.getCosmetic(): Cosmetic? {
     val chanceRegex = Regex("Chance: (?<chance>[\\d,.]+)%")
     val chanceString = this.findLore(chanceRegex)?.get("chance")?.value ?: return null
-    val chance = chanceString.toFloat()
+    val chance = chanceString.toDouble()
 
     val isOwned = this.findLore("Royal Donations:")
     var trophies = 10
@@ -84,15 +84,15 @@ fun ItemStack.getCosmetic(): Cosmetic? {
 }
 
 fun BlueprintLootPreview.update(cosmetics: List<Cosmetic>) {
-    this.newCosmeticChance = 0.0f
+    this.newCosmeticChance = 0.0
     this.currentTrophies = 0
     this.totalTrophies = 0
-    this.newRepChance = 0.0f
+    this.newRepChance = 0.0
     this.currentRep = 0
     this.totalRep = 0
 
-    var totalNewCosmeticChance = 0.0f
-    var totalNewRepChance = 0.0f
+    var totalNewCosmeticChance = 0.0
+    var totalNewRepChance = 0.0
 
     cosmetics.forEach {
         if (!it.isOwned) {
@@ -114,8 +114,8 @@ fun BlueprintLootPreview.update(cosmetics: List<Cosmetic>) {
     }
 
     // this is needed because the chances for some crates are rounded and don't add up to 100% (eg. the mythic crate)
-    this.newCosmeticChance = (this.newCosmeticChance / totalNewCosmeticChance) * 100f
-    this.newRepChance = (this.newRepChance / totalNewRepChance) * 100f
+    this.newCosmeticChance = (this.newCosmeticChance / totalNewCosmeticChance) * 100.0
+    this.newRepChance = (this.newRepChance / totalNewRepChance) * 100.0
 }
 
 fun BlueprintLootPreview.render(graphics: GuiGraphicsExtractor, x: Int, y: Int, w: Int) {

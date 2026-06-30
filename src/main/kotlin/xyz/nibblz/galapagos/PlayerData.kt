@@ -43,6 +43,14 @@ object PlayerData {
         val isColored: Boolean
     )
 
+    fun Cosmetic.getRep(): Int {
+        return this.donations * when(this.tag) {
+            CosmeticTag.STANDARD -> this.rarity.trophies / 10
+            CosmeticTag.EXCLUSIVE -> this.rarity.trophies / 5
+            CosmeticTag.ARCANE -> 30
+        }
+    }
+
     @Serializable
     data class APICosmeticData(
         val trophies: Int,
