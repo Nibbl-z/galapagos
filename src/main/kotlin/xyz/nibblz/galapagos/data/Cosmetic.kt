@@ -6,5 +6,6 @@ data class Cosmetic(
     var trophies: Int,
     var rep: Int,
     var perDonation: Int,
-    var bonusCores: Double
+    var mythicCores: Double,
+    var arcaneCores: Double
 )

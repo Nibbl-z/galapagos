@@ -81,7 +81,7 @@ object PlayerData {
         val trophies: Int,
         val name: String,
         val collection: String,
-        val obtainmentHint: String
+        val type: String
     )
 
     @Serializable
@@ -109,7 +109,7 @@ object PlayerData {
                       trophies
                       name
                       collection
-                      obtainmentHint
+                      type
                     }
                     chromaPacks
                     owned
@@ -137,9 +137,7 @@ object PlayerData {
 
         apiCosmetics.forEach {
             val collection = Collection.entries.find { entry -> entry.label == it.cosmetic.collection } ?: return@forEach
-            val tag = if (collection != Collection.GATE) collection.tag else {
-               if (it.cosmetic.obtainmentHint.contains("Arcane Gate")) CosmeticTag.ARCANE else CosmeticTag.STANDARD
-            } ?: throw IllegalStateException("Could not determine cosmetic tag for ${it.cosmetic.name}")
+            val tag = CosmeticTag.valueOf(it.cosmetic.type)
 
             val cosmetic = Cosmetic(
                 name = it.cosmetic.name,

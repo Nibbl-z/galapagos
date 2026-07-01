@@ -15,13 +15,19 @@ import net.minecraft.world.item.TooltipFlag
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.Glyphs
 import xyz.nibblz.galapagos.PlayerData
+import xyz.nibblz.galapagos.PlayerData.CosmeticTag
 import xyz.nibblz.galapagos.PlayerData.bonusCoresPerScavenge
 import xyz.nibblz.galapagos.PlayerData.getRep
 import xyz.nibblz.galapagos.PlayerData.repPerDonation
 import xyz.nibblz.galapagos.data.BlueprintLootPreview
 import xyz.nibblz.galapagos.data.Cosmetic
 import xyz.nibblz.galapagos.data.Rarity
+import xyz.nibblz.galapagos.data.arcaneCoresPerRollTooltip
+import xyz.nibblz.galapagos.data.mythicCoresPerRollTooltip
+import xyz.nibblz.galapagos.data.newCosmeticTooltip
+import xyz.nibblz.galapagos.data.newRepTooltip
 import xyz.nibblz.galapagos.data.render
+import xyz.nibblz.galapagos.data.trophiesPerRollTooltip
 import xyz.nibblz.galapagos.data.update
 import xyz.nibblz.galapagos.events.ContainerCloseEvent
 import xyz.nibblz.galapagos.events.ContainerOpenEvent
@@ -96,10 +102,9 @@ object CosmeticMachineChances : Feature {
     fun updateItems() {
         val screen = Minecraft.getInstance().screen ?: return
         if (screen.title.string.contains("COSMETIC MACHINE")) inCosmeticMachine = true
-        if (!screen.title.string.contains("LOOT PREVIEW")) return
         if (!inCosmeticMachine) return
 
-        val cosmeticCounts: HashMap<Pair<Rarity, PlayerData.CosmeticTag>, Int> = hashMapOf()
+        val cosmeticCounts: HashMap<Pair<Rarity, CosmeticTag>, Int> = hashMapOf()
 
         Galapagos.save.cosmetics.forEach { (_, it) ->
             cosmeticCounts[Pair(it.rarity, it.tag)] = (cosmeticCounts[Pair(it.rarity, it.tag)] ?: 0) + 1
@@ -120,7 +125,8 @@ object CosmeticMachineChances : Feature {
                         trophies = it.rarity.trophies,
                         rep = it.getRep(),
                         perDonation = it.repPerDonation(),
-                        bonusCores = it.bonusCoresPerScavenge()
+                        mythicCores = it.bonusCoresPerScavenge() * if (it.tag == CosmeticTag.STANDARD) 1.0 else 10.0,
+                        arcaneCores = it.bonusCoresPerScavenge() * if (it.tag == CosmeticTag.STANDARD) 0.05 else 1.0,
                     )
                 } else Galapagos.logger.warn("Failed to get basic pull chance for ${it.name}")
             }
@@ -136,7 +142,8 @@ object CosmeticMachineChances : Feature {
                         trophies = it.rarity.trophies,
                         rep = it.getRep(),
                         perDonation = it.repPerDonation(),
-                        bonusCores = it.bonusCoresPerScavenge()
+                        mythicCores = it.bonusCoresPerScavenge() * if (it.tag == CosmeticTag.STANDARD) 1.0 else 10.0,
+                        arcaneCores = it.bonusCoresPerScavenge() * if (it.tag == CosmeticTag.STANDARD) 0.05 else 1.0,
                     )
                 } else Galapagos.logger.warn("Failed to get ultimate pull chance for ${it.name}")
             }
@@ -194,6 +201,13 @@ object CosmeticMachineChances : Feature {
             // devcmb told me to use repeat (2) but idont wanna
             list.removeAt(11)
             list.removeAt(11)
+
+            list.add(10, Component.empty())
+            list.add(11, basicData.newCosmeticTooltip())
+            list.add(12, basicData.newRepTooltip())
+            list.add(13, basicData.trophiesPerRollTooltip())
+            list.add(14, basicData.mythicCoresPerRollTooltip())
+            list.add(15, basicData.arcaneCoresPerRollTooltip())
         }
 
         if(item.itemName.string == "Ultimate Pull") {
@@ -209,6 +223,13 @@ object CosmeticMachineChances : Feature {
             list.removeAt(11)
             list.removeAt(11)
             list.removeAt(11)
+
+            list.add(10, Component.empty())
+            list.add(11, ultimateData.newCosmeticTooltip())
+            list.add(12, ultimateData.newRepTooltip())
+            list.add(13, ultimateData.trophiesPerRollTooltip())
+            list.add(14, ultimateData.mythicCoresPerRollTooltip())
+            list.add(15, ultimateData.arcaneCoresPerRollTooltip())
         }
     }
 

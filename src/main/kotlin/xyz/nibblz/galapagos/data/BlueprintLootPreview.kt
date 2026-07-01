@@ -17,7 +17,8 @@ data class BlueprintLootPreview(
     var currentRep: Int = 0,
     var totalRep: Int = 0,
     var trophiesPerRoll: Double = 0.0,
-    var bonusCoresPerRoll: Double = 0.0
+    var mythicCoresPerRoll: Double = 0.0,
+    var arcaneCoresPerRoll: Double = 0.0
 )
 
 fun BlueprintLootPreview.update(cosmetics: List<Cosmetic>) {
@@ -28,7 +29,8 @@ fun BlueprintLootPreview.update(cosmetics: List<Cosmetic>) {
     this.currentRep = 0
     this.totalRep = 0
     this.trophiesPerRoll = 0.0
-    this.bonusCoresPerRoll = 0.0
+    this.mythicCoresPerRoll = 0.0
+    this.arcaneCoresPerRoll = 0.0
 
     var totalChance = 0.0
 
@@ -37,7 +39,8 @@ fun BlueprintLootPreview.update(cosmetics: List<Cosmetic>) {
     cosmetics.forEach {
         val fixedChance = it.chance / totalChance
 
-        this.bonusCoresPerRoll += it.bonusCores * fixedChance
+        this.mythicCoresPerRoll += it.mythicCores * fixedChance
+        this.arcaneCoresPerRoll += it.arcaneCores * fixedChance
 
         if (!it.isOwned) {
             this.newCosmeticChance += fixedChance
@@ -94,9 +97,14 @@ fun BlueprintLootPreview.trophiesPerRollTooltip(): Component {
 
 }
 
-fun BlueprintLootPreview.bonusCoresPerRollTooltip(isExclusive: Boolean): Component {
-    return Component.literal("Average ${if (isExclusive) "Arcane Cores" else "Mythic Cores"}/Roll: ").withColor(ChatFormatting.GRAY.color!!)
-        .append(Component.literal("%.3f".format(this.bonusCoresPerRoll)).withColor(if (isExclusive) ChatFormatting.LIGHT_PURPLE.color!! else ChatFormatting.RED.color!!))
-        .append(Component.literal(if (isExclusive) "\uE004" else "\uE003").withColor(0xffffff).withStyle(Style.EMPTY.withFont(Galapagos.font)))
+fun BlueprintLootPreview.mythicCoresPerRollTooltip(): Component {
+    return Component.literal("Average Mythic Cores/Roll: ").withColor(ChatFormatting.GRAY.color!!)
+        .append(Component.literal("%.3f ".format(this.mythicCoresPerRoll)).withColor(ChatFormatting.RED.color!!))
+        .append(Component.literal("\uE003").withColor(0xffffff).withStyle(Style.EMPTY.withFont(Galapagos.font)))
+}
 
+fun BlueprintLootPreview.arcaneCoresPerRollTooltip(): Component {
+    return Component.literal("Average Arcane Cores/Roll: ").withColor(ChatFormatting.GRAY.color!!)
+        .append(Component.literal("%.3f ".format(this.arcaneCoresPerRoll)).withColor(ChatFormatting.LIGHT_PURPLE.color!!))
+        .append(Component.literal("\uE004").withColor(0xffffff).withStyle(Style.EMPTY.withFont(Galapagos.font)))
 }
