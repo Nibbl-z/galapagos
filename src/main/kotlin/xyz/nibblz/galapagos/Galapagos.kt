@@ -6,6 +6,7 @@ import net.minecraft.network.chat.FontDescription
 import net.minecraft.resources.Identifier
 import org.slf4j.LoggerFactory
 import org.slf4j.Logger
+import xyz.nibblz.galapagos.data.ConstantIslandData
 import xyz.nibblz.galapagos.features.CoinTracking
 import xyz.nibblz.galapagos.features.CosmeticMachineChances
 import xyz.nibblz.galapagos.features.CrateChances
@@ -29,6 +30,7 @@ object Galapagos : ModInitializer {
 
 	override fun onInitialize() {
 		Save.load()
+		ConstantIslandData.load()
 		registerFeatures()
 
 		ClientLifecycleEvents.CLIENT_STOPPING.register {onShutdown()}

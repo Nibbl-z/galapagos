@@ -6,6 +6,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;
 import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -15,6 +16,7 @@ import xyz.nibblz.galapagos.UtilKt;
 import xyz.nibblz.galapagos.events.ContainerOpenEvent;
 import xyz.nibblz.galapagos.events.ContainerRenderEvent;
 import xyz.nibblz.galapagos.events.SlotClickEvent;
+import xyz.nibblz.galapagos.events.SlotRenderEvent;
 import xyz.nibblz.galapagos.features.CoinTracking;
 
 @Mixin(AbstractContainerScreen.class)
@@ -25,9 +27,11 @@ public class AbstractContainerScreenMixin {
     @Shadow
     protected int topPos;
 
+    @Final
     @Shadow
     protected int imageWidth;
 
+    @Final
     @Shadow
     protected int imageHeight;
 
@@ -47,5 +51,12 @@ public class AbstractContainerScreenMixin {
         if (screen == null) return;
 
         ContainerRenderEvent.INSTANCE.getEVENT().invoker().invoke(screen, graphics, leftPos, topPos, imageWidth, imageHeight);
+    }
+
+    @Inject(method = "extractSlot", at = @At("TAIL"))
+    private void extractSlot(GuiGraphicsExtractor graphics, Slot slot, int mouseX, int mouseY, CallbackInfo ci) {
+        if (!UtilKt.onIsland()) return;
+
+        SlotRenderEvent.INSTANCE.getEVENT().invoker().invoke(graphics, slot);
     }
 }

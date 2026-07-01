@@ -1,0 +1,1634 @@
+{
+  "Exclusive Slimy Cosmetic Crate": [
+    {
+      "name": "Popsicle (Friend-Shaped)",
+      "chance": 15.0
+    },
+    {
+      "name": "Popsicle (Giga)",
+      "chance": 15.0
+    },
+    {
+      "name": "Goggles (Tinted Over-Eye)",
+      "chance": 15.0
+    },
+    {
+      "name": "Goggles (Tinted)",
+      "chance": 15.0
+    },
+    {
+      "name": "Competitor's Safety Pad (Slimed)",
+      "chance": 7.5
+    },
+    {
+      "name": "Slime Fist (Toxic)",
+      "chance": 7.5
+    },
+    {
+      "name": "Competitor's Helmet (Slimed)",
+      "chance": 7.5
+    },
+    {
+      "name": "Head in the Wall (Toxic)",
+      "chance": 7.5
+    },
+    {
+      "name": "Slimeling (Kawaii)",
+      "chance": 4.0
+    },
+    {
+      "name": "Slimeling (Loot)",
+      "chance": 4.0
+    },
+    {
+      "name": "Slimeling (Magma)",
+      "chance": 1.0
+    },
+    {
+      "name": "Slimeling (King Slime)",
+      "chance": 1.0
+    }
+  ],
+  "Exclusive Ninja Cosmetic Crate": [
+    {
+      "name": "Parkour Staff (Bamboo)",
+      "chance": 15.0
+    },
+    {
+      "name": "Sai (Ignited)",
+      "chance": 15.0
+    },
+    {
+      "name": "Bandana (Blindfold)",
+      "chance": 15.0
+    },
+    {
+      "name": "Sensei (Stripe)",
+      "chance": 15.0
+    },
+    {
+      "name": "Katana (Cherry Blossoms)",
+      "chance": 7.5
+    },
+    {
+      "name": "Shuriken (Deadaim)",
+      "chance": 7.5
+    },
+    {
+      "name": "Kitsune Mask (Black)",
+      "chance": 7.5
+    },
+    {
+      "name": "Parkour Cowl (Ninja Frog)",
+      "chance": 7.5
+    },
+    {
+      "name": "Paper Umbrella (Sakura)",
+      "chance": 4.0
+    },
+    {
+      "name": "Master Frog (Statue)",
+      "chance": 4.0
+    },
+    {
+      "name": "Master Frog (Golden)",
+      "chance": 1.0
+    },
+    {
+      "name": "Paper Umbrella (Blossoms)",
+      "chance": 1.0
+    }
+  ],
+  "Exclusive Cuckoo Cosmetic Crate": [
+    {
+      "name": "Road Sign (Go)",
+      "chance": 15.0
+    },
+    {
+      "name": "Road Sign (Warning)",
+      "chance": 15.0
+    },
+    {
+      "name": "Egg Yolk (Fried)",
+      "chance": 15.0
+    },
+    {
+      "name": "Claim Flag (Feathers)",
+      "chance": 15.0
+    },
+    {
+      "name": "Chicken Wing (Hot!)",
+      "chance": 7.5
+    },
+    {
+      "name": "Traffic Light (Junction)",
+      "chance": 7.5
+    },
+    {
+      "name": "Chicken-Copter (McSquawk)",
+      "chance": 7.5
+    },
+    {
+      "name": "Traffic Cone (Roadworks)",
+      "chance": 7.5
+    },
+    {
+      "name": "Chicken Head (Cyborg)",
+      "chance": 4.0
+    },
+    {
+      "name": "Chicken Head (Golden)",
+      "chance": 4.0
+    },
+    {
+      "name": "Chicken Head (Clucktoons)",
+      "chance": 1.0
+    },
+    {
+      "name": "Chicken Head (Zombie)",
+      "chance": 1.0
+    }
+  ],
+  "Mechanic Cosmetic Crate": [
+    {
+      "name": "Toolbox",
+      "chance": 12.5
+    },
+    {
+      "name": "Wrench (Pipe)",
+      "chance": 12.5
+    },
+    {
+      "name": "Hair Dryer",
+      "chance": 12.5
+    },
+    {
+      "name": "Mechanic's Cap",
+      "chance": 12.5
+    },
+    {
+      "name": "Gauntlet",
+      "chance": 8.33
+    },
+    {
+      "name": "Holosword",
+      "chance": 8.33
+    },
+    {
+      "name": "Night Vision Goggles",
+      "chance": 8.33
+    },
+    {
+      "name": "Holosword (Serrated)",
+      "chance": 7.5
+    },
+    {
+      "name": "Night Vision Goggles (Arachno)",
+      "chance": 7.5
+    },
+    {
+      "name": "Fire Fist",
+      "chance": 4.0
+    },
+    {
+      "name": "Hothead",
+      "chance": 4.0
+    },
+    {
+      "name": "Gauntlet (Elemental)",
+      "chance": 1.0
+    },
+    {
+      "name": "Hothead (Explode)",
+      "chance": 1.0
+    }
+  ],
+  "Exclusive Cloudy Cosmetic Crate": [
+    {
+      "name": "Zeus Bolt (Catch!)",
+      "chance": 15.0
+    },
+    {
+      "name": "Zeus Bolt (Lightning)",
+      "chance": 15.0
+    },
+    {
+      "name": "Winged Helmet (Gold Trim)",
+      "chance": 15.0
+    },
+    {
+      "name": "Winged Helmet (Thunder)",
+      "chance": 15.0
+    },
+    {
+      "name": "Cloud Fist (Lightning)",
+      "chance": 7.5
+    },
+    {
+      "name": "Cloud Fist (Stormy)",
+      "chance": 7.5
+    },
+    {
+      "name": "Mjölnir (Charged)",
+      "chance": 7.5
+    },
+    {
+      "name": "Mjölnir (Thunder)",
+      "chance": 7.5
+    },
+    {
+      "name": "Zeus (Athens)",
+      "chance": 4.0
+    },
+    {
+      "name": "Zeus (Golden)",
+      "chance": 4.0
+    },
+    {
+      "name": "Zeus (Lightning)",
+      "chance": 1.0
+    },
+    {
+      "name": "Zeus (Stormy)",
+      "chance": 1.0
+    }
+  ],
+  "Sailor Cosmetic Crate": [
+    {
+      "name": "Oar",
+      "chance": 12.5
+    },
+    {
+      "name": "Plunderer's Bandana",
+      "chance": 12.5
+    },
+    {
+      "name": "Sailor Hat",
+      "chance": 12.5
+    },
+    {
+      "name": "Snorkel",
+      "chance": 12.5
+    },
+    {
+      "name": "Harpoon",
+      "chance": 8.33
+    },
+    {
+      "name": "Fishing Hat",
+      "chance": 8.33
+    },
+    {
+      "name": "Sailor Hat (Striped)",
+      "chance": 8.33
+    },
+    {
+      "name": "Harpoon (Sharkbait)",
+      "chance": 7.5
+    },
+    {
+      "name": "Diving Helmet",
+      "chance": 7.5
+    },
+    {
+      "name": "Fire Fist (Energy)",
+      "chance": 4.0
+    },
+    {
+      "name": "Fishbowl",
+      "chance": 4.0
+    },
+    {
+      "name": "Arm Cannon (Buccaneer)",
+      "chance": 1.0
+    },
+    {
+      "name": "Diving Helmet (Raptured)",
+      "chance": 1.0
+    }
+  ],
+  "Magician Cosmetic Crate": [
+    {
+      "name": "Playing Cards",
+      "chance": 12.5
+    },
+    {
+      "name": "Magician's Wand",
+      "chance": 12.5
+    },
+    {
+      "name": "3D Glasses",
+      "chance": 12.5
+    },
+    {
+      "name": "Top Hat",
+      "chance": 12.5
+    },
+    {
+      "name": "Shaman Staff",
+      "chance": 8.33
+    },
+    {
+      "name": "Sparkler",
+      "chance": 8.33
+    },
+    {
+      "name": "8-Ball (Classic)",
+      "chance": 8.33
+    },
+    {
+      "name": "Plague Doctor Staff",
+      "chance": 7.5
+    },
+    {
+      "name": "Plague Doctor",
+      "chance": 7.5
+    },
+    {
+      "name": "Plague Doctor Staff (Steampunk)",
+      "chance": 4.0
+    },
+    {
+      "name": "8-Ball (Holographic)",
+      "chance": 4.0
+    },
+    {
+      "name": "8-Ball (Golden)",
+      "chance": 1.0
+    },
+    {
+      "name": "Plague Doctor (Steampunk)",
+      "chance": 1.0
+    }
+  ],
+  "Arena Cosmetic Crate": [
+    {
+      "name": "Knight Shield (Wooden)",
+      "chance": 25.0
+    },
+    {
+      "name": "Viking Shield",
+      "chance": 25.0
+    },
+    {
+      "name": "Crusader",
+      "chance": 12.5
+    },
+    {
+      "name": "Viking Helmet",
+      "chance": 12.5
+    },
+    {
+      "name": "Guild Banner (Knight)",
+      "chance": 7.5
+    },
+    {
+      "name": "Guild Banner (Viking)",
+      "chance": 7.5
+    },
+    {
+      "name": "Knight Shield (Emblem)",
+      "chance": 4.0
+    },
+    {
+      "name": "Viking Shield (Knotwork)",
+      "chance": 4.0
+    },
+    {
+      "name": "Fenrir",
+      "chance": 1.0
+    },
+    {
+      "name": "Knight Helmet",
+      "chance": 1.0
+    }
+  ],
+  "Seasonal Variety 2 Cosmetic Crate": [
+    {
+      "name": "Shades (Sunset)",
+      "chance": 6.67
+    },
+    {
+      "name": "Summer Shades",
+      "chance": 6.67
+    },
+    {
+      "name": "Constellation Cartographer",
+      "chance": 6.67
+    },
+    {
+      "name": "Starbeam Laser",
+      "chance": 6.67
+    },
+    {
+      "name": "Star Scouter",
+      "chance": 6.67
+    },
+    {
+      "name": "Ancient Potion",
+      "chance": 6.67
+    },
+    {
+      "name": "Bone Claw",
+      "chance": 6.67
+    },
+    {
+      "name": "Skull Orb (Stone)",
+      "chance": 6.67
+    },
+    {
+      "name": "Potion Frenzy",
+      "chance": 6.67
+    },
+    {
+      "name": "Astronaut Helmet (Star-Ranger)",
+      "chance": 3.33
+    },
+    {
+      "name": "Heart Glasses",
+      "chance": 3.33
+    },
+    {
+      "name": "Exo-Arm",
+      "chance": 3.33
+    },
+    {
+      "name": "Exo-Helmet",
+      "chance": 3.33
+    },
+    {
+      "name": "Dart Bracer",
+      "chance": 3.33
+    },
+    {
+      "name": "Skull Orb (Golden)",
+      "chance": 3.33
+    },
+    {
+      "name": "Feathery Arm",
+      "chance": 3.33
+    },
+    {
+      "name": "Blowdart",
+      "chance": 3.33
+    },
+    {
+      "name": "Feathery Cap",
+      "chance": 3.33
+    },
+    {
+      "name": "Skull Orb (Crystal)",
+      "chance": 2.5
+    },
+    {
+      "name": "Cosmic Visor",
+      "chance": 2.5
+    },
+    {
+      "name": "Lay-Ka",
+      "chance": 2.5
+    },
+    {
+      "name": "Treat Tracker",
+      "chance": 2.5
+    }
+  ],
+  "Mythic Cosmetic Crate": [
+    {
+      "name": "Burger Staff",
+      "chance": 8.33
+    },
+    {
+      "name": "Infernal Pitchfork",
+      "chance": 8.33
+    },
+    {
+      "name": "Paintbrush (Mega)",
+      "chance": 8.33
+    },
+    {
+      "name": "Pixel Pusher",
+      "chance": 8.33
+    },
+    {
+      "name": "Art Easel",
+      "chance": 8.33
+    },
+    {
+      "name": "Game Buddy",
+      "chance": 8.33
+    },
+    {
+      "name": "Griddle Pack (Golden)",
+      "chance": 8.33
+    },
+    {
+      "name": "Infernal Wings",
+      "chance": 8.33
+    },
+    {
+      "name": "Arcade Cadet",
+      "chance": 8.33
+    },
+    {
+      "name": "Burger Head (Monarch)",
+      "chance": 8.33
+    },
+    {
+      "name": "Palette Cap",
+      "chance": 8.33
+    },
+    {
+      "name": "Shroud (Infernal)",
+      "chance": 8.33
+    }
+  ],
+  "Plunder Cosmetic Crate": [
+    {
+      "name": "Oar (Shipwrecked)",
+      "chance": 12.5
+    },
+    {
+      "name": "Pirate Hook",
+      "chance": 12.5
+    },
+    {
+      "name": "Viking Shield (Black)",
+      "chance": 12.5
+    },
+    {
+      "name": "Plunderer's Bandana (Skull)",
+      "chance": 12.5
+    },
+    {
+      "name": "Cutlass",
+      "chance": 8.33
+    },
+    {
+      "name": "Lantern",
+      "chance": 8.33
+    },
+    {
+      "name": "Spyglass",
+      "chance": 8.33
+    },
+    {
+      "name": "Pirate Hook (Gold-Trim)",
+      "chance": 7.5
+    },
+    {
+      "name": "Pirate Hat",
+      "chance": 7.5
+    },
+    {
+      "name": "Pirate Hat (Barnacles)",
+      "chance": 4.0
+    },
+    {
+      "name": "Skull (Scallywag)",
+      "chance": 4.0
+    },
+    {
+      "name": "Pirate Hook (Phantom)",
+      "chance": 1.0
+    },
+    {
+      "name": "Pirate Hat (Phantom)",
+      "chance": 1.0
+    }
+  ],
+  "Slimy Cosmetic Crate": [
+    {
+      "name": "Popsicle",
+      "chance": 25.0
+    },
+    {
+      "name": "Goggles",
+      "chance": 25.0
+    },
+    {
+      "name": "Popsicle (Frozen)",
+      "chance": 12.5
+    },
+    {
+      "name": "Goggles (Over-Eye)",
+      "chance": 12.5
+    },
+    {
+      "name": "Competitor's Safety Pad",
+      "chance": 7.5
+    },
+    {
+      "name": "Slime Fist",
+      "chance": 7.5
+    },
+    {
+      "name": "Competitor's Helmet",
+      "chance": 4.0
+    },
+    {
+      "name": "Head in the Wall",
+      "chance": 4.0
+    },
+    {
+      "name": "Slimeling",
+      "chance": 1.0
+    },
+    {
+      "name": "Slimeling (Familiar)",
+      "chance": 1.0
+    }
+  ],
+  "Explosive Cosmetic Crate": [
+    {
+      "name": "Dynamite Stick",
+      "chance": 25.0
+    },
+    {
+      "name": "Dynamite Stick (Isotope)",
+      "chance": 25.0
+    },
+    {
+      "name": "Gas Mask (Hazmat)",
+      "chance": 12.5
+    },
+    {
+      "name": "Motorcycle Helmet (Stuntmaster)",
+      "chance": 12.5
+    },
+    {
+      "name": "Uranium Slicer",
+      "chance": 7.5
+    },
+    {
+      "name": "Hothead (Skelly)",
+      "chance": 7.5
+    },
+    {
+      "name": "Gas Mask (Nuclear)",
+      "chance": 4.0
+    },
+    {
+      "name": "Army Helmet (Colonel Cluck)",
+      "chance": 4.0
+    },
+    {
+      "name": "Boom Cap",
+      "chance": 1.0
+    },
+    {
+      "name": "Rocky Rocket",
+      "chance": 1.0
+    }
+  ],
+  "Cyber Surge Cosmetic Crate": [
+    {
+      "name": "Cyber Fist",
+      "chance": 10.0
+    },
+    {
+      "name": "Cyber Helmet",
+      "chance": 10.0
+    },
+    {
+      "name": "Hover Pilot Helmet",
+      "chance": 10.0
+    },
+    {
+      "name": "Hacker Headset",
+      "chance": 10.0
+    },
+    {
+      "name": "Hacker Terminal",
+      "chance": 10.0
+    },
+    {
+      "name": "Server Rack",
+      "chance": 10.0
+    },
+    {
+      "name": "Microphone (Cyber)",
+      "chance": 6.0
+    },
+    {
+      "name": "Mohawk (Cyber)",
+      "chance": 6.0
+    },
+    {
+      "name": "Guitar (Cyber)",
+      "chance": 6.0
+    },
+    {
+      "name": "Android Axe",
+      "chance": 6.0
+    },
+    {
+      "name": "Android Helmet",
+      "chance": 6.0
+    },
+    {
+      "name": "Android Brain",
+      "chance": 2.0
+    },
+    {
+      "name": "Holographic Wings",
+      "chance": 2.0
+    },
+    {
+      "name": "Holographic Crown",
+      "chance": 2.0
+    },
+    {
+      "name": "Holographic Axe",
+      "chance": 2.0
+    },
+    {
+      "name": "Watcher Fist",
+      "chance": 0.67
+    },
+    {
+      "name": "Watcher Eye",
+      "chance": 0.67
+    },
+    {
+      "name": "Watcher Pack",
+      "chance": 0.67
+    }
+  ],
+  "Exclusive Arena Cosmetic Crate": [
+    {
+      "name": "Knight Shield (Ornamental)",
+      "chance": 15.0
+    },
+    {
+      "name": "Viking Shield (Battleworn)",
+      "chance": 15.0
+    },
+    {
+      "name": "Crusader (Sunlord)",
+      "chance": 15.0
+    },
+    {
+      "name": "Viking Helmet (Horned)",
+      "chance": 15.0
+    },
+    {
+      "name": "Knight Shield (Goldshire)",
+      "chance": 7.5
+    },
+    {
+      "name": "Viking Shield (Dragon)",
+      "chance": 7.5
+    },
+    {
+      "name": "Crusader (Black Knight)",
+      "chance": 7.5
+    },
+    {
+      "name": "Viking Helmet (Prestiged)",
+      "chance": 7.5
+    },
+    {
+      "name": "Fenrir (Steelwulf)",
+      "chance": 4.0
+    },
+    {
+      "name": "Knight Helmet (Goldshire)",
+      "chance": 4.0
+    },
+    {
+      "name": "Knight Helmet (Darklands)",
+      "chance": 1.0
+    },
+    {
+      "name": "Fenrir (Fire)",
+      "chance": 1.0
+    }
+  ],
+  "Cuckoo Cosmetic Crate": [
+    {
+      "name": "Road Sign",
+      "chance": 25.0
+    },
+    {
+      "name": "Egg Yolk",
+      "chance": 25.0
+    },
+    {
+      "name": "Chicken Wing",
+      "chance": 12.5
+    },
+    {
+      "name": "Road Sign (Route 66)",
+      "chance": 12.5
+    },
+    {
+      "name": "Claim Flag",
+      "chance": 7.5
+    },
+    {
+      "name": "Traffic Cone",
+      "chance": 7.5
+    },
+    {
+      "name": "Traffic Light",
+      "chance": 4.0
+    },
+    {
+      "name": "Chicken-Copter",
+      "chance": 4.0
+    },
+    {
+      "name": "Chicken Head",
+      "chance": 1.0
+    },
+    {
+      "name": "Chicken Head (Familiar)",
+      "chance": 1.0
+    }
+  ],
+  "Exclusive Explosive Cosmetic Crate": [
+    {
+      "name": "Atomic Armor",
+      "chance": 15.0
+    },
+    {
+      "name": "Dynamite Stick (Bundled)",
+      "chance": 15.0
+    },
+    {
+      "name": "Dynamite Stick (Nuclear)",
+      "chance": 15.0
+    },
+    {
+      "name": "Motorcycle Helmet (Daredevil)",
+      "chance": 15.0
+    },
+    {
+      "name": "Box o' Explosives",
+      "chance": 7.5
+    },
+    {
+      "name": "Box o' Explosives (Nuclear Meltdown)",
+      "chance": 7.5
+    },
+    {
+      "name": "Atomic Adventurer",
+      "chance": 7.5
+    },
+    {
+      "name": "Hothead (Cheri)",
+      "chance": 7.5
+    },
+    {
+      "name": "Arm Cannon (Chicken Ballistics)",
+      "chance": 4.0
+    },
+    {
+      "name": "Krate",
+      "chance": 4.0
+    },
+    {
+      "name": "Krate (Atomic Menace)",
+      "chance": 1.0
+    },
+    {
+      "name": "Rocky Rocket (Radioactive)",
+      "chance": 1.0
+    }
+  ],
+  "Ancient Jungle Cosmetic Crate": [
+    {
+      "name": "Bone Club",
+      "chance": 10.0
+    },
+    {
+      "name": "Bone Spear",
+      "chance": 10.0
+    },
+    {
+      "name": "Direwolf Cap",
+      "chance": 10.0
+    },
+    {
+      "name": "Rock on Head",
+      "chance": 10.0
+    },
+    {
+      "name": "Sabertooth Cap",
+      "chance": 10.0
+    },
+    {
+      "name": "Skull Crown (Stone)",
+      "chance": 10.0
+    },
+    {
+      "name": "Jawbone Saw",
+      "chance": 5.0
+    },
+    {
+      "name": "Wheel of Destiny",
+      "chance": 5.0
+    },
+    {
+      "name": "Skull Crown (Golden)",
+      "chance": 5.0
+    },
+    {
+      "name": "Stone Dragon Emperor",
+      "chance": 5.0
+    },
+    {
+      "name": "Raptor Skull",
+      "chance": 5.0
+    },
+    {
+      "name": "Tail of Wisdom",
+      "chance": 5.0
+    },
+    {
+      "name": "Voodoo Doll",
+      "chance": 1.33
+    },
+    {
+      "name": "Witch Doctor's Mask",
+      "chance": 1.33
+    },
+    {
+      "name": "Swarm Basket",
+      "chance": 1.33
+    },
+    {
+      "name": "Volcano Torch",
+      "chance": 1.33
+    },
+    {
+      "name": "Skull Crown (Crystal)",
+      "chance": 1.33
+    },
+    {
+      "name": "Torch Head",
+      "chance": 1.33
+    },
+    {
+      "name": "Hive Fist",
+      "chance": 0.67
+    },
+    {
+      "name": "Beetleface",
+      "chance": 0.67
+    },
+    {
+      "name": "Beehive",
+      "chance": 0.67
+    }
+  ],
+  "Seasonal Variety 1 Cosmetic Crate": [
+    {
+      "name": "Cyclops Fist",
+      "chance": 6.67
+    },
+    {
+      "name": "Sewing Needle",
+      "chance": 6.67
+    },
+    {
+      "name": "Cyclops",
+      "chance": 6.67
+    },
+    {
+      "name": "Haunted Doll",
+      "chance": 6.67
+    },
+    {
+      "name": "Surfboard (Suns' Out)",
+      "chance": 6.67
+    },
+    {
+      "name": "Lollipop Staff (Sticky)",
+      "chance": 6.67
+    },
+    {
+      "name": "Hairbow (Peppermint)",
+      "chance": 6.67
+    },
+    {
+      "name": "Halo (Candy)",
+      "chance": 6.67
+    },
+    {
+      "name": "Candy Flow",
+      "chance": 6.67
+    },
+    {
+      "name": "Lollipop Staff (Minty)",
+      "chance": 3.33
+    },
+    {
+      "name": "Choco Shield",
+      "chance": 3.33
+    },
+    {
+      "name": "Gumball Head",
+      "chance": 3.33
+    },
+    {
+      "name": "Waffle Stack",
+      "chance": 3.33
+    },
+    {
+      "name": "Waffle Shield",
+      "chance": 3.33
+    },
+    {
+      "name": "Spirit Orb",
+      "chance": 3.33
+    },
+    {
+      "name": "Pumpkin Scooper",
+      "chance": 3.33
+    },
+    {
+      "name": "Lantern (Haunted)",
+      "chance": 3.33
+    },
+    {
+      "name": "Pumpkin Spirit",
+      "chance": 3.33
+    },
+    {
+      "name": "Spell Shield (Solar)",
+      "chance": 2.5
+    },
+    {
+      "name": "Moai Head (Grooving)",
+      "chance": 2.5
+    },
+    {
+      "name": "Crab Claw",
+      "chance": 2.5
+    },
+    {
+      "name": "Crab Hat",
+      "chance": 2.5
+    }
+  ],
+  "Cloudy Cosmetic Crate": [
+    {
+      "name": "Winged Helmet",
+      "chance": 25.0
+    },
+    {
+      "name": "Winged Helmet (Trim)",
+      "chance": 25.0
+    },
+    {
+      "name": "Zeus Bolt",
+      "chance": 12.5
+    },
+    {
+      "name": "Zeus Bolt (Blue)",
+      "chance": 12.5
+    },
+    {
+      "name": "Mjölnir",
+      "chance": 7.5
+    },
+    {
+      "name": "Mjölnir (Nordic)",
+      "chance": 7.5
+    },
+    {
+      "name": "Cloud Fist",
+      "chance": 4.0
+    },
+    {
+      "name": "Cloud Fist (Heavenly)",
+      "chance": 4.0
+    },
+    {
+      "name": "Zeus",
+      "chance": 1.0
+    },
+    {
+      "name": "Zeus (Marble)",
+      "chance": 1.0
+    }
+  ],
+  "Neon Galaxy Cosmetic Crate": [
+    {
+      "name": "Lunar Claw",
+      "chance": 10.0
+    },
+    {
+      "name": "Believer",
+      "chance": 10.0
+    },
+    {
+      "name": "Space Slime",
+      "chance": 10.0
+    },
+    {
+      "name": "Alien Antennae",
+      "chance": 10.0
+    },
+    {
+      "name": "LARR-E",
+      "chance": 10.0
+    },
+    {
+      "name": "Space Slug",
+      "chance": 10.0
+    },
+    {
+      "name": "Comet Fist",
+      "chance": 5.0
+    },
+    {
+      "name": "Star Sailor's Staff (Crescent)",
+      "chance": 5.0
+    },
+    {
+      "name": "Star Sailor's Tutu",
+      "chance": 5.0
+    },
+    {
+      "name": "Comet Head",
+      "chance": 5.0
+    },
+    {
+      "name": "Star Sailor",
+      "chance": 5.0
+    },
+    {
+      "name": "Star Sailor's Tiara",
+      "chance": 5.0
+    },
+    {
+      "name": "Gauntlet (Starforged)",
+      "chance": 1.33
+    },
+    {
+      "name": "Star Sailor's Staff",
+      "chance": 1.33
+    },
+    {
+      "name": "Ray Blaster (Alien)",
+      "chance": 1.33
+    },
+    {
+      "name": "Void Fist",
+      "chance": 1.33
+    },
+    {
+      "name": "Alien Visor",
+      "chance": 1.33
+    },
+    {
+      "name": "Void Head",
+      "chance": 1.33
+    },
+    {
+      "name": "Cosmic Wings",
+      "chance": 0.67
+    },
+    {
+      "name": "Cosmic Visor (Solar Navigator)",
+      "chance": 0.67
+    },
+    {
+      "name": "Cosmic Sword",
+      "chance": 0.67
+    }
+  ],
+  "Wizardry Cosmetic Crate": [
+    {
+      "name": "Book",
+      "chance": 12.5
+    },
+    {
+      "name": "Fez",
+      "chance": 12.5
+    },
+    {
+      "name": "Party Hat",
+      "chance": 12.5
+    },
+    {
+      "name": "Wicked Horns",
+      "chance": 12.5
+    },
+    {
+      "name": "Witch's Broom",
+      "chance": 8.33
+    },
+    {
+      "name": "Wizard Staff",
+      "chance": 8.33
+    },
+    {
+      "name": "Witch Hat",
+      "chance": 8.33
+    },
+    {
+      "name": "Wicked Horns (Curved)",
+      "chance": 7.5
+    },
+    {
+      "name": "Witch Hat (Striped)",
+      "chance": 7.5
+    },
+    {
+      "name": "Fire Fist (Violet)",
+      "chance": 4.0
+    },
+    {
+      "name": "Wizard Hat",
+      "chance": 4.0
+    },
+    {
+      "name": "Book (Spellbook)",
+      "chance": 1.0
+    },
+    {
+      "name": "Skull (Flaming)",
+      "chance": 1.0
+    }
+  ],
+  "Fruit Cosmetic Crate": [
+    {
+      "name": "Banana",
+      "chance": 12.5
+    },
+    {
+      "name": "Sprouted",
+      "chance": 12.5
+    },
+    {
+      "name": "Sun Hat",
+      "chance": 12.5
+    },
+    {
+      "name": "Sun Hat (Bow)",
+      "chance": 12.5
+    },
+    {
+      "name": "Blockle Tea",
+      "chance": 8.33
+    },
+    {
+      "name": "Sprouted (Bloom)",
+      "chance": 8.33
+    },
+    {
+      "name": "Bucket Hat (Strawberry)",
+      "chance": 8.33
+    },
+    {
+      "name": "Banana Head",
+      "chance": 7.5
+    },
+    {
+      "name": "Fruit Crown",
+      "chance": 7.5
+    },
+    {
+      "name": "Strawberry Head",
+      "chance": 4.0
+    },
+    {
+      "name": "Banana Head (Peeled)",
+      "chance": 4.0
+    },
+    {
+      "name": "Flower Umbrella",
+      "chance": 1.0
+    },
+    {
+      "name": "Banana Head (Crazy Nana)",
+      "chance": 1.0
+    }
+  ],
+  "Engineer Cosmetic Crate": [
+    {
+      "name": "Hammer (Welding)",
+      "chance": 12.5
+    },
+    {
+      "name": "Wrench",
+      "chance": 12.5
+    },
+    {
+      "name": "Hard Hat",
+      "chance": 12.5
+    },
+    {
+      "name": "Welding Mask",
+      "chance": 12.5
+    },
+    {
+      "name": "Blowtorch",
+      "chance": 8.33
+    },
+    {
+      "name": "Gearhead",
+      "chance": 8.33
+    },
+    {
+      "name": "Hard Hat (Headlight)",
+      "chance": 8.33
+    },
+    {
+      "name": "Wrench (Giga)",
+      "chance": 7.5
+    },
+    {
+      "name": "Welding Mask (At Work)",
+      "chance": 7.5
+    },
+    {
+      "name": "Chainsaw Hand",
+      "chance": 4.0
+    },
+    {
+      "name": "Beam Sword",
+      "chance": 4.0
+    },
+    {
+      "name": "Drill Arm",
+      "chance": 1.0
+    },
+    {
+      "name": "Beam Sword (Dual)",
+      "chance": 1.0
+    }
+  ],
+  "Candy Factory Cosmetic Crate": [
+    {
+      "name": "Cupcake Staff",
+      "chance": 10.0
+    },
+    {
+      "name": "Lollipop Staff",
+      "chance": 10.0
+    },
+    {
+      "name": "S'more Staff",
+      "chance": 10.0
+    },
+    {
+      "name": "Cupcake",
+      "chance": 10.0
+    },
+    {
+      "name": "Mellowhead (Crackers)",
+      "chance": 10.0
+    },
+    {
+      "name": "Candy Hood",
+      "chance": 10.0
+    },
+    {
+      "name": "Hot Chocolate",
+      "chance": 5.0
+    },
+    {
+      "name": "Gummi Paw",
+      "chance": 5.0
+    },
+    {
+      "name": "Lil' Gummi",
+      "chance": 5.0
+    },
+    {
+      "name": "Cupcake (Choco)",
+      "chance": 5.0
+    },
+    {
+      "name": "Choccy",
+      "chance": 5.0
+    },
+    {
+      "name": "Gummi",
+      "chance": 5.0
+    },
+    {
+      "name": "S'more Staff (Royalty)",
+      "chance": 1.33
+    },
+    {
+      "name": "Mellowhead (Monarch)",
+      "chance": 1.33
+    },
+    {
+      "name": "Cupcake Staff (Spearhead)",
+      "chance": 1.33
+    },
+    {
+      "name": "Lollipop Staff (Chancellor)",
+      "chance": 1.33
+    },
+    {
+      "name": "Choco Cloak",
+      "chance": 1.33
+    },
+    {
+      "name": "Cupcake (Knight)",
+      "chance": 1.33
+    },
+    {
+      "name": "Choco Chancellor",
+      "chance": 0.67
+    },
+    {
+      "name": "S'more Staff (Charred)",
+      "chance": 0.67
+    },
+    {
+      "name": "Mellowhead (S'more'd)",
+      "chance": 0.67
+    }
+  ],
+  "Ninja Cosmetic Crate": [
+    {
+      "name": "Sai",
+      "chance": 25.0
+    },
+    {
+      "name": "Bandana",
+      "chance": 25.0
+    },
+    {
+      "name": "Parkour Staff",
+      "chance": 12.5
+    },
+    {
+      "name": "Sensei",
+      "chance": 12.5
+    },
+    {
+      "name": "Katana",
+      "chance": 7.5
+    },
+    {
+      "name": "Shuriken",
+      "chance": 7.5
+    },
+    {
+      "name": "Kitsune Mask",
+      "chance": 4.0
+    },
+    {
+      "name": "Parkour Cowl",
+      "chance": 4.0
+    },
+    {
+      "name": "Paper Umbrella (Cherry Tree)",
+      "chance": 1.0
+    },
+    {
+      "name": "Master Frog",
+      "chance": 1.0
+    }
+  ],
+  "Mystical Aquatic Cosmetic Crate": [
+    {
+      "name": "Bubble Fist",
+      "chance": 10.0
+    },
+    {
+      "name": "Starfish Staff",
+      "chance": 10.0
+    },
+    {
+      "name": "Umbrella (Beach)",
+      "chance": 10.0
+    },
+    {
+      "name": "Blubberfish",
+      "chance": 10.0
+    },
+    {
+      "name": "Jellyfist",
+      "chance": 10.0
+    },
+    {
+      "name": "Surfboard (Palms)",
+      "chance": 10.0
+    },
+    {
+      "name": "Hydroblaster",
+      "chance": 5.0
+    },
+    {
+      "name": "Squidtek Visor",
+      "chance": 5.0
+    },
+    {
+      "name": "Harpoon (Sunken)",
+      "chance": 5.0
+    },
+    {
+      "name": "Jellyfish Tendrils",
+      "chance": 5.0
+    },
+    {
+      "name": "Diving Helmet (Sunken)",
+      "chance": 5.0
+    },
+    {
+      "name": "Jellyfish",
+      "chance": 5.0
+    },
+    {
+      "name": "Headphones (Squidtek)",
+      "chance": 1.33
+    },
+    {
+      "name": "Quackshot",
+      "chance": 1.33
+    },
+    {
+      "name": "Poseidon's Trident",
+      "chance": 1.33
+    },
+    {
+      "name": "Poseidon's Cloak",
+      "chance": 1.33
+    },
+    {
+      "name": "Octopus",
+      "chance": 1.33
+    },
+    {
+      "name": "Poseidon's Crown",
+      "chance": 1.33
+    },
+    {
+      "name": "Surfboard (Squidtek)",
+      "chance": 0.67
+    },
+    {
+      "name": "Arm Cannon (B.W.B 8000)",
+      "chance": 0.67
+    },
+    {
+      "name": "Sea Shell (H.E.R.M.I.T)",
+      "chance": 0.67
+    }
+  ],
+  "Garden Cosmetic Crate": [
+    {
+      "name": "Rose",
+      "chance": 12.5
+    },
+    {
+      "name": "Trowel",
+      "chance": 12.5
+    },
+    {
+      "name": "Straw Hat",
+      "chance": 12.5
+    },
+    {
+      "name": "Sun Hat (Outline)",
+      "chance": 12.5
+    },
+    {
+      "name": "Watering Can",
+      "chance": 8.33
+    },
+    {
+      "name": "Bucket Hat (Floral)",
+      "chance": 8.33
+    },
+    {
+      "name": "Flower Crown",
+      "chance": 8.33
+    },
+    {
+      "name": "Toadstool",
+      "chance": 7.5
+    },
+    {
+      "name": "Bouquet",
+      "chance": 7.5
+    },
+    {
+      "name": "Fire Fist (Soul)",
+      "chance": 4.0
+    },
+    {
+      "name": "Gnome",
+      "chance": 4.0
+    },
+    {
+      "name": "Toadstool (Fungi)",
+      "chance": 1.0
+    },
+    {
+      "name": "Gnome (Botanical)",
+      "chance": 1.0
+    }
+  ]
+}

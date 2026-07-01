@@ -6,12 +6,8 @@ import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.screens.inventory.ContainerScreen
 import net.minecraft.network.chat.Component
-import net.minecraft.network.chat.FontDescription
 import net.minecraft.network.chat.Style
 import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
-import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
-import net.minecraft.resources.Identifier
-import net.minecraft.util.ARGB
 import net.minecraft.world.inventory.ContainerInput
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
@@ -23,16 +19,13 @@ import xyz.nibblz.galapagos.PlayerData.getRep
 import xyz.nibblz.galapagos.data.BlueprintLootPreview
 import xyz.nibblz.galapagos.data.Cosmetic
 import xyz.nibblz.galapagos.data.Rarity
+import xyz.nibblz.galapagos.data.render
+import xyz.nibblz.galapagos.data.update
 import xyz.nibblz.galapagos.events.ContainerCloseEvent
 import xyz.nibblz.galapagos.events.ContainerOpenEvent
 import xyz.nibblz.galapagos.events.ContainerRenderEvent
-import xyz.nibblz.galapagos.events.ContainerSetSlotEvent
 import xyz.nibblz.galapagos.events.SlotClickEvent
-import xyz.nibblz.galapagos.getCosmetic
 import xyz.nibblz.galapagos.mixin.accessor.HoveredSlotAccessor
-import xyz.nibblz.galapagos.render
-import xyz.nibblz.galapagos.update
-import java.util.EnumMap
 import kotlin.math.round
 
 object CosmeticMachineChances : Feature {
