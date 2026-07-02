@@ -25,10 +25,10 @@ object PlayerData {
     //// COSMETICS
 
     @Serializable
-    enum class CosmeticTag {
-        STANDARD,
-        EXCLUSIVE,
-        ARCANE
+    enum class CosmeticTag(val maxDonations: Int) {
+        STANDARD(10),
+        EXCLUSIVE(5),
+        ARCANE(5)
     }
 
     @Serializable
@@ -247,6 +247,16 @@ object PlayerData {
     fun decrementItem(name: String, amount: Int) {
         val item = Galapagos.save.infinibag[name] ?: return
         item.count -= amount
+
+        if (item.isCosmeticToken) {
+            val cosmetic = Galapagos.save.cosmetics[name.dropLast(6)]
+            if (cosmetic != null) {
+                Galapagos.logger.info("updating ${cosmetic.name}'s rep, previous: ${cosmetic.donations}")
+                cosmetic.donations = (cosmetic.donations + amount).coerceIn(0, cosmetic.tag.maxDonations)
+                Galapagos.logger.info("updated ${cosmetic.name}'s rep! it is now ${cosmetic.donations}")
+            }
+        }
+
         if (item.count <= 0) {
             Galapagos.save.infinibag.remove(name)
         }
@@ -419,6 +429,7 @@ object PlayerData {
 
         // Handles:
         // - Any item loss via scavenging
+        // - Updating cosmetic donation status (via decrementItem)
 
         if (screen.title.string.contains("SCAVENGING WILL PERMANENTLY")) { // destroy selected items!
             if (slot.index !in 46..48) return
@@ -454,6 +465,7 @@ object PlayerData {
 
     // Handles:
     // - Any item gain
+    // - Cosmetic claiming
 
     fun systemChat(packet: ClientboundSystemChatPacket) {
         val regex = Regex("You receive: \\[(?<name>.+)](?: x(?<count>[\\d,]+))?")
@@ -463,6 +475,11 @@ object PlayerData {
         val count = match.groups["count"]?.value?.toIntOrNull() ?: 1
 
         Galapagos.logger.info("obtained $name x$count")
+
+        if (Galapagos.save.cosmetics[name] != null) {
+            Galapagos.save.cosmetics[name]!!.isOwned = true
+            return
+        }
 
         if (Galapagos.save.infinibag[name] == null) {
             Galapagos.save.infinibag[name] = Item(
