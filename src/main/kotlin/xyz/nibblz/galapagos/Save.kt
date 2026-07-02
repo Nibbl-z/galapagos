@@ -13,6 +13,8 @@ data class PlayerSave(
     var coinChanges: MutableList<CoinTracking.CoinChange> = mutableListOf(),
     var questHistory: MutableList<QuestTracking.QuestingReward> = mutableListOf(),
     var cosmetics: HashMap<String, Cosmetic> = hashMapOf(),
+    var infinibag: HashMap<String, PlayerData.Item> = hashMapOf(),
+    var infinivault: HashMap<String, PlayerData.Item> = hashMapOf(),
     var apiKey: String = ""
 )
 

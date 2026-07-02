@@ -49,3 +49,36 @@ fun ItemStack.findLore(string: String): Boolean {
 
     return false
 }
+
+fun ItemStack.findLores(regex: Regex): List<MatchGroupCollection> {
+    val lore = this.getTooltipLines(
+        Item.TooltipContext.EMPTY,
+        Minecraft.getInstance().player,
+        TooltipFlag.Default.NORMAL
+    )
+    // w mojang
+
+    val matches: MutableList<MatchGroupCollection> = mutableListOf()
+
+    lore.forEach {
+        val match = regex.find(it.string) ?: return@forEach
+        matches.add(match.groups)
+    }
+
+    return matches
+}
+
+fun ItemStack.toDataItem(): PlayerData.Item {
+    val name = this.itemName.string
+
+    val regex = Regex("Amount: (?<amount>[\\d,]+)")
+    val amountString = this.findLore(regex)?.get("amount")?.value ?: this.count.toString()
+    val cleanedString = amountString.replace(",", "")
+    val count = cleanedString.toInt()
+
+    return PlayerData.Item(
+        name = name,
+        count = count,
+        isCosmeticToken = name.contains("Token") && !name.contains("Blueprint:") && !name.contains("MCC+")
+    )
+}
