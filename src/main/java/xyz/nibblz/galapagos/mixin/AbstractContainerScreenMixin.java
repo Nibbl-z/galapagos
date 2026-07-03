@@ -37,6 +37,9 @@ public class AbstractContainerScreenMixin {
 
     @Inject(method = "slotClicked", at = @At("HEAD"))
     private void slotClicked(Slot slot, int slotId, int buttonNum, ContainerInput containerInput, CallbackInfo ci) {
+        if (containerInput == ContainerInput.PICKUP_ALL) return;
+        // ^ for whatever reason, double clicking fast will run this function twice, and then AGAIN with pickup all. i dont want that. PMO!!!
+
         ContainerScreen screen = Minecraft.getInstance().screen instanceof ContainerScreen s ? s : null;
         if (!UtilKt.onIsland()) return;
         if (screen == null) return;

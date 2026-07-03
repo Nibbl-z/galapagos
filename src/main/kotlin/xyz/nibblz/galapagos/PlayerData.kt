@@ -7,11 +7,14 @@ import kotlinx.serialization.json.jsonObject
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.screens.inventory.ContainerScreen
 import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
+import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket
 import net.minecraft.world.inventory.ContainerInput
+import net.minecraft.world.inventory.Slot
 import net.minecraft.world.item.ItemStack
 import xyz.nibblz.galapagos.data.Rarity
 import xyz.nibblz.galapagos.events.ContainerOpenEvent
+import xyz.nibblz.galapagos.events.ContainerSetSlotEvent
 import xyz.nibblz.galapagos.events.SlotClickEvent
 import xyz.nibblz.galapagos.events.SystemChatEvent
 import xyz.nibblz.galapagos.mixin.accessor.HoveredSlotAccessor
@@ -240,6 +243,7 @@ object PlayerData {
         fetchAPI()
 
         ContainerOpenEvent.EVENT.register { packet -> containerOpen(packet) }
+        ContainerSetSlotEvent.EVENT.register { packet -> containerSetSlot(packet) }
         SlotClickEvent.EVENT.register { screen, input -> slotClick(screen, input) }
         SystemChatEvent.EVENT.register { packet -> systemChat(packet) }
     }
@@ -295,6 +299,10 @@ object PlayerData {
     fun containerOpen(packet: ClientboundContainerSetContentPacket) {
         val screen = Minecraft.getInstance().screen ?: return
 
+        packet.items.forEach {
+            updateItemState(it)
+        }
+
         if (screen.title.string.contains("SCAVENGING") && !screen.title.string.contains("WILL PERMANENTLY")) {
             itemsInScavenging.clear()
             val slots = listOf(11, 12, 13, 14, 15, 20, 21, 22, 23, 24)
@@ -308,6 +316,28 @@ object PlayerData {
             }
 
             Galapagos.logger.info(itemsInScavenging.toString())
+        }
+    }
+
+    fun containerSetSlot(packet: ClientboundContainerSetSlotPacket) {
+        updateItemState(packet.item)
+    }
+
+    fun updateItemState(item: ItemStack) {
+        val screen = Minecraft.getInstance().screen ?: return
+
+        val location = (if (screen.title.string.contains("INFINIBAG"))
+            Galapagos.save.infinibag
+        else if (screen.title.string.contains("INFINVAULT"))
+            Galapagos.save.infinivault
+        else null) ?: return
+
+        val data = item.toDataItem()
+
+        if (location[data.name] != null) {
+            location[data.name]!!.count = data.count
+        } else {
+            location[data.name] = data
         }
     }
 
@@ -332,134 +362,37 @@ object PlayerData {
         val slot = (screen as HoveredSlotAccessor).`galapagos$hoveredSlot`() ?: return
         val item = slot.item
 
-        // Handles:
-        // - Material Loss
-        // - Blueprint Loss
-
-        if (screen.title.string.contains("INFINIBAG")) { // Blueprint assembler infinibag
-            if (!item.findLore("Click to Assemble")) return
-            if (item.findLore("(Missing materials)")) return
-
-            val materials = fetchCraftingMaterials(item)
-            if (materials.isEmpty()) return
-
-            // TODO: i have no idea if shift-click to assemble 5x blueprints is a real thing. confirm later!!!
-
-            itemsInCraftedBlueprint.clear()
-            craftedBlueprint = item.itemName.string
-
-            materials.forEach {
-                itemsInCraftedBlueprint.add(Item(
-                    name = it.first,
-                    count = it.second,
-                    isCosmeticToken = false
-                ))
-            }
+        if (screen.title.string.contains("INFINIBAG")) {
+            handleBlueprintAssemblerInfinibag(slot, item, input)
+            handleVault(slot, item, input)
         }
 
         if (screen.title.string.contains("ASSEMBLE THIS BLUEPRINT?")) {
-            if (slot.index !in 46..48) return
-            if (craftedBlueprint == null) return
-            if (itemsInCraftedBlueprint.isEmpty()) return
-
-            itemsInCraftedBlueprint.forEach {
-                decrementItem(it.name, it.count)
-            }
-
-            decrementItem(craftedBlueprint!!, 1)
-
-            itemsInCraftedBlueprint.clear()
-            craftedBlueprint = null
+            handleBlueprintAssembly(slot, item, input)
         }
 
-        // Handles:
-        // - Swap between bag and vault
-
-        if (screen.title.string.contains("INFINIVAULT") || screen.title.string.contains("INFINIBAG")) {
-            val bag = item.findLore("Left-Click to Vault")
-            val vault = item.findLore("Left-Click to Withdraw")
-
-            if (!bag && !vault) return
-
-            var amount = 1
-
-            if (input == ContainerInput.QUICK_MOVE) {
-                val regex = Regex("Amount: (?<amount>[\\d,]+)")
-                val amountString = item.findLore(regex)?.get("amount")?.value ?: item.count.toString()
-                val cleanedString = amountString.replace(",", "")
-                amount = cleanedString.toInt()
-            }
-
-            Galapagos.logger.info("${if (vault) "withdraw" else "vault"} $amount ${item.itemName.string} ${if (vault) "from" else "to"} vault")
-            moveItem(item.itemName.string, amount, if (vault) ItemLocation.INFINIBAG else ItemLocation.INFINIVAULT)
+        if (screen.title.string.contains("INFINIVAULT")) {
+            handleVault(slot, item, input)
         }
 
-        // Handles:
-        // - Material gloop loss
-        if (screen.title.string.contains("BLUEPRINT ASSEMBLER") || screen.title.string.contains("FUSION FORGE")) {
-            if (item.itemName.string != "Material Gloop") return
-            if (item.findLore("You do not have any active")) return
-
-            if (input == ContainerInput.QUICK_MOVE) decrementItem("Material Gloop", 6)
-            else decrementItem("Material Gloop", 1)
+        if (screen.title.string.contains("BLUEPRINT ASSEMBLER") ) {
+            handleMaterialGloopTimeskip(slot, item, input)
         }
 
         if (screen.title.string.contains("PURCHASE THIS ITEM?")) {
-            val regex = Regex("Cost: [\\d,]+/(?<cost>[\\d,]+) \\[Material Gloop]")
-            val cost = item.findLore(regex)?.get("cost")?.value?.toIntOrNull() ?: return
-
-            decrementItem("Material Gloop", cost)
+            handleMaterialGloopSpending(slot, item, input)
         }
-
-        // Handles:
-        // - Material loss
 
         if (screen.title.string.contains("FUSION FORGE")) {
-            if (!item.findLore("Click to Forge")) return
-            if (item.findLore("Click to Forge (Missing materials)")) return
-            if (input == ContainerInput.QUICK_MOVE && item.findLore("(Missing materials)")) return
-
-            val materials = fetchCraftingMaterials(item)
-            if (materials.isEmpty()) return
-
-            materials.forEach {
-                decrementItem(it.first, it.second * if (input == ContainerInput.QUICK_MOVE) 5 else 1)
-            }
+            handleMaterialGloopTimeskip(slot, item, input)
+            handleFusionForgeCraft(slot, item, input)
         }
 
-        // Handles:
-        // - Any item loss via scavenging
-        // - Updating cosmetic donation status (via decrementItem)
-
-        if (screen.title.string.contains("SCAVENGING WILL PERMANENTLY")) { // destroy selected items!
-            if (slot.index !in 46..48) return
-
-            itemsInScavenging.forEach {
-                decrementItem(it.name, it.count)
-            }
-
-            itemsInScavenging.clear()
+        // also handles rep gain from scavenging
+        if (screen.title.string.contains("SCAVENGING WILL PERMANENTLY")) {
+            handleScavengeConfirm(slot, item, input)
         } else if (screen.title.string.contains("SCAVENGING")) {
-            if (item.itemName.string == "Cosmetic Bulk Scavenge") {
-                if (item.findLore("Grand Champ")) return
-
-                Galapagos.save.infinibag.values.toList().forEach {
-                    if (!it.isCosmeticToken) return@forEach
-                    if (Galapagos.save.cosmetics[it.name.dropLast(6)] == null) return@forEach
-
-                    decrementItem(it.name, it.count)
-                }
-            }
-
-            if (input != ContainerInput.QUICK_MOVE) return
-            val dataItem = item.toDataItem()
-
-            val index = itemsInScavenging.indexOfFirst {
-                it.name == dataItem.name && it.count == dataItem.count
-            }
-            if (index == -1) return
-
-            itemsInScavenging.removeAt(index)
+            handleScavengeMenu(slot, item, input)
         }
     }
 
@@ -490,5 +423,121 @@ object PlayerData {
         } else {
             Galapagos.save.infinibag[name]!!.count += count
         }
+    }
+
+    fun handleBlueprintAssemblerInfinibag(slot: Slot, item: ItemStack, input: ContainerInput) {
+        if (!item.findLore("Click to Assemble")) return
+        if (item.findLore("(Missing materials)")) return
+
+        val materials = fetchCraftingMaterials(item)
+        if (materials.isEmpty()) return
+
+        // TODO: i have no idea if shift-click to assemble 5x blueprints is a real thing. confirm later!!!
+
+        itemsInCraftedBlueprint.clear()
+        craftedBlueprint = item.itemName.string
+
+        materials.forEach {
+            itemsInCraftedBlueprint.add(Item(
+                name = it.first,
+                count = it.second,
+                isCosmeticToken = false
+            ))
+        }
+    }
+
+    fun handleBlueprintAssembly(slot: Slot, item: ItemStack, input: ContainerInput) {
+        if (slot.index !in 46..48) return
+        if (craftedBlueprint == null) return
+        if (itemsInCraftedBlueprint.isEmpty()) return
+
+        itemsInCraftedBlueprint.forEach {
+            decrementItem(it.name, it.count)
+        }
+
+        decrementItem(craftedBlueprint!!, 1)
+
+        itemsInCraftedBlueprint.clear()
+        craftedBlueprint = null
+    }
+
+    fun handleVault(slot: Slot, item: ItemStack, input: ContainerInput) {
+        val bag = item.findLore("Left-Click to Vault")
+        val vault = item.findLore("Left-Click to Withdraw")
+
+        if (!bag && !vault) return
+
+        var amount = 1
+
+        if (input == ContainerInput.QUICK_MOVE) {
+            val regex = Regex("Amount: (?<amount>[\\d,]+)")
+            val amountString = item.findLore(regex)?.get("amount")?.value ?: item.count.toString()
+            val cleanedString = amountString.replace(",", "")
+            amount = cleanedString.toInt()
+        }
+
+        Galapagos.logger.info("${if (vault) "withdraw" else "vault"} $amount ${item.itemName.string} ${if (vault) "from" else "to"} vault")
+        moveItem(item.itemName.string, amount, if (vault) ItemLocation.INFINIBAG else ItemLocation.INFINIVAULT)
+    }
+
+    fun handleMaterialGloopTimeskip(slot: Slot, item: ItemStack, input: ContainerInput) {
+        if (item.itemName.string != "Material Gloop") return
+        if (item.findLore("You do not have any active")) return
+
+        if (input == ContainerInput.QUICK_MOVE) decrementItem("Material Gloop", 6)
+        else decrementItem("Material Gloop", 1)
+    }
+
+    fun handleMaterialGloopSpending(slot: Slot, item: ItemStack, input: ContainerInput) {
+        val regex = Regex("Cost: [\\d,]+/(?<cost>[\\d,]+) \\[Material Gloop]")
+        val cost = item.findLore(regex)?.get("cost")?.value?.toIntOrNull() ?: return
+
+        decrementItem("Material Gloop", cost)
+    }
+
+    fun handleFusionForgeCraft(slot: Slot, item: ItemStack, input: ContainerInput) {
+        if (!item.findLore("Click to Forge")) return
+        if (item.findLore("Click to Forge (Missing materials)")) return
+        if (input == ContainerInput.QUICK_MOVE && item.findLore("(Missing materials)")) return
+
+        val materials = fetchCraftingMaterials(item)
+        if (materials.isEmpty()) return
+
+        materials.forEach {
+            decrementItem(it.first, it.second * if (input == ContainerInput.QUICK_MOVE) 5 else 1)
+        }
+    }
+
+    fun handleScavengeConfirm(slot: Slot, item: ItemStack, input: ContainerInput) {
+        if (slot.index !in 46..48) return
+
+        itemsInScavenging.forEach {
+            decrementItem(it.name, it.count)
+        }
+
+        itemsInScavenging.clear()
+    }
+
+    fun handleScavengeMenu(slot: Slot, item: ItemStack, input: ContainerInput) {
+        if (item.itemName.string == "Cosmetic Bulk Scavenge") {
+            if (item.findLore("Grand Champ")) return
+
+            Galapagos.save.infinibag.values.toList().forEach {
+                if (!it.isCosmeticToken) return@forEach
+                if (Galapagos.save.cosmetics[it.name.dropLast(6)] == null) return@forEach
+
+                decrementItem(it.name, it.count)
+            }
+        }
+
+        if (input != ContainerInput.QUICK_MOVE) return
+        val dataItem = item.toDataItem()
+
+        val index = itemsInScavenging.indexOfFirst {
+            it.name == dataItem.name && it.count == dataItem.count
+        }
+        if (index == -1) return
+
+        itemsInScavenging.removeAt(index)
     }
 }

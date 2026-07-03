@@ -109,6 +109,8 @@ object CoinTracking : Feature {
     fun slotClick(screen: ContainerScreen, type: ContainerInput) {
         val item = (screen as HoveredSlotAccessor).`galapagos$hoveredSlot`() ?: return
 
+        Galapagos.logger.info("${item.index}, ${item.item.itemName.string}, $type")
+
         if (price == 0 && rewardCrate == null) {
             if (item.item.itemName.string.contains("Reward Crate")) {
                 rewardCrate = item.item.itemName.string
@@ -120,11 +122,9 @@ object CoinTracking : Feature {
                 shiftClickAmount = 0
             }
 
-            Galapagos.logger.info("${item.index}, ${item.item.itemName.string}, $shiftClickAmount")
-
             return
         } else {
-            Galapagos.logger.info("${item.index}, ${item.item.itemName.string}, $shiftClickAmount")
+
         }
 
         if (item.index in 46..48) {

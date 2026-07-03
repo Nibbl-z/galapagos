@@ -1,6 +1,7 @@
 package xyz.nibblz.galapagos
 
 import net.fabricmc.api.ModInitializer
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents
 import net.minecraft.network.chat.FontDescription
 import net.minecraft.resources.Identifier
@@ -32,10 +33,11 @@ object Galapagos : ModInitializer {
 		Save.load()
 		ConstantIslandData.load()
 		registerFeatures()
+		PlayerData.init()
 
 		ClientLifecycleEvents.CLIENT_STOPPING.register {onShutdown()}
+		ClientCommandRegistrationCallback.EVENT.register { dispatcher, _ -> GalapagosCommand.register(dispatcher) }
 
-		PlayerData.init()
 
 		logger.info("Galapagos initialized!")
 	}
