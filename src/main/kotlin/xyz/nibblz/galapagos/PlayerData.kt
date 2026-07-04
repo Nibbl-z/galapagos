@@ -17,6 +17,7 @@ import xyz.nibblz.galapagos.events.ContainerOpenEvent
 import xyz.nibblz.galapagos.events.ContainerSetSlotEvent
 import xyz.nibblz.galapagos.events.SlotClickEvent
 import xyz.nibblz.galapagos.events.SystemChatEvent
+import xyz.nibblz.galapagos.features.CraftingInstructions.fetchCraftingMaterials
 import xyz.nibblz.galapagos.mixin.accessor.HoveredSlotAccessor
 import java.net.URI
 import java.net.http.HttpClient
@@ -118,7 +119,11 @@ object PlayerData {
         val name: String,
         var count: Int,
         val isCosmeticToken: Boolean
-    )
+    ) : Cloneable {
+        public override fun clone(): Item {
+            return super.clone() as Item
+        }
+    }
 
     @Serializable
     data class APIItem(
@@ -341,22 +346,7 @@ object PlayerData {
         }
     }
 
-    fun fetchCraftingMaterials(item: ItemStack): List<Pair<String, Int>> {
-        val regex = Regex("\\[(?<name>.+?)] \\[(?<count>[\\d,]+)/(?<price>[\\d,]+)]")
-        val matches = item.findLores(regex)
-        if (matches.isEmpty()) return listOf()
 
-        val materials: MutableList<Pair<String, Int>> = mutableListOf()
-
-        matches.forEach {
-            val name = it["name"]?.value ?: return@forEach
-            val price = it["price"]?.value?.toIntOrNull() ?: return@forEach
-
-            materials.add(name to price)
-        }
-
-        return materials
-    }
 
     fun slotClick(screen: ContainerScreen, input: ContainerInput) {
         val slot = (screen as HoveredSlotAccessor).`galapagos$hoveredSlot`() ?: return

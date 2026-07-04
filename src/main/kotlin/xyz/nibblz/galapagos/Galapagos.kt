@@ -10,6 +10,7 @@ import org.slf4j.Logger
 import xyz.nibblz.galapagos.data.ConstantIslandData
 import xyz.nibblz.galapagos.features.CoinTracking
 import xyz.nibblz.galapagos.features.CosmeticMachineChances
+import xyz.nibblz.galapagos.features.CraftingInstructions
 import xyz.nibblz.galapagos.features.CrateChances
 import xyz.nibblz.galapagos.features.ExchangeUnitPrice
 import xyz.nibblz.galapagos.features.QuestTracking
@@ -27,6 +28,7 @@ object Galapagos : ModInitializer {
 		CrateChances.init()
 		CosmeticMachineChances.init()
 		ExchangeUnitPrice.init()
+		CraftingInstructions.init()
 	}
 
 	override fun onInitialize() {
