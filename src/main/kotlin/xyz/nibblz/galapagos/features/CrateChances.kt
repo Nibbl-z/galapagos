@@ -56,7 +56,7 @@ object CrateChances: Feature {
         ContainerRenderEvent.EVENT.register { screen, graphics, x, y, w, h -> containerRender(screen, graphics, x, y, w, h) }
         ContainerCloseEvent.EVENT.register { containerClose() }
         ContainerOpenEvent.EVENT.register { packet -> containerOpen(packet) }
-        SlotClickEvent.EVENT.register { screen, input -> slotClick(screen, input) }
+        SlotClickEvent.EVENT.register { screen, input, _, _ -> slotClick(screen, input) }
         ItemTooltipCallback.EVENT.register { stack, context, flag, components -> tooltipAdd(stack, context, flag, components) }
         SlotRenderEvent.EVENT.register { extractor, slot -> slotRender(extractor, slot) }
     }

@@ -1,18 +1,38 @@
 package xyz.nibblz.galapagos.features
 
+import com.noxcrew.sheeplib.DialogContainer
+import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback
+import net.minecraft.ChatFormatting
+import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.screens.inventory.ContainerScreen
+import net.minecraft.client.resources.sounds.SimpleSoundInstance
+import net.minecraft.client.resources.sounds.SoundInstance
+import net.minecraft.network.chat.Component
+import net.minecraft.resources.Identifier
+import net.minecraft.sounds.SoundSource
 import net.minecraft.world.inventory.ContainerInput
+import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.TooltipFlag
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo
 import xyz.nibblz.galapagos.Galapagos
-import xyz.nibblz.galapagos.GalapagosCommand
+import xyz.nibblz.galapagos.Glyphs
 import xyz.nibblz.galapagos.PlayerData
 import xyz.nibblz.galapagos.data.Material
 import xyz.nibblz.galapagos.data.Rarity
+import xyz.nibblz.galapagos.data.craftingDuration
+import xyz.nibblz.galapagos.data.getItemRarity
 import xyz.nibblz.galapagos.data.materialFromName
 import xyz.nibblz.galapagos.data.recipes
 import xyz.nibblz.galapagos.data.shardFromRarity
+import xyz.nibblz.galapagos.dialogs.CraftingInstructionsDialog
+import xyz.nibblz.galapagos.events.InfinibagUpdateEvent
 import xyz.nibblz.galapagos.events.SlotClickEvent
+import xyz.nibblz.galapagos.findLore
 import xyz.nibblz.galapagos.findLores
+import xyz.nibblz.galapagos.formatTimeString
+import xyz.nibblz.galapagos.getCosmeticTag
+import xyz.nibblz.galapagos.mccTextureComponent
 import xyz.nibblz.galapagos.mixin.accessor.HoveredSlotAccessor
 import kotlin.math.ceil
 import kotlin.text.get
@@ -23,21 +43,128 @@ object CraftingInstructions : Feature {
 
     var tempInfinibag: HashMap<String, PlayerData.Item> = hashMapOf()
 
-    override fun init() {
-        SlotClickEvent.EVENT.register { screen, input -> slotClick(screen, input)  }
+    data class BlueprintInfo(
+        val rarity: Rarity,
+        val type: PlayerData.CosmeticTag,
+        val name: String
+    )
+
+    enum class InstructionType {
+        CRAFT,
+        PURCHASE,
+        PURCHASE_IE
     }
 
-    fun slotClick(screen: ContainerScreen, type: ContainerInput) {
-        //if (!screen.title.string.contains("INFINIBAG", false)) return
-        val slot = (screen as HoveredSlotAccessor).`galapagos$hoveredSlot`() ?: return
+    data class Instruction(
+        val material: Material,
+        val type: InstructionType,
+        val count: Int
+    )
 
+    val openBlueprints: HashMap<String, CraftingInstructionsDialog> = hashMapOf()
+
+    fun Instruction.getComponent(): Component {
+        return when(type) {
+            InstructionType.CRAFT -> {
+                val craftTime = (craftingDuration[material] ?: 0) * count
+                val efficientFusion = 1.0 - (Galapagos.save.stylePerks[PlayerData.StylePerk.EFFICIENT_FUSION]!! * 0.05)
+
+                Component.literal("Craft ${count}x ")
+                    .append(material.getStyledComponent())
+                    .append(Component.literal(if (craftTime != 0) " [${formatTimeString(
+                        (craftTime * efficientFusion).toInt())}]" else "")
+                        .withColor(ChatFormatting.GRAY.color!!))
+            }
+            InstructionType.PURCHASE -> {
+                val purchases = purchasesForRawMaterial(material, count)
+
+                Component.literal("Buy ${count}x ")
+                    .append(material.getStyledComponent())
+                    .append(Component.literal(" [${purchases}x purchase${if (purchases == 1) "" else "s"}, ${gloopForRawMaterial(material, count)} ")
+                            .withColor(ChatFormatting.GRAY.color!!))
+                    .append(mccTextureComponent("island_items/infinibag/material/gloop"))
+                    .append(Component.literal("]").withColor(ChatFormatting.GRAY.color!!))
+            }
+            InstructionType.PURCHASE_IE -> Component.literal("Purchase ${count}x ")
+                .append(material.getStyledComponent())
+                .append(Component.literal(" from Island Exchange").withColor(0xFFFFFF))
+        }
+    }
+
+    override fun init() {
+        SlotClickEvent.EVENT.register { screen, input, ci, button -> slotClick(screen, input, ci, button) }
+        ItemTooltipCallback.EVENT.register { stack, context, flag, components -> tooltipAdd(stack, context, flag, components) }
+        InfinibagUpdateEvent.EVENT.register { infinibagUpdate() }
+    }
+
+    fun infinibagUpdate() {
+        openBlueprints.forEach { (name, dialog) ->
+            dialog.calculateInstructions()
+        }
+    }
+
+    fun slotClick(screen: ContainerScreen, type: ContainerInput, ci: CallbackInfo, button: Int) {
+        val slot = (screen as HoveredSlotAccessor).`galapagos$hoveredSlot`() ?: return
+        if (!slot.item.itemName.string.contains("Blueprint:")) return
+        if (type != ContainerInput.QUICK_MOVE) return
         val requirements = fetchCraftingMaterials(slot.item)
         if (requirements.isEmpty()) return
+        if (button != 1) return
 
-        calculateCraftingInstructions(requirements.sortedByDescending {
+        ci.cancel()
+
+        Minecraft.getInstance().soundManager.play(SimpleSoundInstance(
+            Identifier.fromNamespaceAndPath("mcc", "ui.click_normal"),
+            SoundSource.MASTER,
+            1.0f, 1.0f,
+            SoundInstance.createUnseededRandom(),
+            false,
+            0,
+            SoundInstance.Attenuation.NONE,
+            0.0, 0.0, 0.0, true
+        ))
+
+        if (openBlueprints[slot.item.itemName.string] != null) {
+            openBlueprints[slot.item.itemName.string]!!.close()
+            return
+        }
+
+        val tag = if (slot.item.findLore(Glyphs.getGlyph("_fonts/icon/tooltips/collector.png"))) {
+            PlayerData.CosmeticTag.ARCANE
+        } else {
+            slot.item.getCosmeticTag()
+        }
+
+        val dialog = CraftingInstructionsDialog(10, 10, BlueprintInfo(
+            slot.item.getItemRarity() ?: Rarity.COMMON,
+            tag,
+            slot.item.itemName.string,
+        ))
+
+        dialog.requirements = requirements.sortedByDescending {
             val material = materialFromName(it.first) ?: throw IllegalStateException("Crafting recipe calls for ${it.first}, which is not a valid material")
             material.rarity.ordinal
-        })
+        }
+
+        dialog.calculateInstructions()
+
+        openBlueprints[slot.item.itemName.string] = dialog
+        DialogContainer += dialog
+    }
+
+    fun tooltipAdd(stack: ItemStack, context: Item.TooltipContext, flag: TooltipFlag, components: MutableList<Component>) {
+        if (!stack.itemName.string.contains("Blueprint:")) return
+
+        val index = components.indexOfFirst { it.string.contains("Crafting Materials:") }
+        if (index == -1) return
+
+        components.add(index + 1, Component.empty()
+            .append(Glyphs.getGlyphComponent("_fonts/icon/click_action_shift.png"))
+            .append(Component.literal("+").withColor(0xecd584))
+            .append(Glyphs.getGlyphComponent("_fonts/icon/click_action_right.png"))
+            .append(Component.literal(" > ").withColor(ChatFormatting.DARK_GRAY.color!!))
+            .append(Component.literal("Shift-Right-Click to ").withColor(0xecd584))
+            .append(Component.literal("${if (openBlueprints[stack.itemName.string] == null) "Open" else "Close"} Instructions").withColor(0xfee761)))
     }
 
     // if (!item.itemName.string.contains("Blueprint:")) return
@@ -60,9 +187,15 @@ object CraftingInstructions : Feature {
 
     fun gloopForRawMaterial(material: Material, count: Int): Int? {
         if (material.marketPrice == null) return null
+
+        return purchasesForRawMaterial(material, count)!! * material.marketPrice
+    }
+
+    fun purchasesForRawMaterial(material: Material, count: Int): Int? {
+        if (material.marketPrice == null) return null
         val purchases = ceil(count / material.marketCount!!.toDouble()).toInt()
 
-        return purchases * material.marketPrice
+        return purchases
     }
 
     fun calculateRecipeCrafting(material: Material, count: Int): List<Pair<Material, Int>> {
@@ -91,27 +224,32 @@ object CraftingInstructions : Feature {
         return missing
     }
 
-    fun calculateClusterInstructions(cluster: Material, count: Int): Pair<List<String>, Int> {
+    fun calculateClusterInstructions(cluster: Material, count: Int): Pair<List<Instruction>, Int> {
         val materials = calculateRecipeCrafting(cluster, count)
-        val instructions: MutableList<String> = mutableListOf()
+        val instructions: MutableList<Instruction> = mutableListOf()
         var gloop = 0
 
-        instructions.add("to craft x$count ${cluster.name}...")
         materials.forEach {
-            instructions.add("spend ${gloopForRawMaterial(it.first, it.second)} gloop on ${it.first.name}")
+            instructions.add(Instruction(
+                type = InstructionType.PURCHASE,
+                material = it.first,
+                count = it.second
+            ))
             gloop += gloopForRawMaterial(it.first, it.second) ?: 0
         }
-        instructions.add("craft x$count ${cluster.name}")
+        instructions.add(Instruction(
+            type = InstructionType.CRAFT,
+            material = cluster,
+            count = count
+        ))
 
         return instructions to gloop
     }
 
-    fun calculateSingularityInstructions(count: Int): Pair<List<String>, Int> {
+    fun calculateSingularityInstructions(count: Int): Pair<List<Instruction>, Int> {
         val materials = calculateRecipeCrafting(Material.MATERIAL_SINGULARITY, count)
-        val instructions: MutableList<String> = mutableListOf()
+        val instructions: MutableList<Instruction> = mutableListOf()
         var gloop = 0
-
-        instructions.add("to craft x$count material singularity")
 
         materials.forEach {
             val clusterData = calculateClusterInstructions(it.first, it.second)
@@ -119,12 +257,16 @@ object CraftingInstructions : Feature {
             gloop += clusterData.second
         }
 
-        instructions.add("craft x$count material singularity")
+        instructions.add(Instruction(
+            type = InstructionType.CRAFT,
+            material = Material.MATERIAL_SINGULARITY,
+            count = count
+        ))
         return instructions to gloop
     }
 
-    fun calculatePowerShardInstructions(shard: Material, count: Int): Pair<List<String>, Int> { // hello and welcome to recursion hell
-        val instructions: MutableList<String> = mutableListOf()
+    fun calculatePowerShardInstructions(shard: Material, count: Int): Pair<List<Instruction>, Int> { // hello and welcome to ~~recursion~~NVM hell
+        val instructions: MutableList<Instruction> = mutableListOf()
 
         val purchases: HashMap<Material, Int> = hashMapOf()
         val crafts: HashMap<Material, Int> = hashMapOf()
@@ -133,8 +275,6 @@ object CraftingInstructions : Feature {
 
         val lowerShards: MutableMap<Material, Int> = mutableMapOf()
         var lowestShard: Pair<Material, Int>
-
-        instructions.add("to craft x$count $shard...")
 
         Rarity.entries.forEach {
             purchases[shardFromRarity(it)] = 0
@@ -204,64 +344,20 @@ object CraftingInstructions : Feature {
 
         Rarity.entries.forEach {
             val shard = shardFromRarity(it)
-            if (purchases[shard]!! > 0) instructions.add("purchase x${purchases[shard]} $shard")
-            if (crafts[shard]!! > 0) instructions.add("craft x${crafts[shard]} $shard")
+
+            if (crafts[shard]!! > 0) instructions.add(Instruction(
+                type = InstructionType.CRAFT,
+                material = shard,
+                count = crafts[shard]!!
+            ))
+
+            if (purchases[shard]!! > 0) instructions.add(Instruction(
+                type = InstructionType.PURCHASE,
+                material = shard,
+                count = purchases[shard]!!
+            ))
         }
 
         return instructions to gloop
-    }
-
-    fun calculateCraftingInstructions(requirements: List<Pair<String, Int>>) {
-        tempInfinibag.clear()
-        Galapagos.save.infinibag.forEach { (name, item) ->
-            tempInfinibag[name] = item.clone()
-        }
-
-        val instructions: MutableList<String> = mutableListOf()
-        var gloop = 0
-
-        requirements.forEach { req ->
-            val material = materialFromName(req.first) ?: return@forEach
-            val count = req.second
-            val saveMaterial = tempInfinibag[material.label]
-
-            Galapagos.logger.info("checking requirement $material (${material.label}), i need $count, i have ${saveMaterial?.count ?: 0}")
-
-            if (saveMaterial != null) {
-                if (saveMaterial.count >= count) { // already have enough of the material
-                    saveMaterial.count -= count
-                    return@forEach
-                }
-            }
-
-            val required = count - (saveMaterial?.count ?: 0)
-
-                    // call me yanderedev the way i be if else if else if else if else if ing
-            if (material.label.contains("Power Shard")) {
-                val shardData = calculatePowerShardInstructions(material, required)
-                shardData.first.forEach { instruction -> instructions.add(instruction) }
-                gloop += shardData.second
-            } else if (material.label.contains("Cluster")) {
-                val clusterData = calculateClusterInstructions(material, required)
-                clusterData.first.forEach { instruction -> instructions.add(instruction) }
-                gloop += clusterData.second
-            } else if (material.label.contains("Material Singularity")) {
-                val singularityData = calculateSingularityInstructions(required)
-                singularityData.first.forEach { instruction -> instructions.add(instruction) }
-                gloop += singularityData.second
-            } else if (material.label.contains("Style Soul")) {
-                instructions.add("sell your soul for style souls on ie")
-            } else { // Standard material
-                instructions.add("spend ${gloopForRawMaterial(material, required)} gloop on ${material.name}")
-                gloop += gloopForRawMaterial(material, required) ?: 0
-
-                saveMaterial?.count -= required
-            }
-        }
-
-        Galapagos.logger.info(gloop.toString())
-        instructions.forEach {
-            Galapagos.logger.info(it)
-        }
     }
 }

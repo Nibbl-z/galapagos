@@ -23,7 +23,7 @@ object QuestTracking : Feature {
 
     override fun init() {
         ContainerOpenEvent.EVENT.register { packet -> containerOpen(packet) }
-        SlotClickEvent.EVENT.register { screen, input -> slotClick(screen, input) }
+        SlotClickEvent.EVENT.register { screen, input, _, _ -> slotClick(screen, input) }
         SystemChatEvent.EVENT.register { packet -> systemChat(packet) }
     }
 

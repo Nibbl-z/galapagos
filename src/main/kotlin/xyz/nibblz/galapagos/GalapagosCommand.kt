@@ -9,6 +9,14 @@ object GalapagosCommand {
     fun register(dispatcher: CommandDispatcher<FabricClientCommandSource>) {
         Command("galapagos") {
             literal("debug") {
+                literal("fusionforge") {
+                    executes {
+                        Minecraft.getInstance().gui.chat.addClientSystemMessage(
+                            Component.literal(Galapagos.save.fusionForge.toString())
+                        )
+                    }
+                }
+
                 literal("cosmetic") {
                     argument("name") {
                         suggests { _, builder ->

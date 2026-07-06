@@ -1,5 +1,9 @@
 package xyz.nibblz.galapagos.data
 
+import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.MutableComponent
+import xyz.nibblz.galapagos.mccTextureComponent
+
 enum class MaterialType {
     NONE,
     CLUSTER,
@@ -8,47 +12,56 @@ enum class MaterialType {
     STYLE_SOUL
 }
 
-enum class Material(val label: String, val type: MaterialType, val rarity: Rarity, val marketPrice: Int? = null, val marketCount: Int? = null) {
-    FOGGY_CRYSTAL("Foggy Crystal", MaterialType.NONE, Rarity.COMMON, 4, 10),
-    IRON_BOLT("Iron Bolt", MaterialType.NONE, Rarity.COMMON, 4, 10),
-    PALE_BLOOM("Pale Bloom", MaterialType.NONE, Rarity.COMMON, 4, 10),
-    BLAND_WATER("Bland Water", MaterialType.NONE, Rarity.COMMON, 4, 10),
+enum class Material(val label: String, val type: MaterialType, val rarity: Rarity, val spriteName: String, val marketPrice: Int? = null, val marketCount: Int? = null) {
+    FOGGY_CRYSTAL("Foggy Crystal", MaterialType.NONE, Rarity.COMMON, "magical_common", 4, 10),
+    IRON_BOLT("Iron Bolt", MaterialType.NONE, Rarity.COMMON, "mechanical_common", 4, 10),
+    PALE_BLOOM("Pale Bloom", MaterialType.NONE, Rarity.COMMON, "nature_common", 4, 10),
+    BLAND_WATER("Bland Water", MaterialType.NONE, Rarity.COMMON, "oceanic_common", 4, 10),
 
-    JADE_EYE("Jade Eye", MaterialType.NONE, Rarity.UNCOMMON, 6, 5),
-    COPPER_CHUNK("Copper Chunk", MaterialType.NONE, Rarity.UNCOMMON, 6, 5),
-    VERDANT_MOSS("Verdant Moss", MaterialType.NONE, Rarity.UNCOMMON, 6, 5),
-    SEAWEED_GOO("Seaweed Goo", MaterialType.NONE, Rarity.UNCOMMON, 6, 5),
+    JADE_EYE("Jade Eye", MaterialType.NONE, Rarity.UNCOMMON, "magical_uncommon", 6, 5),
+    COPPER_CHUNK("Copper Chunk", MaterialType.NONE, Rarity.UNCOMMON, "mechanical_uncommon", 6, 5),
+    VERDANT_MOSS("Verdant Moss", MaterialType.NONE, Rarity.UNCOMMON, "nature_uncommon", 6, 5),
+    SEAWEED_GOO("Seaweed Goo", MaterialType.NONE, Rarity.UNCOMMON, "oceanic_uncommon", 6, 5),
 
-    FRIGID_SAPPHIRE("Frigid Sapphire", MaterialType.NONE, Rarity.RARE, 9, 3),
-    COBALT_ROD("Cobalt Rod", MaterialType.NONE, Rarity.RARE, 9, 3),
-    SKY_POPPY("Sky Poppy", MaterialType.NONE, Rarity.RARE, 9, 3),
-    DEEP_BRINE("Deep Brine", MaterialType.NONE, Rarity.RARE, 9, 3),
+    FRIGID_SAPPHIRE("Frigid Sapphire", MaterialType.NONE, Rarity.RARE, "magical_rare", 9, 3),
+    COBALT_ROD("Cobalt Rod", MaterialType.NONE, Rarity.RARE, "mechanical_rare", 9, 3),
+    SKY_POPPY("Sky Poppy", MaterialType.NONE, Rarity.RARE, "nature_rare", 9, 3),
+    DEEP_BRINE("Deep Brine", MaterialType.NONE, Rarity.RARE, "oceanic_rare", 9, 3),
 
-    AMETHYST_TABLET("Amethyst Tablet", MaterialType.NONE, Rarity.EPIC, 12, 2),
-    TITANIUM_PLATE("Titanium Plate", MaterialType.NONE, Rarity.EPIC, 12, 2),
-    NIGHTSHADE_LILY("Nightshade Lily", MaterialType.NONE, Rarity.EPIC, 12, 2),
-    VIRULENT_VIAL("Virulent Vial", MaterialType.NONE, Rarity.EPIC, 12, 2),
+    AMETHYST_TABLET("Amethyst Tablet", MaterialType.NONE, Rarity.EPIC, "magical_epic", 12, 2),
+    TITANIUM_PLATE("Titanium Plate", MaterialType.NONE, Rarity.EPIC, "mechanical_epic",  12, 2),
+    NIGHTSHADE_LILY("Nightshade Lily", MaterialType.NONE, Rarity.EPIC, "nature_epic", 12, 2),
+    VIRULENT_VIAL("Virulent Vial", MaterialType.NONE, Rarity.EPIC, "oceanic_epic", 12, 2),
 
-    CRYSTALLIZED_SUNSET("Crystallized Sunset", MaterialType.NONE, Rarity.LEGENDARY, 12, 1),
-    SOLARFLAME_BAR("Solarflame Bar", MaterialType.NONE, Rarity.LEGENDARY, 12, 1),
-    SPARKLING_SUNFLOWER("Sparkling Sunflower", MaterialType.NONE, Rarity.LEGENDARY, 12, 1),
-    BOTTLED_SUNRISE("Bottled Sunrise", MaterialType.NONE, Rarity.LEGENDARY, 12, 1),
+    CRYSTALLIZED_SUNSET("Crystallized Sunset", MaterialType.NONE, Rarity.LEGENDARY, "magical_legendary", 12, 1),
+    SOLARFLAME_BAR("Solarflame Bar", MaterialType.NONE, Rarity.LEGENDARY, "mechanical_legendary", 12, 1),
+    SPARKLING_SUNFLOWER("Sparkling Sunflower", MaterialType.NONE, Rarity.LEGENDARY, "nature_legendary", 12, 1),
+    BOTTLED_SUNRISE("Bottled Sunrise", MaterialType.NONE, Rarity.LEGENDARY, "oceanic_legendary",12,  1),
 
-    COMMON_POWER_SHARD("Common Power Shard", MaterialType.POWER_SHARD, Rarity.COMMON, 3, 1),
-    UNCOMMON_POWER_SHARD("Uncommon Power Shard", MaterialType.POWER_SHARD, Rarity.UNCOMMON, 6, 1),
-    RARE_POWER_SHARD("Rare Power Shard", MaterialType.POWER_SHARD, Rarity.RARE, 12, 1),
-    EPIC_POWER_SHARD("Epic Power Shard", MaterialType.POWER_SHARD, Rarity.EPIC, 24, 1),
-    LEGENDARY_POWER_SHARD("Legendary Power Shard", MaterialType.POWER_SHARD, Rarity.LEGENDARY, 48, 1),
-    MYTHIC_POWER_SHARD("Mythic Power Shard", MaterialType.POWER_SHARD, Rarity.MYTHIC),
+    COMMON_POWER_SHARD("Common Power Shard", MaterialType.POWER_SHARD, Rarity.COMMON, "power_shard_common", 3, 1),
+    UNCOMMON_POWER_SHARD("Uncommon Power Shard", MaterialType.POWER_SHARD, Rarity.UNCOMMON, "power_shard_uncommon", 6, 1),
+    RARE_POWER_SHARD("Rare Power Shard", MaterialType.POWER_SHARD, Rarity.RARE, "power_shard_rare", 12, 1),
+    EPIC_POWER_SHARD("Epic Power Shard", MaterialType.POWER_SHARD, Rarity.EPIC, "power_shard_epic", 24, 1),
+    LEGENDARY_POWER_SHARD("Legendary Power Shard", MaterialType.POWER_SHARD, Rarity.LEGENDARY, "power_shard_legendary", 48, 1),
+    MYTHIC_POWER_SHARD("Mythic Power Shard", MaterialType.POWER_SHARD, Rarity.MYTHIC, "power_shard_mythic"),
 
-    COMMON_MATERIAL_CLUSTER("Common Material Cluster", MaterialType.CLUSTER, Rarity.COMMON),
-    UNCOMMON_MATERIAL_CLUSTER("Uncommon Material Cluster", MaterialType.CLUSTER, Rarity.COMMON),
-    RARE_MATERIAL_CLUSTER("Rare Material Cluster", MaterialType.CLUSTER, Rarity.COMMON),
-    EPIC_MATERIAL_CLUSTER("Epic Material Cluster", MaterialType.CLUSTER, Rarity.COMMON),
-    LEGENDARY_MATERIAL_CLUSTER("Legendary Material Cluster", MaterialType.CLUSTER, Rarity.COMMON),
+    COMMON_MATERIAL_CLUSTER("Common Material Cluster", MaterialType.CLUSTER, Rarity.COMMON, "cluster_common"),
+    UNCOMMON_MATERIAL_CLUSTER("Uncommon Material Cluster", MaterialType.CLUSTER, Rarity.UNCOMMON, "cluster_uncommon"),
+    RARE_MATERIAL_CLUSTER("Rare Material Cluster", MaterialType.CLUSTER, Rarity.RARE, "cluster_rare"),
+    EPIC_MATERIAL_CLUSTER("Epic Material Cluster", MaterialType.CLUSTER, Rarity.EPIC, "cluster_epic"),
+    LEGENDARY_MATERIAL_CLUSTER("Legendary Material Cluster", MaterialType.CLUSTER, Rarity.LEGENDARY, "cluster_legendary"),
 
-    MATERIAL_SINGULARITY("Material Singularity", MaterialType.SINGULARITY, Rarity.MYTHIC, 900, 1),
-    STYLE_SOUL("Style Soul", MaterialType.STYLE_SOUL, Rarity.MYTHIC);
+    MATERIAL_SINGULARITY("Material Singularity", MaterialType.SINGULARITY, Rarity.MYTHIC, "material_singularity", 900, 1),
+    STYLE_SOUL("Style Soul", MaterialType.STYLE_SOUL, Rarity.MYTHIC, "style_soul");
+
+    fun getSpriteLocation(): String {
+        return "island_items/infinibag/${if (this == Material.MATERIAL_SINGULARITY) "component" else "material"}/${this.spriteName}"
+    }
+
+    fun getStyledComponent(): MutableComponent {
+        return mccTextureComponent(this.getSpriteLocation())
+            .append(Component.literal(" ${this.label}").withColor(this.rarity.color))
+    }
 }
 
 fun materialFromName(label: String): Material? {
@@ -58,6 +71,21 @@ fun materialFromName(label: String): Material? {
 fun shardFromRarity(rarity: Rarity): Material {
     return Material.entries.find { it.type == MaterialType.POWER_SHARD && it.rarity == rarity }!!
 }
+
+val craftingDuration: Map<Material, Int> = mapOf(
+    Material.COMMON_MATERIAL_CLUSTER to 10*60,
+    Material.UNCOMMON_MATERIAL_CLUSTER to 30*60,
+    Material.RARE_MATERIAL_CLUSTER to 60*60,
+    Material.EPIC_MATERIAL_CLUSTER to 180*60,
+    Material.LEGENDARY_MATERIAL_CLUSTER to 360*60,
+    Material.MATERIAL_SINGULARITY to 24*60*60,
+
+    Material.UNCOMMON_POWER_SHARD to 30*60,
+    Material.RARE_POWER_SHARD to 60*60,
+    Material.EPIC_POWER_SHARD to 180*60,
+    Material.LEGENDARY_POWER_SHARD to 360*60,
+    Material.MYTHIC_POWER_SHARD to 720*60
+)
 
 val recipes: Map<Material, List<Pair<Material, Int>>> = mapOf(
     // shard recipes

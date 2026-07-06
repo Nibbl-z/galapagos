@@ -15,6 +15,8 @@ data class PlayerSave(
     var cosmetics: HashMap<String, Cosmetic> = hashMapOf(),
     var infinibag: HashMap<String, PlayerData.Item> = hashMapOf(),
     var infinivault: HashMap<String, PlayerData.Item> = hashMapOf(),
+    var fusionForge: MutableList<PlayerData.Item> = mutableListOf(),
+    var stylePerks: HashMap<PlayerData.StylePerk, Int> = hashMapOf(),
     var apiKey: String = ""
 )
 
@@ -31,6 +33,10 @@ object Save {
         val jsonText = Files.readString(path) ?: return
         val loaded = json.decodeFromString<PlayerSave>(jsonText)
         Galapagos.save = loaded
+
+        PlayerData.StylePerk.entries.forEach {
+            if (Galapagos.save.stylePerks[it] == null) Galapagos.save.stylePerks[it] = 0
+        }
     }
 
     fun save() {

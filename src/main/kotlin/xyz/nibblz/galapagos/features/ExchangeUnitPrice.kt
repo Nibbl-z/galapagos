@@ -30,7 +30,7 @@ object ExchangeUnitPrice : Feature {
         ItemTooltipCallback.EVENT.register { stack, context, flag, components -> tooltipAdd(stack, context, flag, components) }
         ContainerOpenEvent.EVENT.register { packet -> containerOpen(packet) }
         ContainerSetSlotEvent.EVENT.register { packet -> containerSetSlot(packet) }
-        SlotClickEvent.EVENT.register { screen, input -> slotClick(screen, input) }
+        SlotClickEvent.EVENT.register { screen, input, _, _ -> slotClick(screen, input) }
     }
 
     val perUnitPrices: MutableMap<ItemStack, Int> = mutableMapOf()

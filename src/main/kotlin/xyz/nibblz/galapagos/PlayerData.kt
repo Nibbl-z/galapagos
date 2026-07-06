@@ -15,6 +15,7 @@ import net.minecraft.world.item.ItemStack
 import xyz.nibblz.galapagos.data.Rarity
 import xyz.nibblz.galapagos.events.ContainerOpenEvent
 import xyz.nibblz.galapagos.events.ContainerSetSlotEvent
+import xyz.nibblz.galapagos.events.InfinibagUpdateEvent
 import xyz.nibblz.galapagos.events.SlotClickEvent
 import xyz.nibblz.galapagos.events.SystemChatEvent
 import xyz.nibblz.galapagos.features.CraftingInstructions.fetchCraftingMaterials
@@ -137,6 +138,27 @@ object PlayerData {
         val __typename: String? = null
     )
 
+    //// STYLE PERKS
+
+    @Serializable
+    enum class StylePerk(val label: String, val slotID: Int) {
+        LUCKY_METER("Lucky Meter", 11),
+        GLITCHED_CLAIMS("Glitched Claims", 12),
+        EXPANDED_METER("Expanded Meter", 13),
+        EXPANDED_VAULT("Expanded Vault", 14),
+        ARCANE_CLAIMS("Arcane Claims", 15),
+        LUCKY_QUESTS("Lucky Quests", 20),
+        BOOSTED_QUESTS("Boosted Quests", 21),
+        EXPANDED_DAILIES("Expanded Dailies", 22),
+        EXPANDED_WEEKLIES("Expanded Weeklies", 23),
+        ARCANE_QUESTS("Arcane Quests", 24),
+        EFFICIENT_FUSION("Efficient Fusion", 29),
+        EFFICIENT_ASSEMBLY("Efficient Assembly", 30),
+        EXPANDED_FORGE("Expanded Forge", 31),
+        EXPANDED_ASSEMBLER("Expanded Assembler", 32),
+        ARCANE_ANOMALY("Arcane Anomaly", 33) // I love this perk! this perk is cool.this is my favorite  perk. :3  ilove.arcane   anomaly! anomalyyy:3
+    }
+
     val client: HttpClient? = HttpClient.newHttpClient()
     
     fun fetchAPI() {
@@ -242,6 +264,7 @@ object PlayerData {
 
     val itemsInScavenging: MutableList<Item> = mutableListOf()
     val itemsInCraftedBlueprint: MutableList<Item> = mutableListOf()
+    var cancellingForging: Int? = null
     var craftedBlueprint: String? = null
 
     fun init() {
@@ -249,7 +272,7 @@ object PlayerData {
 
         ContainerOpenEvent.EVENT.register { packet -> containerOpen(packet) }
         ContainerSetSlotEvent.EVENT.register { packet -> containerSetSlot(packet) }
-        SlotClickEvent.EVENT.register { screen, input -> slotClick(screen, input) }
+        SlotClickEvent.EVENT.register { screen, input, _, _ -> slotClick(screen, input) }
         SystemChatEvent.EVENT.register { packet -> systemChat(packet) }
     }
 
@@ -308,6 +331,8 @@ object PlayerData {
             updateItemState(it)
         }
 
+        if (screen.title.string.contains("INFINIBAG")) InfinibagUpdateEvent.EVENT.invoker().invoke()
+
         if (screen.title.string.contains("SCAVENGING") && !screen.title.string.contains("WILL PERMANENTLY")) {
             itemsInScavenging.clear()
             val slots = listOf(11, 12, 13, 14, 15, 20, 21, 22, 23, 24)
@@ -321,6 +346,39 @@ object PlayerData {
             }
 
             Galapagos.logger.info(itemsInScavenging.toString())
+        }
+
+        if (screen.title.string.contains("FUSION FORGE")) {
+            if (!packet.items[28].isEmpty) return // makes sure its on the forge page and not the recipe page
+
+            val slots = listOf(19, 20, 21, 22, 23, 24, 25)
+
+            Galapagos.save.fusionForge.clear()
+
+            slots.forEach {
+                val item = packet.items[it]
+                if (item.isEmpty) return@forEach
+                if (item.itemName.string == "Select a Recipe") return@forEach
+                if (item.itemName.string == "Locked Forge Slot") return@forEach
+
+                Galapagos.save.fusionForge.add(Item(
+                    name = item.itemName.string,
+                    count = item.count,
+                    isCosmeticToken = false
+                ))
+            }
+        }
+
+        if (screen.title.string.contains("STYLE PERKS")) {
+            StylePerk.entries.forEach {
+                val item = packet.items[it.slotID]
+                if (!item.itemName.string.contains(it.label)) throw IllegalStateException("Style perk ${it.name} has incorrect slot ID")
+
+                val regex = Regex("${it.label} \\((?<upgrades>\\d+)")
+                val upgrades = regex.find(item.itemName.string)?.groups["upgrades"]?.value?.toIntOrNull() ?: 0
+
+                Galapagos.save.stylePerks[it] = upgrades
+            }
         }
     }
 
@@ -344,9 +402,9 @@ object PlayerData {
         } else {
             location[data.name] = data
         }
+
+
     }
-
-
 
     fun slotClick(screen: ContainerScreen, input: ContainerInput) {
         val slot = (screen as HoveredSlotAccessor).`galapagos$hoveredSlot`() ?: return
@@ -376,6 +434,11 @@ object PlayerData {
         if (screen.title.string.contains("FUSION FORGE")) {
             handleMaterialGloopTimeskip(slot, item, input)
             handleFusionForgeCraft(slot, item, input)
+            handleFusionForgeClaim(slot, item, input)
+        }
+
+        if (screen.title.string.contains("CANCEL FORGING?")) {
+            handleFusionForgeCancel(slot, item, input)
         }
 
         // also handles rep gain from scavenging
@@ -384,6 +447,8 @@ object PlayerData {
         } else if (screen.title.string.contains("SCAVENGING")) {
             handleScavengeMenu(slot, item, input)
         }
+
+        InfinibagUpdateEvent.EVENT.invoker().invoke()
     }
 
     // Handles:
@@ -413,6 +478,8 @@ object PlayerData {
         } else {
             Galapagos.save.infinibag[name]!!.count += count
         }
+
+        InfinibagUpdateEvent.EVENT.invoker().invoke()
     }
 
     fun handleBlueprintAssemblerInfinibag(slot: Slot, item: ItemStack, input: ContainerInput) {
@@ -490,12 +557,47 @@ object PlayerData {
         if (item.findLore("Click to Forge (Missing materials)")) return
         if (input == ContainerInput.QUICK_MOVE && item.findLore("(Missing materials)")) return
 
+        Galapagos.save.fusionForge.add(Item(
+            name = item.itemName.string,
+            count = if (input == ContainerInput.QUICK_MOVE) 5 else 1,
+            isCosmeticToken = false
+        ))
+
         val materials = fetchCraftingMaterials(item)
         if (materials.isEmpty()) return
 
         materials.forEach {
             decrementItem(it.first, it.second * if (input == ContainerInput.QUICK_MOVE) 5 else 1)
         }
+    }
+
+    fun handleFusionForgeClaim(slot: Slot, item: ItemStack, input: ContainerInput) {
+        if (item.findLore("Click to Claim Item")) {
+            val index = Galapagos.save.fusionForge.indexOfFirst {
+                it.name == item.itemName.string && it.count == item.count
+            }
+
+            if (index == -1) return
+
+            Galapagos.save.fusionForge.removeAt(index)
+        }
+
+        if (item.findLore("Shift-Click to Cancel Forging") && input == ContainerInput.QUICK_MOVE) {
+            val index = Galapagos.save.fusionForge.indexOfFirst {
+                it.name == item.itemName.string && it.count == item.count
+            }
+
+            if (index == -1) return
+
+            cancellingForging = index
+        }
+    }
+
+    fun handleFusionForgeCancel(slot: Slot, item: ItemStack, input: ContainerInput) {
+        if (slot.index !in 46..48) return
+        if (cancellingForging == null) return
+
+        Galapagos.save.fusionForge.removeAt(cancellingForging!!)
     }
 
     fun handleScavengeConfirm(slot: Slot, item: ItemStack, input: ContainerInput) {

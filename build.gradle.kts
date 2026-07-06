@@ -17,6 +17,10 @@ repositories {
 	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
 	// for more information about repositories.
 	maven("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1")
+	maven {
+		name = "noxcrew-public"
+		url = uri("https://maven.noxcrew.com/public")
+	}
 }
 
 dependencies {
@@ -29,6 +33,8 @@ dependencies {
     implementation("net.fabricmc:fabric-language-kotlin:${providers.gradleProperty("fabric_kotlin_version").get()}")
 
 	runtimeOnly("me.djtheredstoner:DevAuth-fabric:1.2.2")
+
+	implementation("com.noxcrew.sheeplib:api:1.5.2+26.1.2")
 }
 
 tasks.processResources {

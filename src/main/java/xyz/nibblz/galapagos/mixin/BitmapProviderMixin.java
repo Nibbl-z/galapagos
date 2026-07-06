@@ -20,6 +20,7 @@ public class BitmapProviderMixin {
     @Inject(method = "<init>", at = @At("TAIL"))
     private void init(Identifier file, int height, int ascent, int[][] codepointGrid, CallbackInfo ci) {
         if(!file.getNamespace().equals("mcc") || !file.getPath().contains("_fonts")) return;
+        if(ascent < 0) return;
 
         StringBuilder builder = new StringBuilder();
         for(int codePoint : codepointGrid[0]) {

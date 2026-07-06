@@ -76,7 +76,7 @@ object CosmeticMachineChances : Feature {
     override fun init() {
         ContainerOpenEvent.EVENT.register { packet -> containerOpen(packet) }
         ContainerCloseEvent.EVENT.register { containerClose() }
-        SlotClickEvent.EVENT.register { screen, input -> slotClick(screen, input) }
+        SlotClickEvent.EVENT.register { screen, input, _, _ -> slotClick(screen, input) }
         ItemTooltipCallback.EVENT.register { stack, context, flag, components -> tooltipAdd(stack, context, flag, components) }
         ContainerRenderEvent.EVENT.register { screen, graphics, x, y, w, h -> containerRender(screen, graphics, x, y, w, h) }
     }

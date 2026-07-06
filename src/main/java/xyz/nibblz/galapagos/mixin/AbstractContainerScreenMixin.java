@@ -35,7 +35,7 @@ public class AbstractContainerScreenMixin {
     @Shadow
     protected int imageHeight;
 
-    @Inject(method = "slotClicked", at = @At("HEAD"))
+    @Inject(method = "slotClicked", at = @At("HEAD"), cancellable = true)
     private void slotClicked(Slot slot, int slotId, int buttonNum, ContainerInput containerInput, CallbackInfo ci) {
         if (containerInput == ContainerInput.PICKUP_ALL) return;
         // ^ for whatever reason, double clicking fast will run this function twice, and then AGAIN with pickup all. i dont want that. PMO!!!
@@ -44,7 +44,7 @@ public class AbstractContainerScreenMixin {
         if (!UtilKt.onIsland()) return;
         if (screen == null) return;
 
-        SlotClickEvent.INSTANCE.getEVENT().invoker().invoke(screen, containerInput);
+        SlotClickEvent.INSTANCE.getEVENT().invoker().invoke(screen, containerInput, ci, buttonNum);
     }
 
     @Inject(method = "extractRenderState", at = @At("TAIL"))

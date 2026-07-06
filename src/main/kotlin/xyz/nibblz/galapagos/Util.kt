@@ -14,6 +14,10 @@ import com.mojang.brigadier.suggestion.Suggestions
 import com.mojang.brigadier.suggestion.SuggestionsBuilder
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
+import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.MutableComponent
+import net.minecraft.network.chat.contents.objects.AtlasSprite
+import net.minecraft.resources.Identifier
 import java.util.concurrent.CompletableFuture
 
 // stealing from devcmb stealing from pe3ep part 1
@@ -208,4 +212,21 @@ fun ItemStack.toDataItem(): PlayerData.Item {
         count = count,
         isCosmeticToken = name.contains("Token") && !name.contains("Blueprint:") && !name.contains("MCC+")
     )
+}
+
+fun ItemStack.getCosmeticTag(): PlayerData.CosmeticTag {
+    if (this.findLore(Glyphs.getGlyph("_fonts/icon/tooltips/exclusive.png"))) return PlayerData.CosmeticTag.EXCLUSIVE
+    if (this.findLore(Glyphs.getGlyph("_fonts/icon/tooltips/arcane.png"))) return PlayerData.CosmeticTag.ARCANE
+    return PlayerData.CosmeticTag.STANDARD
+}
+
+fun mccTextureComponent(path: String): MutableComponent {
+    return Component.`object`(AtlasSprite(AtlasSprite.DEFAULT_ATLAS, Identifier.fromNamespaceAndPath("mcc", path)))
+}
+
+fun formatTimeString(seconds: Int): String {
+    val hours = seconds / 3600
+    val minutes = (seconds / 60) - (hours * 60)
+
+    return "${if (hours > 0) "${hours}h${if (minutes > 0) " " else ""}" else ""}${if (minutes > 0) "${minutes}m" else ""}"
 }
