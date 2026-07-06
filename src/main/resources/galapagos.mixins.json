@@ -1,18 +1,21 @@
 {
-	"required": true,
-	"package": "xyz.nibblz.galapagos.mixin",
-	"compatibilityLevel": "JAVA_25",
-	"mixins": [
-		"ClientPacketMixin",
-		"PlayerMixin",
-		"AbstractContainerScreenMixin",
-		"BitmapProviderMixin",
-		"accessor.HoveredSlotAccessor"
-	],
-	"injectors": {
-		"defaultRequire": 1
-	},
-	"overwrites": {
-		"requireAnnotations": true
-	}
+  "required": true,
+  "package": "xyz.nibblz.galapagos.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "mixins": [
+    "AbstractContainerScreenMixin",
+    "BitmapProviderMixin",
+    "ClientPacketMixin",
+    "PlayerMixin",
+    "accessor.HoveredSlotAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  },
+  "client": [
+    "GuiMixin"
+  ]
 }

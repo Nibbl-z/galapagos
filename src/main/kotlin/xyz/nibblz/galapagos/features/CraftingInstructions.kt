@@ -1,6 +1,7 @@
 package xyz.nibblz.galapagos.features
 
 import com.noxcrew.sheeplib.DialogContainer
+import com.noxcrew.sheeplib.dialog.Dialog
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback
 import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
@@ -8,6 +9,8 @@ import net.minecraft.client.gui.screens.inventory.ContainerScreen
 import net.minecraft.client.resources.sounds.SimpleSoundInstance
 import net.minecraft.client.resources.sounds.SoundInstance
 import net.minecraft.network.chat.Component
+import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
+import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
 import net.minecraft.resources.Identifier
 import net.minecraft.sounds.SoundSource
 import net.minecraft.world.inventory.ContainerInput
@@ -26,7 +29,10 @@ import xyz.nibblz.galapagos.data.materialFromName
 import xyz.nibblz.galapagos.data.recipes
 import xyz.nibblz.galapagos.data.shardFromRarity
 import xyz.nibblz.galapagos.dialogs.CraftingInstructionsDialog
+import xyz.nibblz.galapagos.events.ContainerOpenEvent
+import xyz.nibblz.galapagos.events.ContainerSetSlotEvent
 import xyz.nibblz.galapagos.events.InfinibagUpdateEvent
+import xyz.nibblz.galapagos.events.ScoreboardTitleUpdateEvent
 import xyz.nibblz.galapagos.events.SlotClickEvent
 import xyz.nibblz.galapagos.findLore
 import xyz.nibblz.galapagos.findLores
@@ -62,6 +68,7 @@ object CraftingInstructions : Feature {
     )
 
     val openBlueprints: HashMap<String, CraftingInstructionsDialog> = hashMapOf()
+    val craftableBlueprints: MutableList<String> = mutableListOf()
 
     fun Instruction.getComponent(): Component {
         return when(type) {
@@ -95,11 +102,23 @@ object CraftingInstructions : Feature {
         SlotClickEvent.EVENT.register { screen, input, ci, button -> slotClick(screen, input, ci, button) }
         ItemTooltipCallback.EVENT.register { stack, context, flag, components -> tooltipAdd(stack, context, flag, components) }
         InfinibagUpdateEvent.EVENT.register { infinibagUpdate() }
+        ContainerSetSlotEvent.EVENT.register { packet -> setSlot(packet) }
+        ContainerOpenEvent.EVENT.register { packet -> openContainer(packet) }
+        ScoreboardTitleUpdateEvent.EVENT.register { title -> scoreboardTitleUpdate(title) }
     }
 
     fun infinibagUpdate() {
+        val toRemove = mutableListOf<String>()
+
         openBlueprints.forEach { (name, dialog) ->
             dialog.calculateInstructions()
+            if (dialog.state == Dialog.State.CLOSED) {
+                toRemove.add(name)
+            }
+        }
+
+        toRemove.forEach {
+            openBlueprints.remove(it)
         }
     }
 
@@ -110,6 +129,7 @@ object CraftingInstructions : Feature {
         val requirements = fetchCraftingMaterials(slot.item)
         if (requirements.isEmpty()) return
         if (button != 1) return
+        if (craftableBlueprints.contains(slot.item.itemName.string)) return
 
         ci.cancel()
 
@@ -152,13 +172,60 @@ object CraftingInstructions : Feature {
         DialogContainer += dialog
     }
 
+    fun setSlot(packet: ClientboundContainerSetSlotPacket) {
+        checkBlueprint(packet.item)
+    }
+
+    fun openContainer(packet: ClientboundContainerSetContentPacket) {
+        packet.items.forEach { checkBlueprint(it) }
+    }
+
+    fun scoreboardTitleUpdate(title: String) {
+        if (title.contains("MAIN ISLAND")) return
+
+        openBlueprints.forEach { (_, dialog) ->
+            dialog.close()
+        }
+
+        openBlueprints.clear()
+    }
+
+    fun checkBlueprint(item: ItemStack) {
+        val requirements = fetchCraftingMaterials(item)
+        if (requirements.isEmpty()) return
+
+        var requirementsMet = 0
+
+        requirements.forEach {
+            val material = it.first
+            val count = it.second
+            val savedCount = Galapagos.save.infinibag[material]?.count ?: 0
+
+            Galapagos.logger.info("${item.itemName.string}, $material $count $savedCount")
+
+            if (count <= savedCount) requirementsMet++
+        }
+
+        if (requirementsMet == requirements.size) {
+            craftableBlueprints.add(item.itemName.string)
+            Galapagos.logger.info("${item.itemName.string} is craftable")
+        } else {
+            craftableBlueprints.removeIf { it == item.itemName.string }
+            Galapagos.logger.info("${item.itemName.string} isNOT craftable")
+        }
+    }
+
     fun tooltipAdd(stack: ItemStack, context: Item.TooltipContext, flag: TooltipFlag, components: MutableList<Component>) {
         if (!stack.itemName.string.contains("Blueprint:")) return
+        if (craftableBlueprints.contains(stack.itemName.string)) return
 
-        val index = components.indexOfFirst { it.string.contains("Crafting Materials:") }
-        if (index == -1) return
+        var index = components.indexOfFirst { it.string.contains("Click to") && !it.string.contains("Right") && !it.string.contains("Middle") }
+        if (index != -1) index++
+        // fallback!!
+        if (index == -1) { index = components.indexOfFirst { it.string.contains("minecraft:") } } // if you have f3+h on :P
+        if (index == -1) { index = components.size - 1 } // if you dont !
 
-        components.add(index + 1, Component.empty()
+        components.add(index, Component.empty()
             .append(Glyphs.getGlyphComponent("_fonts/icon/click_action_shift.png"))
             .append(Component.literal("+").withColor(0xecd584))
             .append(Glyphs.getGlyphComponent("_fonts/icon/click_action_right.png"))
@@ -167,7 +234,6 @@ object CraftingInstructions : Feature {
             .append(Component.literal("${if (openBlueprints[stack.itemName.string] == null) "Open" else "Close"} Instructions").withColor(0xfee761)))
     }
 
-    // if (!item.itemName.string.contains("Blueprint:")) return
     fun fetchCraftingMaterials(item: ItemStack): List<Pair<String, Int>> {
         val regex = Regex("\\[(?<name>.+?)] \\[(?<count>[\\d,]+)/(?<price>[\\d,]+)]")
         val matches = item.findLores(regex)

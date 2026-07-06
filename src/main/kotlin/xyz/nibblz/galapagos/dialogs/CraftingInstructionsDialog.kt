@@ -115,6 +115,11 @@ class CraftingInstructionsDialog(x: Int, y: Int, val blueprint: CraftingInstruct
             }
         }
 
+        if (instructions.isEmpty()) {
+            super.close()
+            return
+        }
+
         instructions.forEach { (_, instructionList) ->
             instructionList.forEach craftCheck@ {
                 if (it.type != InstructionType.CRAFT) return@craftCheck

@@ -141,22 +141,22 @@ object PlayerData {
     //// STYLE PERKS
 
     @Serializable
-    enum class StylePerk(val label: String, val slotID: Int) {
-        LUCKY_METER("Lucky Meter", 11),
-        GLITCHED_CLAIMS("Glitched Claims", 12),
-        EXPANDED_METER("Expanded Meter", 13),
-        EXPANDED_VAULT("Expanded Vault", 14),
-        ARCANE_CLAIMS("Arcane Claims", 15),
-        LUCKY_QUESTS("Lucky Quests", 20),
-        BOOSTED_QUESTS("Boosted Quests", 21),
-        EXPANDED_DAILIES("Expanded Dailies", 22),
-        EXPANDED_WEEKLIES("Expanded Weeklies", 23),
-        ARCANE_QUESTS("Arcane Quests", 24),
-        EFFICIENT_FUSION("Efficient Fusion", 29),
-        EFFICIENT_ASSEMBLY("Efficient Assembly", 30),
-        EXPANDED_FORGE("Expanded Forge", 31),
-        EXPANDED_ASSEMBLER("Expanded Assembler", 32),
-        ARCANE_ANOMALY("Arcane Anomaly", 33) // I love this perk! this perk is cool.this is my favorite  perk. :3  ilove.arcane   anomaly! anomalyyy:3
+    enum class StylePerk(val label: String, val slotID: Int, val arcanes: List<String>) {
+        LUCKY_METER("Lucky Meter", 11, listOf()),
+        GLITCHED_CLAIMS("Glitched Claims", 12, listOf("Abomination Mask", "Wizard Hat (Ember Mage)")),
+        EXPANDED_METER("Expanded Meter", 13, listOf("Wizard Cloak (Ember Mage)")),
+        EXPANDED_VAULT("Expanded Vault", 14, listOf("Abomination Robe")),
+        ARCANE_CLAIMS("Arcane Claims", 15, listOf()),
+        LUCKY_QUESTS("Lucky Quests", 20, listOf()),
+        BOOSTED_QUESTS("Boosted Quests", 21, listOf("Peacock Crown", "Tidal Lord Crown")),
+        EXPANDED_DAILIES("Expanded Dailies", 22, listOf("Tidal Lord Cloak")),
+        EXPANDED_WEEKLIES("Expanded Weeklies", 23, listOf("Peacock Tail")),
+        ARCANE_QUESTS("Arcane Quests", 24, listOf()),
+        EFFICIENT_FUSION("Efficient Fusion", 29, listOf("Abomination Staff", "Wizard Staff (Ember Mage)")),
+        EFFICIENT_ASSEMBLY("Efficient Assembly", 30, listOf("Peacock Staff", "Tidal Lord Staff")),
+        EXPANDED_FORGE("Expanded Forge", 31, listOf()),
+        EXPANDED_ASSEMBLER("Expanded Assembler", 32, listOf()),
+        ARCANE_ANOMALY("Arcane Anomaly", 33, listOf()) // I love this perk! this perk is cool.this is my favorite  perk. :3  ilove.arcane   anomaly! anomalyyy:3
     }
 
     val client: HttpClient? = HttpClient.newHttpClient()
@@ -375,7 +375,13 @@ object PlayerData {
                 if (!item.itemName.string.contains(it.label)) throw IllegalStateException("Style perk ${it.name} has incorrect slot ID")
 
                 val regex = Regex("${it.label} \\((?<upgrades>\\d+)")
-                val upgrades = regex.find(item.itemName.string)?.groups["upgrades"]?.value?.toIntOrNull() ?: 0
+                var upgrades = regex.find(item.itemName.string)?.groups["upgrades"]?.value?.toIntOrNull() ?: 0
+
+                it.arcanes.forEach { arcane ->
+                    if (Galapagos.save.cosmetics[arcane]?.isOwned == true) {
+                        upgrades++
+                    }
+                }
 
                 Galapagos.save.stylePerks[it] = upgrades
             }
