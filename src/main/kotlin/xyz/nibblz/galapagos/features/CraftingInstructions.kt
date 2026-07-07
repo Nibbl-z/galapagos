@@ -124,13 +124,15 @@ object CraftingInstructions : Feature {
 
     fun slotClick(screen: ContainerScreen, type: ContainerInput, ci: CallbackInfo, button: Int) {
         val slot = (screen as HoveredSlotAccessor).`galapagos$hoveredSlot`() ?: return
-        if (!slot.item.itemName.string.contains("Blueprint:")) return
+        if (!slot.item.itemName.string.contains("Blueprint:") && !slot.item.findLore("Trophies: ") && !slot.item.findLore("Style Shard")) return
+        if (slot.item.findLore("Trophies: ") && !slot.item.findLore("Material") ) return
         if (type != ContainerInput.QUICK_MOVE) return
         val requirements = fetchCraftingMaterials(slot.item)
         if (requirements.isEmpty()) return
         if (button != 1) return
         if (craftableBlueprints.contains(slot.item.itemName.string)) return
 
+        Galapagos.logger.info(type.toString())
         ci.cancel()
 
         Minecraft.getInstance().soundManager.play(SimpleSoundInstance(
@@ -216,7 +218,9 @@ object CraftingInstructions : Feature {
     }
 
     fun tooltipAdd(stack: ItemStack, context: Item.TooltipContext, flag: TooltipFlag, components: MutableList<Component>) {
-        if (!stack.itemName.string.contains("Blueprint:")) return
+        if (!stack.itemName.string.contains("Blueprint:") && !components.any { it.string.contains("Trophies: ") } && !components.any { it.string.contains("Style Shard") } ) return
+        if (components.any { it.string.contains("Trophies: ") } && !components.any { it.string.contains("Material") } ) return
+        if (components.any { it.string.contains("You already own this item.") }) return
         if (craftableBlueprints.contains(stack.itemName.string)) return
 
         var index = components.indexOfFirst { it.string.contains("Click to") && !it.string.contains("Right") && !it.string.contains("Middle") }
@@ -235,9 +239,15 @@ object CraftingInstructions : Feature {
     }
 
     fun fetchCraftingMaterials(item: ItemStack): List<Pair<String, Int>> {
-        val regex = Regex("\\[(?<name>.+?)] \\[(?<count>[\\d,]+)/(?<price>[\\d,]+)]")
-        val matches = item.findLores(regex)
-        if (matches.isEmpty()) return listOf()
+        val regex = Regex("\\[(?<name>.+?)] \\[(?<count>[\\d,]+)/(?<price>[\\d,]+)]") // shows up on blueprints
+        var matches = item.findLores(regex)
+
+        if (matches.isEmpty()) {
+            val altRegex = Regex("(?<count>\\d+)/(?<price>\\d+) \\[(?<name>.+)]") // shows up on secret styles/fancypants
+            matches = item.findLores(altRegex)
+
+            if (matches.isEmpty()) return listOf()
+        }
 
         val materials: MutableList<Pair<String, Int>> = mutableListOf()
 

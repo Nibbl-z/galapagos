@@ -9,7 +9,8 @@ enum class MaterialType {
     CLUSTER,
     POWER_SHARD,
     SINGULARITY,
-    STYLE_SOUL
+    STYLE_SOUL,
+    STYLE_SHARD,
 }
 
 enum class Material(val label: String, val type: MaterialType, val rarity: Rarity, val spriteName: String, val marketPrice: Int? = null, val marketCount: Int? = null) {
@@ -52,7 +53,17 @@ enum class Material(val label: String, val type: MaterialType, val rarity: Rarit
     LEGENDARY_MATERIAL_CLUSTER("Legendary Material Cluster", MaterialType.CLUSTER, Rarity.LEGENDARY, "cluster_legendary"),
 
     MATERIAL_SINGULARITY("Material Singularity", MaterialType.SINGULARITY, Rarity.MYTHIC, "material_singularity", 900, 1),
-    STYLE_SOUL("Style Soul", MaterialType.STYLE_SOUL, Rarity.MYTHIC, "style_soul");
+    STYLE_SOUL("Style Soul", MaterialType.STYLE_SOUL, Rarity.MYTHIC, "style_soul"),
+
+    RUBY_STYLE_SHARD("Ruby Style Shard", MaterialType.STYLE_SHARD, Rarity.MYTHIC, "style_shard_ruby"),
+    AMBER_STYLE_SHARD("Amber Style Shard", MaterialType.STYLE_SHARD, Rarity.MYTHIC, "style_shard_amber"),
+    CITRINE_STYLE_SHARD("Citrine Style Shard", MaterialType.STYLE_SHARD, Rarity.MYTHIC, "style_shard_citrine"),
+    JADE_STYLE_SHARD("Jade Style Shard", MaterialType.STYLE_SHARD, Rarity.MYTHIC, "style_shard_jade"),
+    AQUAMARINE_STYLE_SHARD("Aquamarine Style Shard", MaterialType.STYLE_SHARD, Rarity.MYTHIC, "style_shard_aquamarine"),
+    SAPPHIRE_STYLE_SHARD("Sapphire Style Shard", MaterialType.STYLE_SHARD, Rarity.MYTHIC, "style_shard_sapphire"),
+    AMETHYST_STYLE_SHARD("Amethyst Style Shard", MaterialType.STYLE_SHARD, Rarity.MYTHIC, "style_shard_amethyst"),
+    GARNET_STYLE_SHARD("Garnet Style Shard", MaterialType.STYLE_SHARD, Rarity.MYTHIC, "style_shard_garnet"),
+    OPAL_STYLE_SHARD("Opal Style Shard", MaterialType.STYLE_SHARD, Rarity.MYTHIC, "style_shard_opal");
 
     fun getSpriteLocation(): String {
         return "island_items/infinibag/${if (this == Material.MATERIAL_SINGULARITY) "component" else "material"}/${this.spriteName}"

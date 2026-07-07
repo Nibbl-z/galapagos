@@ -96,7 +96,7 @@ class CraftingInstructionsDialog(x: Int, y: Int, val blueprint: CraftingInstruct
 
                 instructions[material] = singularityData.first
                 gloop += singularityData.second
-            } else if (material.label.contains("Style Soul")) {
+            } else if (material.label.contains("Style Soul") || material.label.contains("Style Shard")) {
                 instructions[material] = listOf(Instruction(
                     type = InstructionType.PURCHASE_IE,
                     material = material,
