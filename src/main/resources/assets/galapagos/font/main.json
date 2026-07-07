@@ -44,6 +44,24 @@
       "chars": [
         "\uE004"
       ]
+    },
+    {
+      "type": "bitmap",
+      "file": "galapagos:font/standard_core.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\uE005"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "galapagos:font/exclusive_core.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\uE006"
+      ]
     }
   ]
 }

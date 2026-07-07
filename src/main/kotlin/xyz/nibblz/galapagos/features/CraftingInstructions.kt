@@ -14,13 +14,14 @@ import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
 import net.minecraft.resources.Identifier
 import net.minecraft.sounds.SoundSource
 import net.minecraft.world.inventory.ContainerInput
-import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.TooltipFlag
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.Glyphs
 import xyz.nibblz.galapagos.PlayerData
+import xyz.nibblz.galapagos.data.CosmeticTag
+import xyz.nibblz.galapagos.data.Item
 import xyz.nibblz.galapagos.data.Material
 import xyz.nibblz.galapagos.data.Rarity
 import xyz.nibblz.galapagos.data.craftingDuration
@@ -47,11 +48,11 @@ object CraftingInstructions : Feature {
     override val id: String = "crafting_instructions"
     override val name: String = "Crafting Instructions"
 
-    var tempInfinibag: HashMap<String, PlayerData.Item> = hashMapOf()
+    var tempInfinibag: HashMap<String, xyz.nibblz.galapagos.data.Item> = hashMapOf()
 
     data class BlueprintInfo(
         val rarity: Rarity,
-        val type: PlayerData.CosmeticTag,
+        val type: CosmeticTag,
         val name: String
     )
 
@@ -152,7 +153,7 @@ object CraftingInstructions : Feature {
         }
 
         val tag = if (slot.item.findLore(Glyphs.getGlyph("_fonts/icon/tooltips/collector.png"))) {
-            PlayerData.CosmeticTag.ARCANE
+            CosmeticTag.ARCANE
         } else {
             slot.item.getCosmeticTag()
         }
@@ -217,7 +218,7 @@ object CraftingInstructions : Feature {
         }
     }
 
-    fun tooltipAdd(stack: ItemStack, context: Item.TooltipContext, flag: TooltipFlag, components: MutableList<Component>) {
+    fun tooltipAdd(stack: ItemStack, context: net.minecraft.world.item.Item.TooltipContext, flag: TooltipFlag, components: MutableList<Component>) {
         if (!stack.itemName.string.contains("Blueprint:") && !components.any { it.string.contains("Trophies: ") } && !components.any { it.string.contains("Style Shard") } ) return
         if (components.any { it.string.contains("Trophies: ") } && !components.any { it.string.contains("Material") } ) return
         if (components.any { it.string.contains("You already own this item.") }) return
@@ -377,9 +378,9 @@ object CraftingInstructions : Feature {
                 if (lowerShards[upperShard] == null) updateAbove = false
 
                 if (tempInfinibag[lowerShard.label] == null) tempInfinibag[lowerShard.label] =
-                    PlayerData.Item(name = lowerShard.label, count = 0, isCosmeticToken = false)
+                    Item(name = lowerShard.label, count = 0, isCosmeticToken = false)
                 if (tempInfinibag[upperShard.label] == null) tempInfinibag[upperShard.label] =
-                    PlayerData.Item(name = upperShard.label, count = 0, isCosmeticToken = false)
+                    Item(name = upperShard.label, count = 0, isCosmeticToken = false)
 
                 if (lowerCount == 0) return@forEach
 

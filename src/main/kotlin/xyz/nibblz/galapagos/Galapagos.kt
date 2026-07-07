@@ -8,6 +8,7 @@ import net.minecraft.resources.Identifier
 import org.slf4j.LoggerFactory
 import org.slf4j.Logger
 import xyz.nibblz.galapagos.data.ConstantIslandData
+import xyz.nibblz.galapagos.features.BlueprintAssemblerInfo
 import xyz.nibblz.galapagos.features.CoinTracking
 import xyz.nibblz.galapagos.features.CosmeticMachineChances
 import xyz.nibblz.galapagos.features.CraftingInstructions
@@ -29,6 +30,7 @@ object Galapagos : ModInitializer {
 		CosmeticMachineChances.init()
 		ExchangeUnitPrice.init()
 		CraftingInstructions.init()
+		BlueprintAssemblerInfo.init()
 	}
 
 	override fun onInitialize() {
@@ -39,7 +41,6 @@ object Galapagos : ModInitializer {
 
 		ClientLifecycleEvents.CLIENT_STOPPING.register {onShutdown()}
 		ClientCommandRegistrationCallback.EVENT.register { dispatcher, _ -> GalapagosCommand.register(dispatcher) }
-
 
 		logger.info("Galapagos initialized!")
 	}

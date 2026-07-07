@@ -12,6 +12,11 @@ import net.minecraft.network.protocol.game.ClientboundSystemChatPacket
 import net.minecraft.world.inventory.ContainerInput
 import net.minecraft.world.inventory.Slot
 import net.minecraft.world.item.ItemStack
+import xyz.nibblz.galapagos.data.Collection
+import xyz.nibblz.galapagos.data.Cosmetic
+import xyz.nibblz.galapagos.data.CosmeticTag
+import xyz.nibblz.galapagos.data.Item
+import xyz.nibblz.galapagos.data.ItemLocation
 import xyz.nibblz.galapagos.data.Rarity
 import xyz.nibblz.galapagos.events.ContainerOpenEvent
 import xyz.nibblz.galapagos.events.ContainerSetSlotEvent
@@ -27,71 +32,6 @@ import java.net.http.HttpResponse
 
 
 object PlayerData {
-    //// COSMETICS
-
-    @Serializable
-    enum class CosmeticTag(val maxDonations: Int) {
-        STANDARD(10),
-        EXCLUSIVE(5),
-        ARCANE(5)
-    }
-
-    @Serializable
-    enum class Collection(val label: String) {
-        ELEMENTAL("Elemental"),
-        STANDARD_GAME("Standard Game"),
-        EXCLUSIVE_GAME("Exclusive Game"),
-        EXCLUSIVE_SEASON("Exclusive Season"),
-        EXCLUSIVE_VARIETY("Exclusive Variety"),
-        GATE("Gate"),
-        FISHING("Fishing")
-    }
-
-    @Serializable
-    data class Cosmetic(
-        val name: String,
-        val collection: Collection,
-        val tag: CosmeticTag,
-        var isOwned: Boolean,
-        var donations: Int,
-        val rarity: Rarity,
-        val isColorable: Boolean,
-        var isColored: Boolean
-    )
-
-    fun Cosmetic.getRep(): Int {
-        return this.donations * this.repPerDonation()
-    }
-
-    fun Cosmetic.repPerDonation(): Int {
-        return when(this.tag) {
-            CosmeticTag.STANDARD -> this.rarity.trophies / 10
-            CosmeticTag.EXCLUSIVE -> this.rarity.trophies / 5
-            CosmeticTag.ARCANE -> 30
-        }
-    }
-
-    fun Cosmetic.bonusCoresPerScavenge(): Double {
-        return when(this.tag) {
-            CosmeticTag.STANDARD -> when(this.rarity) {
-                Rarity.COMMON -> 0.03
-                Rarity.UNCOMMON -> 0.1
-                Rarity.RARE -> 0.25
-                Rarity.EPIC -> 0.5
-                Rarity.LEGENDARY -> 1.0
-                Rarity.MYTHIC -> 2.0
-            } * if (this.donations == 10) 2.0 else 1.0
-            CosmeticTag.EXCLUSIVE -> when(this.rarity) {
-                Rarity.RARE -> 0.06
-                Rarity.EPIC -> 0.15
-                Rarity.LEGENDARY -> 0.30
-                Rarity.MYTHIC -> 1.0
-                else -> 0.0
-            } * if (this.donations == 5) 2.0 else 1.0
-            CosmeticTag.ARCANE -> 1.0 * if (this.donations == 5) 2.0 else 1.0
-        }
-    }
-
     @Serializable
     data class APICosmeticData(
         val trophies: Int,
@@ -107,24 +47,6 @@ object PlayerData {
         val owned: Boolean,
         val donationsMade: Int? = null
     )
-
-    //// ITEMS/INFINIBAG
-
-    enum class ItemLocation {
-        INFINIBAG,
-        INFINIVAULT
-    }
-
-    @Serializable
-    data class Item(
-        val name: String,
-        var count: Int,
-        val isCosmeticToken: Boolean
-    ) : Cloneable {
-        public override fun clone(): Item {
-            return super.clone() as Item
-        }
-    }
 
     @Serializable
     data class APIItem(

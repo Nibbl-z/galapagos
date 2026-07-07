@@ -14,19 +14,18 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.TooltipFlag
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.Glyphs
-import xyz.nibblz.galapagos.PlayerData
-import xyz.nibblz.galapagos.PlayerData.CosmeticTag
-import xyz.nibblz.galapagos.PlayerData.bonusCoresPerScavenge
-import xyz.nibblz.galapagos.PlayerData.getRep
-import xyz.nibblz.galapagos.PlayerData.repPerDonation
 import xyz.nibblz.galapagos.data.BlueprintLootPreview
-import xyz.nibblz.galapagos.data.Cosmetic
+import xyz.nibblz.galapagos.data.CosmeticTag
+import xyz.nibblz.galapagos.data.LootPreviewCosmetic
 import xyz.nibblz.galapagos.data.Rarity
 import xyz.nibblz.galapagos.data.arcaneCoresPerRollTooltip
+import xyz.nibblz.galapagos.data.bonusCoresPerScavenge
+import xyz.nibblz.galapagos.data.getRep
 import xyz.nibblz.galapagos.data.mythicCoresPerRollTooltip
 import xyz.nibblz.galapagos.data.newCosmeticTooltip
 import xyz.nibblz.galapagos.data.newRepTooltip
 import xyz.nibblz.galapagos.data.render
+import xyz.nibblz.galapagos.data.repPerDonation
 import xyz.nibblz.galapagos.data.trophiesPerRollTooltip
 import xyz.nibblz.galapagos.data.update
 import xyz.nibblz.galapagos.events.ContainerCloseEvent
@@ -58,15 +57,15 @@ object CosmeticMachineChances : Feature {
     const val ULTIMATE_EXCLUSIVE_CHANCE = 0.3
     const val ULTIMATE_ARCANE_CHANCE = 0.01
 
-    fun getChance(isUltimate: Boolean, rarity: Rarity, tag: PlayerData.CosmeticTag): Double? {
+    fun getChance(isUltimate: Boolean, rarity: Rarity, tag: CosmeticTag): Double? {
         return if (isUltimate) {
             ULTIMATE_CHANCES[rarity]?.times(when(tag) {
-                PlayerData.CosmeticTag.STANDARD -> 1.0 - ULTIMATE_EXCLUSIVE_CHANCE - if (rarity == Rarity.MYTHIC) ULTIMATE_ARCANE_CHANCE else 0.0
-                PlayerData.CosmeticTag.EXCLUSIVE -> ULTIMATE_EXCLUSIVE_CHANCE
-                PlayerData.CosmeticTag.ARCANE -> ULTIMATE_ARCANE_CHANCE
+                CosmeticTag.STANDARD -> 1.0 - ULTIMATE_EXCLUSIVE_CHANCE - if (rarity == Rarity.MYTHIC) ULTIMATE_ARCANE_CHANCE else 0.0
+                CosmeticTag.EXCLUSIVE -> ULTIMATE_EXCLUSIVE_CHANCE
+                CosmeticTag.ARCANE -> ULTIMATE_ARCANE_CHANCE
             })
         } else {
-            BASIC_CHANCES[rarity]?.times(if (tag == PlayerData.CosmeticTag.STANDARD) 1.0 - when(rarity) {
+            BASIC_CHANCES[rarity]?.times(if (tag == CosmeticTag.STANDARD) 1.0 - when(rarity) {
                 Rarity.COMMON, Rarity.UNCOMMON -> 0.0
                 else -> BASIC_EXCLUSIVE_CHANCE
             } else BASIC_EXCLUSIVE_CHANCE)
@@ -84,8 +83,8 @@ object CosmeticMachineChances : Feature {
     var inCosmeticMachine = false
     var isUltimate = false
 
-    var basicCosmetics: MutableMap<String, Cosmetic> = mutableMapOf()
-    var ultimateCosmetics: MutableMap<String, Cosmetic> = mutableMapOf()
+    var basicCosmetics: MutableMap<String, LootPreviewCosmetic> = mutableMapOf()
+    var ultimateCosmetics: MutableMap<String, LootPreviewCosmetic> = mutableMapOf()
 
     var basicData = BlueprintLootPreview()
     var ultimateData = BlueprintLootPreview()
@@ -119,7 +118,7 @@ object CosmeticMachineChances : Feature {
 
                 if (basicChance != null) {
                     //Galapagos.logger.info("BASIC: ${it.name} - ${basicChance / cosmeticCounts[(Pair(it.rarity, it.tag))]!!}")
-                    basicCosmetics[it.name] = Cosmetic(
+                    basicCosmetics[it.name] = LootPreviewCosmetic(
                         chance = basicChance / cosmeticCounts[(Pair(it.rarity, it.tag))]!!,
                         isOwned = it.isOwned,
                         trophies = it.rarity.trophies,
@@ -136,7 +135,7 @@ object CosmeticMachineChances : Feature {
 
                 if (ultimateChance != null) {
                     //Galapagos.logger.info("ULTIMATE: ${it.name} - ${ultimateChance / cosmeticCounts[(Pair(it.rarity, it.tag))]!!}")
-                    ultimateCosmetics[it.name] = Cosmetic(
+                    ultimateCosmetics[it.name] = LootPreviewCosmetic(
                         chance = ultimateChance / cosmeticCounts[(Pair(it.rarity, it.tag))]!!,
                         isOwned = it.isOwned,
                         trophies = it.rarity.trophies,

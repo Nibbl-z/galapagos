@@ -9,6 +9,16 @@ import net.minecraft.util.ARGB
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.Glyphs
 
+data class LootPreviewCosmetic(
+    var chance: Double,
+    var isOwned: Boolean,
+    var trophies: Int,
+    var rep: Int,
+    var perDonation: Int,
+    var mythicCores: Double,
+    var arcaneCores: Double
+)
+
 data class BlueprintLootPreview(
     var newCosmeticChance: Double = 0.0,
     var currentTrophies: Int = 0,
@@ -21,7 +31,7 @@ data class BlueprintLootPreview(
     var arcaneCoresPerRoll: Double = 0.0
 )
 
-fun BlueprintLootPreview.update(cosmetics: List<Cosmetic>) {
+fun BlueprintLootPreview.update(lootPreviewCosmetics: List<LootPreviewCosmetic>) {
     this.newCosmeticChance = 0.0
     this.currentTrophies = 0
     this.totalTrophies = 0
@@ -34,9 +44,9 @@ fun BlueprintLootPreview.update(cosmetics: List<Cosmetic>) {
 
     var totalChance = 0.0
 
-    cosmetics.forEach { totalChance += it.chance }
+    lootPreviewCosmetics.forEach { totalChance += it.chance }
 
-    cosmetics.forEach {
+    lootPreviewCosmetics.forEach {
         val fixedChance = it.chance / totalChance
 
         this.mythicCoresPerRoll += it.mythicCores * fixedChance

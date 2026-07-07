@@ -1,6 +1,5 @@
 package xyz.nibblz.galapagos.features
 
-import com.mojang.blaze3d.pipeline.RenderPipeline
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback
 import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
@@ -17,19 +16,18 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.TooltipFlag
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.Glyphs
-import xyz.nibblz.galapagos.PlayerData
-import xyz.nibblz.galapagos.PlayerData.CosmeticTag
-import xyz.nibblz.galapagos.PlayerData.bonusCoresPerScavenge
-import xyz.nibblz.galapagos.PlayerData.getRep
-import xyz.nibblz.galapagos.PlayerData.repPerDonation
 import xyz.nibblz.galapagos.data.BlueprintLootPreview
 import xyz.nibblz.galapagos.data.ConstantIslandData
-import xyz.nibblz.galapagos.data.Cosmetic
+import xyz.nibblz.galapagos.data.CosmeticTag
+import xyz.nibblz.galapagos.data.LootPreviewCosmetic
 import xyz.nibblz.galapagos.data.arcaneCoresPerRollTooltip
+import xyz.nibblz.galapagos.data.bonusCoresPerScavenge
+import xyz.nibblz.galapagos.data.getRep
 import xyz.nibblz.galapagos.data.mythicCoresPerRollTooltip
 import xyz.nibblz.galapagos.data.newCosmeticTooltip
 import xyz.nibblz.galapagos.data.newRepTooltip
 import xyz.nibblz.galapagos.data.render
+import xyz.nibblz.galapagos.data.repPerDonation
 import xyz.nibblz.galapagos.data.trophiesPerRollTooltip
 import xyz.nibblz.galapagos.data.update
 import xyz.nibblz.galapagos.events.ContainerCloseEvent
@@ -69,14 +67,14 @@ object CrateChances: Feature {
         bestCosmeticChance = Pair("", 0.0)
 
         ConstantIslandData.data.crateEmporium.forEach { (crateName, crateItems) ->
-            val cosmetics: MutableList<Cosmetic> = mutableListOf()
+            val lootPreviewCosmetics: MutableList<LootPreviewCosmetic> = mutableListOf()
             var isExclusive = false
 
             crateItems.forEach crateForEach@{
                 val savedCosmetic = Galapagos.save.cosmetics[it.name] ?: return@crateForEach
-                if (!isExclusive && savedCosmetic.tag == PlayerData.CosmeticTag.EXCLUSIVE) isExclusive = true
+                if (!isExclusive && savedCosmetic.tag == CosmeticTag.EXCLUSIVE) isExclusive = true
 
-                val cosmetic = Cosmetic(
+                val lootPreviewCosmetic = LootPreviewCosmetic(
                     chance = it.chance,
                     isOwned = savedCosmetic.isOwned,
                     trophies = savedCosmetic.rarity.trophies,
@@ -86,11 +84,11 @@ object CrateChances: Feature {
                     arcaneCores = savedCosmetic.bonusCoresPerScavenge() * if (savedCosmetic.tag == CosmeticTag.STANDARD) 0.05 else 1.0,
                 )
 
-                cosmetics.add(cosmetic)
+                lootPreviewCosmetics.add(lootPreviewCosmetic)
             }
 
             val crateData = BlueprintLootPreview()
-            crateData.update(cosmetics)
+            crateData.update(lootPreviewCosmetics)
 
             data[crateName] = crateData
 

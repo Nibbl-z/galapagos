@@ -3,7 +3,8 @@ package xyz.nibblz.galapagos
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import net.fabricmc.loader.api.FabricLoader
-import xyz.nibblz.galapagos.PlayerData.Cosmetic
+import xyz.nibblz.galapagos.data.Cosmetic
+import xyz.nibblz.galapagos.data.Item
 import xyz.nibblz.galapagos.features.CoinTracking
 import xyz.nibblz.galapagos.features.QuestTracking
 import java.nio.file.Files
@@ -13,9 +14,9 @@ data class PlayerSave(
     var coinChanges: MutableList<CoinTracking.CoinChange> = mutableListOf(),
     var questHistory: MutableList<QuestTracking.QuestingReward> = mutableListOf(),
     var cosmetics: HashMap<String, Cosmetic> = hashMapOf(),
-    var infinibag: HashMap<String, PlayerData.Item> = hashMapOf(),
-    var infinivault: HashMap<String, PlayerData.Item> = hashMapOf(),
-    var fusionForge: MutableList<PlayerData.Item> = mutableListOf(),
+    var infinibag: HashMap<String, Item> = hashMapOf(),
+    var infinivault: HashMap<String, Item> = hashMapOf(),
+    var fusionForge: MutableList<Item> = mutableListOf(),
     var stylePerks: HashMap<PlayerData.StylePerk, Int> = hashMapOf(),
     var apiKey: String = ""
 )

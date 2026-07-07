@@ -22,6 +22,8 @@ import net.minecraft.util.Mth
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.Glyphs
 import xyz.nibblz.galapagos.PlayerData
+import xyz.nibblz.galapagos.data.CosmeticTag
+import xyz.nibblz.galapagos.data.Item
 import xyz.nibblz.galapagos.data.Material
 import xyz.nibblz.galapagos.data.craftingDuration
 import xyz.nibblz.galapagos.data.materialFromName
@@ -52,7 +54,7 @@ class CraftingInstructionsDialog(x: Int, y: Int, val blueprint: CraftingInstruct
 
         Galapagos.save.fusionForge.forEach {
             if (tempInfinibag[it.name] == null) {
-                tempInfinibag[it.name] = PlayerData.Item(name = it.name, count = it.count, isCosmeticToken = false)
+                tempInfinibag[it.name] = Item(name = it.name, count = it.count, isCosmeticToken = false)
             } else {
                 tempInfinibag[it.name]!!.count += it.count
             }
@@ -161,7 +163,7 @@ class CraftingInstructionsDialog(x: Int, y: Int, val blueprint: CraftingInstruct
     }
 
     override val title = TextTitleWidget(this,
-        mccTextureComponent("island_items/infinibag/blueprint/cosmetic_${if (blueprint.type == PlayerData.CosmeticTag.STANDARD) "" else "${blueprint.type.name.lowercase()}_"}${blueprint.rarity.name.lowercase()}")
+        mccTextureComponent("island_items/infinibag/blueprint/cosmetic_${if (blueprint.type == CosmeticTag.STANDARD) "" else "${blueprint.type.name.lowercase()}_"}${blueprint.rarity.name.lowercase()}")
             .append(Component.literal(" ${blueprint.name}").withColor(blueprint.rarity.color))
     )
 }

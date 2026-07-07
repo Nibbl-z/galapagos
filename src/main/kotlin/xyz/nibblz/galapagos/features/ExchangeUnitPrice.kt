@@ -18,7 +18,6 @@ import xyz.nibblz.galapagos.data.Rarity
 import xyz.nibblz.galapagos.events.ContainerOpenEvent
 import xyz.nibblz.galapagos.events.ContainerSetSlotEvent
 import xyz.nibblz.galapagos.events.SlotClickEvent
-import xyz.nibblz.galapagos.features.QuestTracking.getQuestBonus
 import xyz.nibblz.galapagos.findLore
 import xyz.nibblz.galapagos.mixin.accessor.HoveredSlotAccessor
 

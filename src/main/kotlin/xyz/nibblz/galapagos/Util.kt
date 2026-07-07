@@ -1,7 +1,6 @@
 package xyz.nibblz.galapagos
 
 import net.minecraft.client.Minecraft
-import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.TooltipFlag
 import com.mojang.brigadier.CommandDispatcher
@@ -18,6 +17,8 @@ import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
 import net.minecraft.network.chat.contents.objects.AtlasSprite
 import net.minecraft.resources.Identifier
+import xyz.nibblz.galapagos.data.CosmeticTag
+import xyz.nibblz.galapagos.data.Item
 import java.util.concurrent.CompletableFuture
 
 // stealing from devcmb stealing from pe3ep part 1
@@ -151,7 +152,7 @@ class Command(
 
 fun ItemStack.findLore(regex: Regex): MatchGroupCollection? {
     val lore = this.getTooltipLines(
-        Item.TooltipContext.EMPTY,
+        net.minecraft.world.item.Item.TooltipContext.EMPTY,
         Minecraft.getInstance().player,
         TooltipFlag.Default.NORMAL
     )
@@ -167,7 +168,7 @@ fun ItemStack.findLore(regex: Regex): MatchGroupCollection? {
 
 fun ItemStack.findLore(string: String): Boolean {
     val lore = this.getTooltipLines(
-        Item.TooltipContext.EMPTY,
+        net.minecraft.world.item.Item.TooltipContext.EMPTY,
         Minecraft.getInstance().player,
         TooltipFlag.Default.NORMAL
     )
@@ -183,7 +184,7 @@ fun ItemStack.findLore(string: String): Boolean {
 
 fun ItemStack.findLores(regex: Regex): List<MatchGroupCollection> {
     val lore = this.getTooltipLines(
-        Item.TooltipContext.EMPTY,
+        net.minecraft.world.item.Item.TooltipContext.EMPTY,
         Minecraft.getInstance().player,
         TooltipFlag.Default.NORMAL
     )
@@ -199,7 +200,7 @@ fun ItemStack.findLores(regex: Regex): List<MatchGroupCollection> {
     return matches
 }
 
-fun ItemStack.toDataItem(): PlayerData.Item {
+fun ItemStack.toDataItem(): Item {
     val name = this.itemName.string
 
     val regex = Regex("Amount: (?<amount>[\\d,]+)")
@@ -207,17 +208,17 @@ fun ItemStack.toDataItem(): PlayerData.Item {
     val cleanedString = amountString.replace(",", "")
     val count = cleanedString.toInt()
 
-    return PlayerData.Item(
+    return Item(
         name = name,
         count = count,
         isCosmeticToken = name.contains("Token") && !name.contains("Blueprint:") && !name.contains("MCC+")
     )
 }
 
-fun ItemStack.getCosmeticTag(): PlayerData.CosmeticTag {
-    if (this.findLore(Glyphs.getGlyph("_fonts/icon/tooltips/exclusive.png"))) return PlayerData.CosmeticTag.EXCLUSIVE
-    if (this.findLore(Glyphs.getGlyph("_fonts/icon/tooltips/arcane.png"))) return PlayerData.CosmeticTag.ARCANE
-    return PlayerData.CosmeticTag.STANDARD
+fun ItemStack.getCosmeticTag(): CosmeticTag {
+    if (this.findLore(Glyphs.getGlyph("_fonts/icon/tooltips/exclusive.png"))) return CosmeticTag.EXCLUSIVE
+    if (this.findLore(Glyphs.getGlyph("_fonts/icon/tooltips/arcane.png"))) return CosmeticTag.ARCANE
+    return CosmeticTag.STANDARD
 }
 
 fun mccTextureComponent(path: String): MutableComponent {
