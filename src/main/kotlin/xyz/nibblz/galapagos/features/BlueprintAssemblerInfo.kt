@@ -123,7 +123,7 @@ object BlueprintAssemblerInfo : Feature {
         yOffset += 15
 
         CosmeticCore.entries.forEach {
-            graphics.text(Minecraft.getInstance().font, Component.literal("${it.label}s: ${round(directCores[it]!! * 1000) / 1000.0} (${round(convertedCores[it]!! * 1000) / 1000.0} converted) ")
+            graphics.text(Minecraft.getInstance().font, Component.literal("${it.label}s: ${round((directCores[it] ?: 0.0) * 1000) / 1000.0} (${round((convertedCores[it] ?: 0.0) * 1000) / 1000.0} converted) ")
                 .append(it.getComponent()), x + w + 2, y + yOffset, ARGB.opaque(it.color), true)
 
             yOffset += 15

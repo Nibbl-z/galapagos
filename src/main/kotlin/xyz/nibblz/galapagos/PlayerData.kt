@@ -63,22 +63,22 @@ object PlayerData {
     //// STYLE PERKS
 
     @Serializable
-    enum class StylePerk(val label: String, val slotID: Int, val arcanes: List<String>) {
-        LUCKY_METER("Lucky Meter", 11, listOf()),
-        GLITCHED_CLAIMS("Glitched Claims", 12, listOf("Abomination Mask", "Wizard Hat (Ember Mage)")),
-        EXPANDED_METER("Expanded Meter", 13, listOf("Wizard Cloak (Ember Mage)")),
-        EXPANDED_VAULT("Expanded Vault", 14, listOf("Abomination Robe")),
-        ARCANE_CLAIMS("Arcane Claims", 15, listOf()),
-        LUCKY_QUESTS("Lucky Quests", 20, listOf()),
-        BOOSTED_QUESTS("Boosted Quests", 21, listOf("Peacock Crown", "Tidal Lord Crown")),
-        EXPANDED_DAILIES("Expanded Dailies", 22, listOf("Tidal Lord Cloak")),
-        EXPANDED_WEEKLIES("Expanded Weeklies", 23, listOf("Peacock Tail")),
-        ARCANE_QUESTS("Arcane Quests", 24, listOf()),
-        EFFICIENT_FUSION("Efficient Fusion", 29, listOf("Abomination Staff", "Wizard Staff (Ember Mage)")),
-        EFFICIENT_ASSEMBLY("Efficient Assembly", 30, listOf("Peacock Staff", "Tidal Lord Staff")),
-        EXPANDED_FORGE("Expanded Forge", 31, listOf()),
-        EXPANDED_ASSEMBLER("Expanded Assembler", 32, listOf()),
-        ARCANE_ANOMALY("Arcane Anomaly", 33, listOf()) // I love this perk! this perk is cool.this is my favorite  perk. :3  ilove.arcane   anomaly! anomalyyy:3
+    enum class StylePerk(val label: String, val slotID: Int, val arcanes: List<String>, val sprite: String) {
+        LUCKY_METER("Lucky Meter", 11, listOf(), "island_interface/style_perks/lucky_claims.png"),
+        GLITCHED_CLAIMS("Glitched Claims", 12, listOf("Abomination Mask", "Wizard Hat (Ember Mage)"), "island_interface/style_perks/glitched_claims.png"),
+        EXPANDED_METER("Expanded Meter", 13, listOf("Wizard Cloak (Ember Mage)"), "island_interface/style_perks/expanded_meter.png"),
+        EXPANDED_VAULT("Expanded Vault", 14, listOf("Abomination Robe"), "island_interface/style_perks/expanded_vault.png"),
+        ARCANE_CLAIMS("Arcane Claims", 15, listOf(), "island_interface/style_perks/arcane_claims.png"),
+        LUCKY_QUESTS("Lucky Quests", 20, listOf(), "island_interface/style_perks/lucky_quests.png"),
+        BOOSTED_QUESTS("Boosted Quests", 21, listOf("Peacock Crown", "Tidal Lord Crown"), "island_interface/style_perks/boosted_quests.png"),
+        EXPANDED_DAILIES("Expanded Dailies", 22, listOf("Tidal Lord Cloak"), "island_interface/style_perks/expanded_dailies.png"),
+        EXPANDED_WEEKLIES("Expanded Weeklies", 23, listOf("Peacock Tail"), "island_interface/style_perks/expanded_weeklies.png"),
+        ARCANE_QUESTS("Arcane Quests", 24, listOf(), "island_interface/style_perks/arcane_quests.png"),
+        EFFICIENT_FUSION("Efficient Fusion", 29, listOf("Abomination Staff", "Wizard Staff (Ember Mage)"), "island_interface/style_perks/efficient_fusion.png"),
+        EFFICIENT_ASSEMBLY("Efficient Assembly", 30, listOf("Peacock Staff", "Tidal Lord Staff"), "island_interface/style_perks/efficient_assembler.png"),
+        EXPANDED_FORGE("Expanded Forge", 31, listOf(), "island_interface/style_perks/expanded_forge.png"),
+        EXPANDED_ASSEMBLER("Expanded Assembler", 32, listOf(), "island_interface/style_perks/expanded_assembler.png"),
+        ARCANE_ANOMALY("Arcane Anomaly", 33, listOf(), "island_items/infinibag/openable/arcane_anomaly.png") // I love this perk! this perk is cool.this is my favorite  perk. :3  ilove.arcane   anomaly! anomalyyy:3
     }
 
     val client: HttpClient? = HttpClient.newHttpClient()

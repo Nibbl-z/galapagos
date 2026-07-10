@@ -21,6 +21,8 @@ repositories {
 		name = "noxcrew-public"
 		url = uri("https://maven.noxcrew.com/public")
 	}
+	maven { url = uri("https://maven.wispforest.io/releases/") }
+	maven { url = uri("https://jitpack.io") }
 }
 
 dependencies {
@@ -35,6 +37,8 @@ dependencies {
 	runtimeOnly("me.djtheredstoner:DevAuth-fabric:1.2.2")
 
 	implementation("com.noxcrew.sheeplib:api:1.5.2+26.1.2")
+
+	implementation("io.wispforest:owo-lib:0.13.0+26.1")
 }
 
 tasks.processResources {

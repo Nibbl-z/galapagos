@@ -4,6 +4,7 @@ import com.mojang.brigadier.CommandDispatcher
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
 import net.minecraft.client.Minecraft
 import net.minecraft.network.chat.Component
+import xyz.nibblz.galapagos.screens.CoinHistory
 
 object GalapagosCommand {
     fun register(dispatcher: CommandDispatcher<FabricClientCommandSource>) {
@@ -14,6 +15,14 @@ object GalapagosCommand {
                         Minecraft.getInstance().gui.chat.addClientSystemMessage(
                             Component.literal(Galapagos.save.fusionForge.toString())
                         )
+                    }
+                }
+
+                literal("coinhistory") {
+                    executes {
+                        Minecraft.getInstance().execute {
+                            Minecraft.getInstance().setScreen(CoinHistory())
+                        }
                     }
                 }
 
