@@ -41,6 +41,7 @@ import xyz.nibblz.galapagos.formatTimeString
 import xyz.nibblz.galapagos.getCosmeticTag
 import xyz.nibblz.galapagos.mccTextureComponent
 import xyz.nibblz.galapagos.mixin.accessor.HoveredSlotAccessor
+import xyz.nibblz.galapagos.playMccSound
 import kotlin.math.ceil
 import kotlin.text.get
 
@@ -136,16 +137,7 @@ object CraftingInstructions : Feature {
         Galapagos.logger.info(type.toString())
         ci.cancel()
 
-        Minecraft.getInstance().soundManager.play(SimpleSoundInstance(
-            Identifier.fromNamespaceAndPath("mcc", "ui.click_normal"),
-            SoundSource.MASTER,
-            1.0f, 1.0f,
-            SoundInstance.createUnseededRandom(),
-            false,
-            0,
-            SoundInstance.Attenuation.NONE,
-            0.0, 0.0, 0.0, true
-        ))
+        playMccSound("ui.click_normal")
 
         if (openBlueprints[slot.item.itemName.string] != null) {
             openBlueprints[slot.item.itemName.string]!!.close()

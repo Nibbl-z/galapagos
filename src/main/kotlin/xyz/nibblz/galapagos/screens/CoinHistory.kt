@@ -34,8 +34,6 @@ class CoinHistory : BaseOwoScreen<FlowLayout>() {
     }
 
     fun updateContent(content: FlowLayout) {
-
-
         val sortedChanges = Galapagos.save.coinChanges.sortedByDescending { it.timestamp }
         var previousDay = -1
         var dayGain = 0
@@ -64,8 +62,6 @@ class CoinHistory : BaseOwoScreen<FlowLayout>() {
             if (dayHeader != null && dayLowerHeader != null) {
                 val total = dayGain - dayLoss
 
-
-
                 dayHeader.text(Component.literal(
                     "${date.month.name.lowercase().replaceFirstChar { char -> char.uppercase() }} ${date.day}, ${date.year} [").withColor(ChatFormatting.GRAY.color!!)
                     .append(Component.literal("${if (total > 0) "+" else ""}${"%,d".format(total)} ").withColor(if (total > 0) 0x32ff32 else 0xff3232))
@@ -78,7 +74,6 @@ class CoinHistory : BaseOwoScreen<FlowLayout>() {
                     .append(Component.literal(" -${"%,d".format(dayLoss)} ").withColor(0xff3232))
                     .append(Glyphs.getGlyphComponent("_fonts/icon/coin.png"))
                 )
-
             }
 
             previousDay = date.day
@@ -124,6 +119,7 @@ class CoinHistory : BaseOwoScreen<FlowLayout>() {
 
             content.child(changeContainer)
         }
+        content.child(UIComponents.spacer().verticalSizing(Sizing.fixed(10)))
     }
 
     override fun build(rootComponent: FlowLayout) {
@@ -138,42 +134,7 @@ class CoinHistory : BaseOwoScreen<FlowLayout>() {
 
         updateContent(content)
 
-        val scrollContainer = UIContainers.verticalScroll(Sizing.fixed(163), Sizing.fixed(195), content)
-            .scrollbarThiccness(4) // are we fr
-            .scrollbar(ScrollContainer.Scrollbar.flat(Color.ofRgb(0x1c2b46)))
-            .surface { context: OwoUIGraphics?, component: ParentUIComponent? ->
-                NinePatchTexture.draw(Identifier.fromNamespaceAndPath("galapagos", "mcci_panel"), context, component)
-            }
-            .positioning(Positioning.relative(50, 50))
-
-        rootComponent.child(scrollContainer)
-
-        rootComponent.child(UIContainers.verticalFlow(Sizing.content(), Sizing.content())
-            .child(
-                UIComponents.texture(
-                    Identifier.fromNamespaceAndPath("mcc", "textures/_fonts/chest_backgrounds/header/header.png"),
-                    0, 0, 176, 36, 176, 36))
-            .child(
-                UIComponents.texture(
-                    Identifier.fromNamespaceAndPath("mcc", "textures/island_items/currency/non_premium.png"),
-                    0, 0, 16, 16, 16, 16)
-                    .positioning(Positioning.absolute(7, 7)))
-            .child(
-                UIComponents.label(
-                    Component.literal("COIN HISTORY").withStyle(Style.EMPTY.withFont(FontDescription.Resource(Identifier.fromNamespaceAndPath("mcc", "hud")))))
-                    .positioning(Positioning.absolute(37, 10))
-            )
-
-            .margins(Insets.of(25, 0, 2, 0))
-        )
-
-        rootComponent.child(UIContainers.verticalFlow(Sizing.fixed(1 ), Sizing.fixed(175)))
-
-        rootComponent.child(UIContainers.verticalFlow(Sizing.content(), Sizing.content())
-            .child(UIComponents.texture(
-            Identifier.fromNamespaceAndPath("mcc", "textures/_fonts/chest_backgrounds/footer/0.png"),
-            0, 0, 176, 17, 176, 17))
-            .margins(Insets.of(0, 40, 2, 0)))
+        setupMcciScreen(rootComponent, content, "COIN HISTORY", "textures/island_items/currency/non_premium.png")
 
         val filter = UIComponents.dropdown(Sizing.fixed(50))
             .nested(Component.literal("Filter"), Sizing.content()) { submenu ->
@@ -191,6 +152,5 @@ class CoinHistory : BaseOwoScreen<FlowLayout>() {
             .positioning(Positioning.absolute(10, 10))
 
         rootComponent.child(filter)
-
     }
 }

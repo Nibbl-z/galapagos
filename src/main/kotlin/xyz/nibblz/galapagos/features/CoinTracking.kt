@@ -1,6 +1,7 @@
 package xyz.nibblz.galapagos.features
 
 import kotlinx.serialization.Serializable
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback
 import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
@@ -8,6 +9,7 @@ import net.minecraft.client.gui.screens.inventory.ContainerScreen
 import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket
+import net.minecraft.network.protocol.game.ServerboundContainerClosePacket
 import net.minecraft.world.inventory.ContainerInput
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
@@ -20,9 +22,10 @@ import xyz.nibblz.galapagos.events.ContainerCloseEvent
 import xyz.nibblz.galapagos.events.ContainerOpenEvent
 import xyz.nibblz.galapagos.events.SlotClickEvent
 import xyz.nibblz.galapagos.events.SystemChatEvent
-import xyz.nibblz.galapagos.features.CraftingInstructions.openBlueprints
+import xyz.nibblz.galapagos.features.QuestTracking.slotClick
 import xyz.nibblz.galapagos.findLore
 import xyz.nibblz.galapagos.mixin.accessor.HoveredSlotAccessor
+import xyz.nibblz.galapagos.playMccSound
 import xyz.nibblz.galapagos.screens.CoinHistory
 import java.util.EnumMap
 import kotlin.time.Clock
@@ -34,21 +37,26 @@ object CoinTracking : Feature {
     override fun init() {
         ContainerOpenEvent.EVENT.register { packet -> containerOpen(packet) }
         ContainerCloseEvent.EVENT.register { containerClose() }
-        SlotClickEvent.EVENT.register { screen, input, _, _ -> slotClick(screen, input) }
+        SlotClickEvent.EVENT.register { screen, input, _, button -> slotClick(screen, input, button) }
         SystemChatEvent.EVENT.register { packet -> systemChat(packet) }
         ItemTooltipCallback.EVENT.register { stack, context, flag, components -> tooltipAdd(stack, context, flag, components) }
-
+        ClientTickEvents.END_CLIENT_TICK.register {
+            if (!openCoinHistory) return@register
+            openCoinHistory = false
+            Minecraft.getInstance().setScreen(CoinHistory())
+        }
     }
 
     var price = 0
     var category = CoinChangeCategory.UNKNOWN
     var data = ""
     var dataCount = 0
+    var clickedCoinHistory = false
+    var openCoinHistory = false
 
     val filter = CoinChangeCategory.entries.associateWithTo(EnumMap(CoinChangeCategory::class.java)) {true}
 
     fun resetData() {
-        Galapagos.logger.info("resetting cointrack data")
         price = 0
         category = CoinChangeCategory.UNKNOWN
         data = ""
@@ -139,11 +147,6 @@ object CoinTracking : Feature {
 
             Galapagos.logger.info("$amountGained")
 
-            //val category = if (rewardCrate != null) CoinChangeCategory.REWARD_CRATE else CoinChangeCategory.UNKNOWN
-            //val data = rewardCrate?.dropLast(13) ?: "?"
-            // todo: detecting mailbox
-            "?? Reward Crate"
-
             val change = CoinChange(
                 amount = amountGained,
                 timestamp = Clock.System.now().epochSeconds,
@@ -170,13 +173,16 @@ object CoinTracking : Feature {
         return cleanedCountString.toInt()
     }
 
-    fun slotClick(screen: ContainerScreen, type: ContainerInput) {
+    fun slotClick(screen: ContainerScreen, type: ContainerInput, button: Int) {
         val slot = (screen as HoveredSlotAccessor).`galapagos$hoveredSlot`() ?: return
 
         Galapagos.logger.info("${slot.index}, ${slot.item.itemName.string}, $type")
 
-        if (slot.item.itemName.string == "Coins" && screen.title.string.contains("INFINIBAG")) {
-            Minecraft.getInstance().setScreen(CoinHistory())
+        if (slot.item.itemName.string == "Coins" && screen.title.string.contains("INFINIBAG") && button == 0) {
+            clickedCoinHistory = true
+            playMccSound("ui.click_normal")
+            playMccSound("ui.pickup_coins")
+            Minecraft.getInstance().connection!!.send(ServerboundContainerClosePacket(Minecraft.getInstance().player!!.containerMenu.containerId))
             return
         }
 
@@ -276,6 +282,10 @@ object CoinTracking : Feature {
 
     fun containerClose() {
         resetData()
+
+        if (!clickedCoinHistory) return
+        clickedCoinHistory = false
+        openCoinHistory = true
     }
 
     @Serializable

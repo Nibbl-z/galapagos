@@ -5,6 +5,7 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
 import net.minecraft.client.Minecraft
 import net.minecraft.network.chat.Component
 import xyz.nibblz.galapagos.screens.CoinHistory
+import xyz.nibblz.galapagos.screens.QuestHistory
 
 object GalapagosCommand {
     fun register(dispatcher: CommandDispatcher<FabricClientCommandSource>) {
@@ -22,6 +23,14 @@ object GalapagosCommand {
                     executes {
                         Minecraft.getInstance().execute {
                             Minecraft.getInstance().setScreen(CoinHistory())
+                        }
+                    }
+                }
+
+                literal("questhistory") {
+                    executes {
+                        Minecraft.getInstance().execute {
+                            Minecraft.getInstance().setScreen(QuestHistory())
                         }
                     }
                 }

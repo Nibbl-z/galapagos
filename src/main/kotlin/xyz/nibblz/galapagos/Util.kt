@@ -13,10 +13,13 @@ import com.mojang.brigadier.suggestion.Suggestions
 import com.mojang.brigadier.suggestion.SuggestionsBuilder
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
+import net.minecraft.client.resources.sounds.SimpleSoundInstance
+import net.minecraft.client.resources.sounds.SoundInstance
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
 import net.minecraft.network.chat.contents.objects.AtlasSprite
 import net.minecraft.resources.Identifier
+import net.minecraft.sounds.SoundSource
 import xyz.nibblz.galapagos.data.CosmeticTag
 import xyz.nibblz.galapagos.data.Item
 import java.util.concurrent.CompletableFuture
@@ -230,4 +233,17 @@ fun formatTimeString(seconds: Int): String {
     val minutes = (seconds / 60) - (hours * 60)
 
     return "${if (hours > 0) "${hours}h${if (minutes > 0) " " else ""}" else ""}${if (minutes > 0) "${minutes}m" else ""}"
+}
+
+fun playMccSound(path: String) {
+    Minecraft.getInstance().soundManager.play(SimpleSoundInstance(
+        Identifier.fromNamespaceAndPath("mcc", path),
+        SoundSource.MASTER,
+        1.0f, 1.0f,
+        SoundInstance.createUnseededRandom(),
+        false,
+        0,
+        SoundInstance.Attenuation.NONE,
+        0.0, 0.0, 0.0, true
+    ))
 }
