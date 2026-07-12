@@ -1,5 +1,6 @@
 package xyz.nibblz.galapagos.features
 
+import dev.isxander.yacl3.api.OptionDescription
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback
 import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
@@ -13,7 +14,8 @@ import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.TooltipFlag
 import xyz.nibblz.galapagos.Galapagos
-import xyz.nibblz.galapagos.Glyphs
+import xyz.nibblz.galapagos.util.Glyphs
+import xyz.nibblz.galapagos.config.Config
 import xyz.nibblz.galapagos.data.BlueprintLootPreview
 import xyz.nibblz.galapagos.data.CosmeticTag
 import xyz.nibblz.galapagos.data.LootPreviewCosmetic
@@ -34,10 +36,24 @@ import xyz.nibblz.galapagos.events.ContainerRenderEvent
 import xyz.nibblz.galapagos.events.SlotClickEvent
 import xyz.nibblz.galapagos.mixin.accessor.HoveredSlotAccessor
 import kotlin.math.round
+import kotlin.reflect.KMutableProperty
+import kotlin.reflect.KMutableProperty0
 
 object CosmeticMachineChances : Feature {
     override val id: String = "cosmetic_machine_chances"
     override val name: String = "Cosmetic Machine Chances"
+    override val description: List<Component> = listOf(
+        Component.literal("Displays more statistics in the Cosmetic Machine for each pull type, including:"),
+        Component.literal("- New cosmetic chance"),
+        Component.literal("- New royal reputation chance"),
+        Component.literal("- Average trophies per roll"),
+        Component.literal("- Average mythic cores per roll"),
+        Component.literal("- Average arcane cores per roll"),
+        Component.empty(),
+        Component.literal("The chances for each type of pull is also changed to be more descriptive, showing the exact non-exclusive, exclusive, or arcane chances on a pull for each rarity.")
+    )
+    override val enabledProperty: KMutableProperty0<Boolean> = Config.values::cosmeticMachineChancesEnabled
+    override val image: Config.ConfigImage = Config.ConfigImage("cosmetic_machine_chances.png", 669, 554)
 
     val BASIC_CHANCES: Map<Rarity, Double> = mapOf(
         Rarity.COMMON to 0.45,
@@ -190,54 +206,112 @@ object CosmeticMachineChances : Feature {
     }
 
     fun tooltipAdd(item: ItemStack, context: Item.TooltipContext, flag: TooltipFlag, list: MutableList<Component>) {
+        if (!enabledProperty.get()) return
         if (!inCosmeticMachine) return
 
         if(item.itemName.string == "Basic Pull") {
-            list[7] = getModifiedChanceTooltip(Rarity.RARE, false)
-            list[8] = getModifiedChanceTooltip(Rarity.EPIC, false)
-            list[9] = getModifiedChanceTooltip(Rarity.LEGENDARY, false)
+            var index = 13
 
-            // devcmb told me to use repeat (2) but idont wanna
-            list.removeAt(11)
-            list.removeAt(11)
+            if (Config.values::detailedCosmeticMachineChances.get()) {
+                list[7] = getModifiedChanceTooltip(Rarity.RARE, false)
+                list[8] = getModifiedChanceTooltip(Rarity.EPIC, false)
+                list[9] = getModifiedChanceTooltip(Rarity.LEGENDARY, false)
 
-            list.add(10, Component.empty())
-            list.add(11, basicData.newCosmeticTooltip())
-            list.add(12, basicData.newRepTooltip())
-            list.add(13, basicData.trophiesPerRollTooltip())
-            list.add(14, basicData.mythicCoresPerRollTooltip())
-            list.add(15, basicData.arcaneCoresPerRollTooltip())
+                // devcmb told me to use repeat (2) but idont wanna
+                list.removeAt(11)
+                list.removeAt(11)
+
+                index = 11
+            }
+
+            if (Config.values::showNewCosmeticChancePerPull.get() || Config.values::showNewRepChancePerPull.get() || Config.values::showTrophiesPerPull.get() || Config.values::showMythicCoresPerPull.get() || Config.values::showArcaneCoresPerPull.get()) {
+                list.add(index, Component.empty())
+                // is this the worlds WORST if statement?
+            }
+
+            if (Config.values::showNewCosmeticChancePerPull.get()) {
+                list.add(index, basicData.newCosmeticTooltip())
+                index++
+            }
+
+            if (Config.values::showNewRepChancePerPull.get()) {
+                list.add(index, basicData.newRepTooltip())
+                index++
+            }
+
+            if (Config.values::showTrophiesPerPull.get()) {
+                list.add(index, basicData.trophiesPerRollTooltip())
+                index++
+            }
+
+            if (Config.values::showMythicCoresPerPull.get()) {
+                list.add(index, basicData.mythicCoresPerRollTooltip())
+                index++
+            }
+
+            if (Config.values::showArcaneCoresPerPull.get()) {
+                list.add(index, basicData.arcaneCoresPerRollTooltip())
+            }
         }
 
         if(item.itemName.string == "Ultimate Pull") {
-            list[5] = getModifiedChanceTooltip(Rarity.RARE, true)
-            list[6] = getModifiedChanceTooltip(Rarity.EPIC, true)
-            list[7] = getModifiedChanceTooltip(Rarity.LEGENDARY, true)
-            list[8] = getModifiedChanceTooltip(Rarity.MYTHIC, true)
-            list.add(9, Component.literal(" • ").withColor(ChatFormatting.DARK_GRAY.color!!)
-                .append(Component.literal("0.03%").withColor(ChatFormatting.GRAY.color!!))
-                .append(Component.literal(" - ").withColor(ChatFormatting.DARK_GRAY.color!!))
-                .append(Glyphs.getGlyphComponent("_fonts/icon/tooltips/arcane.png")))
+            var index = 13
 
-            list.removeAt(11)
-            list.removeAt(11)
-            list.removeAt(11)
+            if (Config.values::detailedCosmeticMachineChances.get()) {
+                list[5] = getModifiedChanceTooltip(Rarity.RARE, true)
+                list[6] = getModifiedChanceTooltip(Rarity.EPIC, true)
+                list[7] = getModifiedChanceTooltip(Rarity.LEGENDARY, true)
+                list[8] = getModifiedChanceTooltip(Rarity.MYTHIC, true)
+                list.add(9, Component.literal(" • ").withColor(ChatFormatting.DARK_GRAY.color!!)
+                    .append(Component.literal("0.03%").withColor(ChatFormatting.GRAY.color!!))
+                    .append(Component.literal(" - ").withColor(ChatFormatting.DARK_GRAY.color!!))
+                    .append(Glyphs.getGlyphComponent("_fonts/icon/tooltips/arcane.png")))
 
-            list.add(10, Component.empty())
-            list.add(11, ultimateData.newCosmeticTooltip())
-            list.add(12, ultimateData.newRepTooltip())
-            list.add(13, ultimateData.trophiesPerRollTooltip())
-            list.add(14, ultimateData.mythicCoresPerRollTooltip())
-            list.add(15, ultimateData.arcaneCoresPerRollTooltip())
+                list.removeAt(11)
+                list.removeAt(11)
+                list.removeAt(11)
+
+                index = 11
+            }
+
+            if (Config.values::showNewCosmeticChancePerPull.get() || Config.values::showNewRepChancePerPull.get() || Config.values::showTrophiesPerPull.get() || Config.values::showMythicCoresPerPull.get() || Config.values::showArcaneCoresPerPull.get()) {
+                list.add(index, Component.empty())
+                // is this the worlds WORST if statement? (ultimate + reverb)
+            }
+
+            if (Config.values::showNewCosmeticChancePerPull.get()) {
+                list.add(index, ultimateData.newCosmeticTooltip())
+                index++
+            }
+
+            if (Config.values::showNewRepChancePerPull.get()) {
+                list.add(index, ultimateData.newRepTooltip())
+                index++
+            }
+
+            if (Config.values::showTrophiesPerPull.get()) {
+                list.add(index, ultimateData.trophiesPerRollTooltip())
+                index++
+            }
+
+            if (Config.values::showMythicCoresPerPull.get()) {
+                list.add(index, ultimateData.mythicCoresPerRollTooltip())
+                index++
+            }
+
+            if (Config.values::showArcaneCoresPerPull.get()) {
+                list.add(index, ultimateData.arcaneCoresPerRollTooltip())
+            }
         }
     }
 
     fun containerRender(screen: ContainerScreen, graphics: GuiGraphicsExtractor, x: Int, y: Int, w: Int, h: Int) {
         if (!screen.title.string.contains("LOOT PREVIEW", true)) return
         if (!inCosmeticMachine) return
+        if (!enabledProperty.get()) return
 
         val data = if (isUltimate) ultimateData else basicData
 
-        data.render(graphics, x, y, w)
+        data.render(graphics, x, y, w, Config.values::showNewCosmeticChancePerPull.get(), Config.values::showNewRepChancePerPull.get())
     }
 }

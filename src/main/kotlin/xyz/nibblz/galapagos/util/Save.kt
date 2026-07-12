@@ -1,8 +1,9 @@
-package xyz.nibblz.galapagos
+package xyz.nibblz.galapagos.util
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import net.fabricmc.loader.api.FabricLoader
+import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.data.Cosmetic
 import xyz.nibblz.galapagos.data.Item
 import xyz.nibblz.galapagos.features.CoinTracking

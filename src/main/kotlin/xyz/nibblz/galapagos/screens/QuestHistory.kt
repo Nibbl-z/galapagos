@@ -4,7 +4,6 @@ import io.wispforest.owo.ui.base.BaseOwoScreen
 import io.wispforest.owo.ui.component.UIComponents
 import io.wispforest.owo.ui.container.FlowLayout
 import io.wispforest.owo.ui.container.UIContainers
-import io.wispforest.owo.ui.container.UIContainers.verticalFlow
 import io.wispforest.owo.ui.core.HorizontalAlignment
 import io.wispforest.owo.ui.core.Insets
 import io.wispforest.owo.ui.core.OwoUIAdapter
@@ -21,9 +20,6 @@ import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.Identifier
 import xyz.nibblz.galapagos.Galapagos
-import xyz.nibblz.galapagos.Glyphs
-import xyz.nibblz.galapagos.features.CoinTracking.getIcon
-import xyz.nibblz.galapagos.features.CoinTracking.getSource
 import kotlin.time.Instant
 
 class QuestHistory : BaseOwoScreen<FlowLayout>() {

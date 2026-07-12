@@ -7,6 +7,7 @@ import net.minecraft.network.chat.FontDescription
 import net.minecraft.resources.Identifier
 import org.slf4j.LoggerFactory
 import org.slf4j.Logger
+import xyz.nibblz.galapagos.config.Config
 import xyz.nibblz.galapagos.data.ConstantIslandData
 import xyz.nibblz.galapagos.features.BlueprintAssemblerInfo
 import xyz.nibblz.galapagos.features.CoinTracking
@@ -14,7 +15,12 @@ import xyz.nibblz.galapagos.features.CosmeticMachineChances
 import xyz.nibblz.galapagos.features.CraftingInstructions
 import xyz.nibblz.galapagos.features.CrateChances
 import xyz.nibblz.galapagos.features.ExchangeUnitPrice
+import xyz.nibblz.galapagos.features.Feature
 import xyz.nibblz.galapagos.features.QuestTracking
+import xyz.nibblz.galapagos.util.GalapagosCommand
+import xyz.nibblz.galapagos.util.PlayerData
+import xyz.nibblz.galapagos.util.PlayerSave
+import xyz.nibblz.galapagos.util.Save
 
 object Galapagos : ModInitializer {
 	const val MOD_ID: String = "galapagos"
@@ -23,17 +29,22 @@ object Galapagos : ModInitializer {
 	var save: PlayerSave = PlayerSave()
 	val font = FontDescription.Resource(Identifier.fromNamespaceAndPath(MOD_ID, "main"))
 
+	val features: List<Feature> = listOf(
+		CoinTracking,
+		QuestTracking,
+		CrateChances,
+		CosmeticMachineChances,
+		ExchangeUnitPrice,
+		CraftingInstructions,
+		BlueprintAssemblerInfo
+	)
+
 	fun registerFeatures() {
-		CoinTracking.init()
-		QuestTracking.init()
-		CrateChances.init()
-		CosmeticMachineChances.init()
-		ExchangeUnitPrice.init()
-		CraftingInstructions.init()
-		BlueprintAssemblerInfo.init()
+		features.forEach { it.init() }
 	}
 
 	override fun onInitialize() {
+		Config.handler.load()
 		Save.load()
 		ConstantIslandData.load()
 		registerFeatures()

@@ -1,8 +1,8 @@
 package xyz.nibblz.galapagos.data
 
 import net.minecraft.world.item.ItemStack
-import xyz.nibblz.galapagos.Glyphs
-import xyz.nibblz.galapagos.findLore
+import xyz.nibblz.galapagos.util.Glyphs
+import xyz.nibblz.galapagos.util.findLore
 
 enum class Rarity(val label: String, val trophies: Int, val color: Int) {
     COMMON("Common", 10, 0xffffff),

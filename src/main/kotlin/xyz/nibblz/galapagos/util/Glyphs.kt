@@ -1,4 +1,4 @@
-package xyz.nibblz.galapagos
+package xyz.nibblz.galapagos.util
 
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.FontDescription

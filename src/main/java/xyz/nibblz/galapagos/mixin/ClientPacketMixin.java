@@ -9,10 +9,10 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import xyz.nibblz.galapagos.UtilKt;
 import xyz.nibblz.galapagos.events.ContainerOpenEvent;
 import xyz.nibblz.galapagos.events.ContainerSetSlotEvent;
 import xyz.nibblz.galapagos.events.SystemChatEvent;
+import xyz.nibblz.galapagos.util.UtilKt;
 
 @Mixin(ClientPacketListener.class)
 public class ClientPacketMixin {

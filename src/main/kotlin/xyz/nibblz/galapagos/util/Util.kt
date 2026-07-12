@@ -1,4 +1,4 @@
-package xyz.nibblz.galapagos
+package xyz.nibblz.galapagos.util
 
 import net.minecraft.client.Minecraft
 import net.minecraft.world.item.ItemStack

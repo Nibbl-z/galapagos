@@ -1,5 +1,6 @@
 package xyz.nibblz.galapagos.features
 
+import dev.isxander.yacl3.api.OptionDescription
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback
 import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
@@ -13,17 +14,25 @@ import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.TooltipFlag
 import xyz.nibblz.galapagos.Galapagos
-import xyz.nibblz.galapagos.Glyphs
+import xyz.nibblz.galapagos.util.Glyphs
+import xyz.nibblz.galapagos.config.Config
 import xyz.nibblz.galapagos.data.Rarity
 import xyz.nibblz.galapagos.events.ContainerOpenEvent
 import xyz.nibblz.galapagos.events.ContainerSetSlotEvent
 import xyz.nibblz.galapagos.events.SlotClickEvent
-import xyz.nibblz.galapagos.findLore
+import xyz.nibblz.galapagos.util.findLore
 import xyz.nibblz.galapagos.mixin.accessor.HoveredSlotAccessor
+import kotlin.reflect.KMutableProperty
+import kotlin.reflect.KMutableProperty0
 
 object ExchangeUnitPrice : Feature {
     override val id: String = "exchange_unit_price"
     override val name: String = "Island Exchange Unit Price"
+    override val description: List<Component> = listOf(
+        Component.literal("Shows the unit price of listings on the Island Exchange, as well as the equivalent of cosmetic/weapon skin listings in Style Souls and Weapon Wisps.")
+    )
+    override val enabledProperty: KMutableProperty0<Boolean> = Config.values::exchangeUnitPriceEnabled
+    override val image: Config.ConfigImage = Config.ConfigImage("exchange_unit.png", 425, 906)
 
     override fun init() {
         ItemTooltipCallback.EVENT.register { stack, context, flag, components -> tooltipAdd(stack, context, flag, components) }
@@ -136,6 +145,7 @@ object ExchangeUnitPrice : Feature {
     }
 
     fun tooltipAdd(item: ItemStack, context: Item.TooltipContext, flag: TooltipFlag, list: MutableList<Component>) {
+        if (!enabledProperty.get()) return
         val screen = Minecraft.getInstance().screen ?: return
         if (!screen.title.string.contains("ISLAND EXCHANGE", false)) return
 
@@ -144,7 +154,7 @@ object ExchangeUnitPrice : Feature {
         }
         if (listedPriceIndex == -1) return
 
-        if (item.count != 1) {
+        if (item.count != 1 && Config.values::exchangeShowUnitPrice.get()) {
             list.add(listedPriceIndex + 1,
                 Component.literal("Unit Price: ").withColor(ChatFormatting.GRAY.color!!)
                     .append(Glyphs.getGlyphComponent("_fonts/icon/coin.png"))
@@ -152,7 +162,7 @@ object ExchangeUnitPrice : Feature {
             )
         }
 
-        if (soulEquivalent[item] != null) {
+        if (soulEquivalent[item] != null && Config.values::exchangeShowSoulEquivalent.get()) {
             val soulUnitPrice = (perUnitPrices[item] ?: 1) / (soulEquivalent[item] ?: 1)
 
             list.add(listedPriceIndex + 1,
@@ -165,7 +175,7 @@ object ExchangeUnitPrice : Feature {
             )
         }
 
-        if (wispEquivalent[item] != null) {
+        if (wispEquivalent[item] != null && Config.values::exchangeShowWispEquivalent.get()) {
             val wispUnitPrice = (perUnitPrices[item] ?: 1) / (wispEquivalent[item] ?: 1)
 
             list.add(listedPriceIndex + 1,

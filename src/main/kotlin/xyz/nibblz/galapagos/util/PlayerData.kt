@@ -1,4 +1,4 @@
-package xyz.nibblz.galapagos
+package xyz.nibblz.galapagos.util
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -12,6 +12,7 @@ import net.minecraft.network.protocol.game.ClientboundSystemChatPacket
 import net.minecraft.world.inventory.ContainerInput
 import net.minecraft.world.inventory.Slot
 import net.minecraft.world.item.ItemStack
+import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.data.Collection
 import xyz.nibblz.galapagos.data.Cosmetic
 import xyz.nibblz.galapagos.data.CosmeticTag
@@ -29,6 +30,7 @@ import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
+import kotlin.text.get
 
 
 object PlayerData {

@@ -1,27 +1,18 @@
 package xyz.nibblz.galapagos.dialogs
 
-import com.noxcrew.sheeplib.LayoutConstants
 import com.noxcrew.sheeplib.dialog.Dialog
 import com.noxcrew.sheeplib.dialog.title.TextTitleWidget
-import com.noxcrew.sheeplib.layout.GridLayout
-import com.noxcrew.sheeplib.layout.grid
 import com.noxcrew.sheeplib.layout.linear
-import com.noxcrew.sheeplib.theme.DefaultTheme
-import com.noxcrew.sheeplib.theme.Theme
 import com.noxcrew.sheeplib.theme.Themed
 import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.components.StringWidget
 import net.minecraft.client.gui.layouts.LinearLayout
 import net.minecraft.network.chat.Component
-import net.minecraft.network.chat.FontDescription
-import net.minecraft.network.chat.Style
-import net.minecraft.network.chat.contents.objects.AtlasSprite
-import net.minecraft.resources.Identifier
-import net.minecraft.util.Mth
 import xyz.nibblz.galapagos.Galapagos
-import xyz.nibblz.galapagos.Glyphs
-import xyz.nibblz.galapagos.PlayerData
+import xyz.nibblz.galapagos.config.Config
+import xyz.nibblz.galapagos.util.Glyphs
+import xyz.nibblz.galapagos.util.PlayerData
 import xyz.nibblz.galapagos.data.CosmeticTag
 import xyz.nibblz.galapagos.data.Item
 import xyz.nibblz.galapagos.data.Material
@@ -36,8 +27,8 @@ import xyz.nibblz.galapagos.features.CraftingInstructions.calculateSingularityIn
 import xyz.nibblz.galapagos.features.CraftingInstructions.getComponent
 import xyz.nibblz.galapagos.features.CraftingInstructions.gloopForRawMaterial
 import xyz.nibblz.galapagos.features.CraftingInstructions.tempInfinibag
-import xyz.nibblz.galapagos.formatTimeString
-import xyz.nibblz.galapagos.mccTextureComponent
+import xyz.nibblz.galapagos.util.formatTimeString
+import xyz.nibblz.galapagos.util.mccTextureComponent
 
 class CraftingInstructionsDialog(x: Int, y: Int, val blueprint: CraftingInstructions.BlueprintInfo) : Dialog(x, y), Themed by GalapagosTheme {
     val instructions: HashMap<Material, List<Instruction>> = hashMapOf()
@@ -149,9 +140,13 @@ class CraftingInstructionsDialog(x: Int, y: Int, val blueprint: CraftingInstruct
             }
         }
 
-        +StringWidget(Component.literal(""), font)
-        +StringWidget(Component.literal("Total Gloop: $gloop ").append(mccTextureComponent("island_items/infinibag/material/gloop")), font)
-        if (time > 0) {
+        if (Config.values::craftingInstructionsShowGloop.get() || Config.values::craftingInstructionsShowCraftTime.get()) {
+            +StringWidget(Component.literal(""), font)
+        }
+        if (Config.values::craftingInstructionsShowGloop.get()) {
+            +StringWidget(Component.literal("Total Gloop: $gloop ").append(mccTextureComponent("island_items/infinibag/material/gloop")), font)
+        }
+        if (time > 0 && Config.values::craftingInstructionsShowCraftTime.get()) {
             +StringWidget(Component.literal("Total Craft Time: ${formatTimeString((time * efficientFusion).toInt())} ").append(
                 Glyphs.getGlyphComponent("_fonts/icon/time.png")), font)
         }

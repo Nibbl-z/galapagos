@@ -1,5 +1,6 @@
 package xyz.nibblz.galapagos.features
 
+import dev.isxander.yacl3.api.OptionDescription
 import kotlinx.serialization.Serializable
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback
@@ -15,21 +16,32 @@ import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.TooltipFlag
 import xyz.nibblz.galapagos.Galapagos
-import xyz.nibblz.galapagos.Glyphs
+import xyz.nibblz.galapagos.util.Glyphs
+import xyz.nibblz.galapagos.config.Config
 import xyz.nibblz.galapagos.data.Rarity
 import xyz.nibblz.galapagos.events.ContainerCloseEvent
 import xyz.nibblz.galapagos.events.ContainerOpenEvent
 import xyz.nibblz.galapagos.events.SlotClickEvent
 import xyz.nibblz.galapagos.events.SystemChatEvent
-import xyz.nibblz.galapagos.findLore
+import xyz.nibblz.galapagos.util.findLore
 import xyz.nibblz.galapagos.mixin.accessor.HoveredSlotAccessor
-import xyz.nibblz.galapagos.playMccSound
+import xyz.nibblz.galapagos.util.playMccSound
 import xyz.nibblz.galapagos.screens.QuestHistory
+import kotlin.reflect.KMutableProperty
+import kotlin.reflect.KMutableProperty0
 import kotlin.time.Clock
 
 object QuestTracking : Feature {
     override val id: String = "quest_tracking"
     override val name: String = "Quest Tracking"
+    override val description: List<Component> = listOf(
+        Component.literal("Logs all completed quests and daily meter claims, including their rarity as well as if the quest is boosted/glitched/arcane."),
+        Component.literal("To view past quests, right click on the Island Rewards tab at the bottom of the journal."),
+        Component.empty(),
+        Component.literal("Note: Disabling this feature will NOT disable quest tracking, but will disable the quest history menu.")
+    )
+    override val enabledProperty: KMutableProperty0<Boolean> = Config.values::questTrackingEnabled
+    override val image: Config.ConfigImage = Config.ConfigImage("quest_tracking.png", 1097, 465)
 
     override fun init() {
         ContainerOpenEvent.EVENT.register { packet -> containerOpen(packet) }
@@ -142,6 +154,7 @@ object QuestTracking : Feature {
 
         if (screen.title.string.contains("JOURNAL") || screen.title.string.contains("MAILBOX")) {
             if (slot.item.itemName.string.contains("Island Rewards") && button == 1) {
+                if (!enabledProperty.get()) return
                 clickedQuestHistory = true
                 playMccSound("ui.click_normal")
                 playMccSound("ui.quest_complete")
@@ -182,6 +195,7 @@ object QuestTracking : Feature {
     }
 
     fun tooltipAdd(stack: ItemStack, context: Item.TooltipContext, flag: TooltipFlag, components: MutableList<Component>) {
+        if (!enabledProperty.get()) return
         val screen = Minecraft.getInstance().screen ?: return
         if (!screen.title.string.contains("JOURNAL") && !screen.title.string.contains("MAILBOX")) return
         if (stack.itemName.string != "Island Rewards") return

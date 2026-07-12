@@ -4,11 +4,9 @@ import io.wispforest.owo.ui.base.BaseOwoScreen
 import io.wispforest.owo.ui.component.LabelComponent
 import io.wispforest.owo.ui.component.UIComponents
 import io.wispforest.owo.ui.container.FlowLayout
-import io.wispforest.owo.ui.container.ScrollContainer
 import io.wispforest.owo.ui.container.UIContainers
 import io.wispforest.owo.ui.core.*
 import io.wispforest.owo.ui.core.Surface
-import io.wispforest.owo.ui.util.NinePatchTexture
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
@@ -17,12 +15,9 @@ import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
 import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
-import net.minecraft.network.chat.FontDescription
-import net.minecraft.network.chat.Style
 import net.minecraft.resources.Identifier
-import net.minecraft.util.ARGB
 import xyz.nibblz.galapagos.Galapagos
-import xyz.nibblz.galapagos.Glyphs
+import xyz.nibblz.galapagos.util.Glyphs
 import xyz.nibblz.galapagos.features.CoinTracking
 import xyz.nibblz.galapagos.features.CoinTracking.getIcon
 import xyz.nibblz.galapagos.features.CoinTracking.getSource

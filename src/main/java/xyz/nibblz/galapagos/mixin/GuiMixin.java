@@ -1,6 +1,5 @@
 package xyz.nibblz.galapagos.mixin;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.scores.Objective;
@@ -8,8 +7,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import xyz.nibblz.galapagos.UtilKt;
 import xyz.nibblz.galapagos.events.ScoreboardTitleUpdateEvent;
+import xyz.nibblz.galapagos.util.UtilKt;
 
 @Mixin(Gui.class)
 public class GuiMixin {

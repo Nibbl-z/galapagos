@@ -1,5 +1,6 @@
 package xyz.nibblz.galapagos.features
 
+import dev.isxander.yacl3.api.OptionDescription
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback
 import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
@@ -15,7 +16,8 @@ import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.TooltipFlag
 import xyz.nibblz.galapagos.Galapagos
-import xyz.nibblz.galapagos.Glyphs
+import xyz.nibblz.galapagos.util.Glyphs
+import xyz.nibblz.galapagos.config.Config
 import xyz.nibblz.galapagos.data.BlueprintLootPreview
 import xyz.nibblz.galapagos.data.ConstantIslandData
 import xyz.nibblz.galapagos.data.CosmeticTag
@@ -36,10 +38,24 @@ import xyz.nibblz.galapagos.events.ContainerRenderEvent
 import xyz.nibblz.galapagos.events.SlotClickEvent
 import xyz.nibblz.galapagos.events.SlotRenderEvent
 import xyz.nibblz.galapagos.mixin.accessor.HoveredSlotAccessor
+import kotlin.reflect.KMutableProperty
+import kotlin.reflect.KMutableProperty0
 
 object CrateChances: Feature {
     override val id: String = "crate_chances"
     override val name: String = "Crate Chances"
+    override val description: List<Component> = listOf(
+        Component.literal("Displays more statistics in the Crate Emporium menu for each crate, including:"),
+        Component.literal("- New cosmetic chance"),
+        Component.literal("- New royal reputation chance"),
+        Component.literal("- Average trophies per roll"),
+        Component.literal("- Average mythic cores per roll"),
+        Component.literal("- Average arcane cores per roll"),
+        Component.empty(),
+        Component.literal("The crate with the highest chance for a new cosmetic or new royal reputation will be highlighted with a yellow star and a purple star respectively. The best chance is determined for both standard and exclusive crates seperately, showing both of these stars for both types of crate.")
+    )
+    override val enabledProperty: KMutableProperty0<Boolean> = Config.values::crateChancesEnabled
+    override val image: Config.ConfigImage = Config.ConfigImage("crate_chances.png", 636, 639)
 
     var currentCrate: String? = null
     var data: HashMap<String, BlueprintLootPreview> = hashMapOf()
@@ -123,55 +139,79 @@ object CrateChances: Feature {
     }
 
     fun tooltipAdd(stack: ItemStack, context: Item.TooltipContext, flag: TooltipFlag, components: MutableList<Component>) {
+        if (!enabledProperty.get()) return
         val screen = Minecraft.getInstance().screen ?: return
         if (!screen.title.string.contains("CRATE EMPORIUM", false)) return
         if (!stack.itemName.string.contains("Crate")) return
         val itemName = stack.itemName.string
 
-        components.add(7, data[itemName]?.newCosmeticTooltip() ?: Component.empty())
-        components.add(8, data[itemName]?.newRepTooltip() ?: Component.empty())
-        components.add(9, data[itemName]?.trophiesPerRollTooltip() ?: Component.empty())
-        components.add(10, data[itemName]?.mythicCoresPerRollTooltip() ?: Component.empty())
-        components.add(11, data[itemName]?.arcaneCoresPerRollTooltip() ?: Component.empty())
+        var index = 7
+
+        if (Config.values::showNewCosmeticChance.get()) {
+            components.add(index, data[itemName]?.newCosmeticTooltip() ?: Component.empty())
+            index++
+        }
+
+        if (Config.values::showNewRepChance.get()) {
+            components.add(index, data[itemName]?.newRepTooltip() ?: Component.empty())
+            index++
+        }
+
+        if (Config.values::showTrophiesPerRoll.get()) {
+            components.add(index, data[itemName]?.trophiesPerRollTooltip() ?: Component.empty())
+            index++
+        }
+
+        if (Config.values::showMythicCoresPerRoll.get()) {
+            components.add(index, data[itemName]?.mythicCoresPerRollTooltip() ?: Component.empty())
+            index++
+        }
+
+        if (Config.values::showArcaneCoresPerRoll.get()) {
+            components.add(index, data[itemName]?.arcaneCoresPerRollTooltip() ?: Component.empty())
+            index++
+        }
 
         val message = when(itemName) {
-            bestCosmeticChance.first -> Triple(
+            bestCosmeticChance.first -> if (Config.values::highlightBestCosmeticChance.get()) Triple(
                 "Best Standard Cosmetic Chance",
                 "_fonts/icon/star.png",
                 ChatFormatting.YELLOW.color!!
-            )
-            bestRepChance.first -> Triple(
+            ) else null
+            bestRepChance.first -> if (Config.values::highlightBestRepChance.get()) Triple(
                 "Best Standard Rep Chance",
                 "_fonts/icon/emojis/star_purple.png",
                 0x9143f0
-            )
-            bestExclusiveCosmeticChance.first -> Triple(
+            ) else null
+            bestExclusiveCosmeticChance.first -> if (Config.values::highlightBestCosmeticChance.get()) Triple(
                 "Best Exclusive Cosmetic Chance",
                 "_fonts/icon/star.png",
                 ChatFormatting.YELLOW.color!!
-            )
-            bestExclusiveRepChance.first -> Triple(
+            ) else null
+            bestExclusiveRepChance.first -> if (Config.values::highlightBestRepChance.get()) Triple(
                 "Best Exclusive Rep Chance",
                 "_fonts/icon/emojis/star_purple.png",
                 0x9143f0
-            )
+            ) else null
             else -> null
         } ?: return
 
-        components.add(12, Component.empty())
-        components.add(13, Component.empty()
+        components.add(index, Component.empty())
+        components.add(index + 1, Component.empty()
             .append(Glyphs.getGlyphComponent(message.second))
             .append(Component.literal(" ${message.first}").withColor(message.third)))
     }
 
     fun containerRender(screen: ContainerScreen, graphics: GuiGraphicsExtractor, x: Int, y: Int, w: Int, h: Int) {
+        if (!enabledProperty.get()) return
         if (!screen.title.string.contains("LOOT PREVIEW", true)) return
         if (currentCrate == null) return
 
-        data[currentCrate]?.render(graphics, x, y, w)
+        data[currentCrate]?.render(graphics, x, y, w, Config.values::showNewCosmeticChance.get(), Config.values::showNewRepChance.get())
     }
 
     fun slotRender(graphics: GuiGraphicsExtractor, slot: Slot) {
+        if (!enabledProperty.get()) return
         val screen = Minecraft.getInstance().screen ?: return
         if (!screen.title.string.contains("CRATE EMPORIUM", false)) return
         if (!slot.item.itemName.string.contains("Crate")) return
@@ -181,9 +221,9 @@ object CrateChances: Feature {
         val crateData = data[itemName] ?: return
         var maxSprite: String? = null
 
-        if (crateData.newRepChance == 0.00)
+        if (crateData.newRepChance == 0.00 && Config.values::showMaxRepCrates.get())
             maxSprite = "textures/_fonts/icon/royal_reputation.png"
-        else if (crateData.newCosmeticChance == 0.00)
+        else if (crateData.newCosmeticChance == 0.00 && Config.values::showMaxCosmeticCrates.get())
             maxSprite = "textures/_fonts/icon/trophy/purple.png"
 
         if (maxSprite != null) {
@@ -191,6 +231,7 @@ object CrateChances: Feature {
             val pose = graphics.pose()
             pose.scaleAround(0.67f, (slot.x + 6).toFloat(), (slot.y - 1).toFloat())
             // DevCmb laughed a lot when i wrote "0.67f" for this value. :smile:
+
             graphics.blit(
                 RenderPipelines.GUI_TEXTURED,
                 Identifier.fromNamespaceAndPath("mcc", maxSprite),
@@ -217,9 +258,9 @@ object CrateChances: Feature {
 
         var bestSprite: String? = null
 
-        if (bestCosmeticChance.first == itemName || bestExclusiveCosmeticChance.first == itemName)
+        if ((bestCosmeticChance.first == itemName || bestExclusiveCosmeticChance.first == itemName) && Config.values::highlightBestCosmeticChance.get())
             bestSprite = "textures/_fonts/icon/star.png"
-        else if (bestRepChance.first == itemName || bestExclusiveRepChance.first == itemName)
+        else if ((bestRepChance.first == itemName || bestExclusiveRepChance.first == itemName) && Config.values::highlightBestRepChance.get())
             bestSprite = "textures/_fonts/icon/emojis/star_purple.png"
 
         if (bestSprite != null) {

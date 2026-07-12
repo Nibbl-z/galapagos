@@ -1,9 +1,10 @@
-package xyz.nibblz.galapagos
+package xyz.nibblz.galapagos.util
 
 import com.mojang.brigadier.CommandDispatcher
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
 import net.minecraft.client.Minecraft
 import net.minecraft.network.chat.Component
+import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.screens.CoinHistory
 import xyz.nibblz.galapagos.screens.QuestHistory
 

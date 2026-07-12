@@ -2,7 +2,7 @@ package xyz.nibblz.galapagos.data
 
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
-import xyz.nibblz.galapagos.mccTextureComponent
+import xyz.nibblz.galapagos.util.mccTextureComponent
 
 enum class MaterialType {
     NONE,

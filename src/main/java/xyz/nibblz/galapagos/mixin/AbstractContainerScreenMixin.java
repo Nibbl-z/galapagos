@@ -12,12 +12,10 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import xyz.nibblz.galapagos.UtilKt;
-import xyz.nibblz.galapagos.events.ContainerOpenEvent;
 import xyz.nibblz.galapagos.events.ContainerRenderEvent;
 import xyz.nibblz.galapagos.events.SlotClickEvent;
 import xyz.nibblz.galapagos.events.SlotRenderEvent;
-import xyz.nibblz.galapagos.features.CoinTracking;
+import xyz.nibblz.galapagos.util.UtilKt;
 
 @Mixin(AbstractContainerScreen.class)
 public class AbstractContainerScreenMixin {

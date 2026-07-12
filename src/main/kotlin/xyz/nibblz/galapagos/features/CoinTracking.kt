@@ -1,5 +1,6 @@
 package xyz.nibblz.galapagos.features
 
+import dev.isxander.yacl3.api.OptionDescription
 import kotlinx.serialization.Serializable
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback
@@ -16,23 +17,43 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.TooltipFlag
 import xyz.nibblz.galapagos.Galapagos
-import xyz.nibblz.galapagos.Glyphs
-import xyz.nibblz.galapagos.PlayerData
+import xyz.nibblz.galapagos.util.Glyphs
+import xyz.nibblz.galapagos.util.PlayerData
+import xyz.nibblz.galapagos.config.Config
 import xyz.nibblz.galapagos.events.ContainerCloseEvent
 import xyz.nibblz.galapagos.events.ContainerOpenEvent
 import xyz.nibblz.galapagos.events.SlotClickEvent
 import xyz.nibblz.galapagos.events.SystemChatEvent
-import xyz.nibblz.galapagos.features.QuestTracking.slotClick
-import xyz.nibblz.galapagos.findLore
+import xyz.nibblz.galapagos.util.findLore
 import xyz.nibblz.galapagos.mixin.accessor.HoveredSlotAccessor
-import xyz.nibblz.galapagos.playMccSound
+import xyz.nibblz.galapagos.util.playMccSound
 import xyz.nibblz.galapagos.screens.CoinHistory
 import java.util.EnumMap
+import kotlin.reflect.KMutableProperty
+import kotlin.reflect.KMutableProperty0
 import kotlin.time.Clock
 
 object CoinTracking : Feature {
     override val id = "coin_tracking"
     override val name = "Coin Tracking"
+    override val description: List<Component> = listOf(
+        Component.literal("Logs all gains and losses of coins across many aspects of the server, including: "),
+        Component.literal("- Reward Crates"),
+        Component.literal("- Island Exchange"),
+        Component.literal("- Trading"),
+        Component.literal("- Purchasing items from vendors"),
+        Component.literal("- Mailbox"),
+        Component.literal("- Scavenging"),
+        Component.empty(),
+        Component.literal("To view your coin history, click the ")
+            .append(Component.literal("Coins").withColor(ChatFormatting.YELLOW.color!!))
+            .append(Component.literal(" item in your Infinibag.")),
+        Component.empty(),
+        Component.literal("Note: Disabling this feature will NOT disable coin tracking, but will disable the coin history menu.")
+    )
+    override val enabledProperty: KMutableProperty0<Boolean> = Config.values::coinTrackingEnabled
+    override val image: Config.ConfigImage = Config.ConfigImage("coin_tracking.png", 1021, 456)
+
 
     override fun init() {
         ContainerOpenEvent.EVENT.register { packet -> containerOpen(packet) }
@@ -179,6 +200,7 @@ object CoinTracking : Feature {
         Galapagos.logger.info("${slot.index}, ${slot.item.itemName.string}, $type")
 
         if (slot.item.itemName.string == "Coins" && screen.title.string.contains("INFINIBAG") && button == 0) {
+            if (!enabledProperty.get()) return
             clickedCoinHistory = true
             playMccSound("ui.click_normal")
             playMccSound("ui.pickup_coins")
@@ -264,6 +286,7 @@ object CoinTracking : Feature {
     }
 
     fun tooltipAdd(stack: ItemStack, context: Item.TooltipContext, flag: TooltipFlag, components: MutableList<Component>) {
+        if (!enabledProperty.get()) return
         val screen = Minecraft.getInstance().screen ?: return
         if (!screen.title.string.contains("INFINIBAG")) return
         if (stack.itemName.string != "Coins") return

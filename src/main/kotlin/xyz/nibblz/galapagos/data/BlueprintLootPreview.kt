@@ -7,7 +7,7 @@ import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.Style
 import net.minecraft.util.ARGB
 import xyz.nibblz.galapagos.Galapagos
-import xyz.nibblz.galapagos.Glyphs
+import xyz.nibblz.galapagos.util.Glyphs
 
 data class LootPreviewCosmetic(
     var chance: Double,
@@ -73,13 +73,18 @@ fun BlueprintLootPreview.update(lootPreviewCosmetics: List<LootPreviewCosmetic>)
     this.newRepChance *= 100.0
 }
 
-fun BlueprintLootPreview.render(graphics: GuiGraphicsExtractor, x: Int, y: Int, w: Int) {
-    graphics.text(Minecraft.getInstance().font, Component.literal("New Cosmetic: ${"%.2f".format(this.newCosmeticChance)}%"), x + w + 2, y + 30, ARGB.opaque(0x66fc56), true)
-    graphics.text(Minecraft.getInstance().font, Component.literal("${this.currentTrophies}/${this.totalTrophies} ").append(
-        Glyphs.getGlyphComponent("_fonts/icon/trophy/purple.png")), x + w + 2, y + 45, ARGB.opaque(0x66fc56), true)
-    graphics.text(Minecraft.getInstance().font, Component.literal("New Rep: ${"%.2f".format(this.newRepChance)}%"), x + w + 2, y + 60, ARGB.opaque(0x9143f0), true)
-    graphics.text(Minecraft.getInstance().font, Component.literal("${this.currentRep}/${this.totalRep} ").append(
-        Glyphs.getGlyphComponent("_fonts/icon/royal_reputation.png")), x + w + 2, y + 75, ARGB.opaque(0x9143f0), true)
+fun BlueprintLootPreview.render(graphics: GuiGraphicsExtractor, x: Int, y: Int, w: Int, showCosmeticChance: Boolean, showRepChance: Boolean) {
+    if (showCosmeticChance) {
+        graphics.text(Minecraft.getInstance().font, Component.literal("New Cosmetic: ${"%.2f".format(this.newCosmeticChance)}%"), x + w + 2, y + 30, ARGB.opaque(0x66fc56), true)
+        graphics.text(Minecraft.getInstance().font, Component.literal("${this.currentTrophies}/${this.totalTrophies} ").append(
+            Glyphs.getGlyphComponent("_fonts/icon/trophy/purple.png")), x + w + 2, y + 45, ARGB.opaque(0x66fc56), true)
+    }
+
+    if (showRepChance) {
+        graphics.text(Minecraft.getInstance().font, Component.literal("New Rep: ${"%.2f".format(this.newRepChance)}%"), x + w + 2, y + 60, ARGB.opaque(0x9143f0), true)
+        graphics.text(Minecraft.getInstance().font, Component.literal("${this.currentRep}/${this.totalRep} ").append(
+            Glyphs.getGlyphComponent("_fonts/icon/royal_reputation.png")), x + w + 2, y + 75, ARGB.opaque(0x9143f0), true)
+    }
 }
 
 fun BlueprintLootPreview.newCosmeticTooltip(): Component {

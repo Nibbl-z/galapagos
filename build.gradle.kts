@@ -17,12 +17,19 @@ repositories {
 	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
 	// for more information about repositories.
 	maven("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1")
-	maven {
+	maven("https://maven.noxcrew.com/public") {
 		name = "noxcrew-public"
-		url = uri("https://maven.noxcrew.com/public")
 	}
-	maven { url = uri("https://maven.wispforest.io/releases/") }
-	maven { url = uri("https://jitpack.io") }
+	maven("https://maven.wispforest.io/releases/")
+	maven("https://jitpack.io")
+
+	maven("https://maven.isxander.dev/releases") {
+		name = "Xander Maven"
+	}
+
+	maven("https://maven.terraformersmc.com/") {
+		name = "Terraformers"
+	}
 }
 
 dependencies {
@@ -39,6 +46,9 @@ dependencies {
 	implementation("com.noxcrew.sheeplib:api:1.5.2+26.1.2")
 
 	implementation("io.wispforest:owo-lib:0.13.0+26.1")
+
+	implementation("dev.isxander:yet-another-config-lib:3.9.4+26.1-fabric")
+	implementation("com.terraformersmc:modmenu:18.0.0-beta.1")
 }
 
 tasks.processResources {

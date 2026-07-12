@@ -2,24 +2,21 @@ package xyz.nibblz.galapagos.features
 
 import com.noxcrew.sheeplib.DialogContainer
 import com.noxcrew.sheeplib.dialog.Dialog
+import dev.isxander.yacl3.api.OptionDescription
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback
 import net.minecraft.ChatFormatting
-import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.screens.inventory.ContainerScreen
-import net.minecraft.client.resources.sounds.SimpleSoundInstance
-import net.minecraft.client.resources.sounds.SoundInstance
 import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
-import net.minecraft.resources.Identifier
-import net.minecraft.sounds.SoundSource
 import net.minecraft.world.inventory.ContainerInput
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.TooltipFlag
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo
 import xyz.nibblz.galapagos.Galapagos
-import xyz.nibblz.galapagos.Glyphs
-import xyz.nibblz.galapagos.PlayerData
+import xyz.nibblz.galapagos.util.Glyphs
+import xyz.nibblz.galapagos.util.PlayerData
+import xyz.nibblz.galapagos.config.Config
 import xyz.nibblz.galapagos.data.CosmeticTag
 import xyz.nibblz.galapagos.data.Item
 import xyz.nibblz.galapagos.data.Material
@@ -35,21 +32,30 @@ import xyz.nibblz.galapagos.events.ContainerSetSlotEvent
 import xyz.nibblz.galapagos.events.InfinibagUpdateEvent
 import xyz.nibblz.galapagos.events.ScoreboardTitleUpdateEvent
 import xyz.nibblz.galapagos.events.SlotClickEvent
-import xyz.nibblz.galapagos.findLore
-import xyz.nibblz.galapagos.findLores
-import xyz.nibblz.galapagos.formatTimeString
-import xyz.nibblz.galapagos.getCosmeticTag
-import xyz.nibblz.galapagos.mccTextureComponent
+import xyz.nibblz.galapagos.util.findLore
+import xyz.nibblz.galapagos.util.findLores
+import xyz.nibblz.galapagos.util.formatTimeString
+import xyz.nibblz.galapagos.util.getCosmeticTag
+import xyz.nibblz.galapagos.util.mccTextureComponent
 import xyz.nibblz.galapagos.mixin.accessor.HoveredSlotAccessor
-import xyz.nibblz.galapagos.playMccSound
+import xyz.nibblz.galapagos.util.playMccSound
 import kotlin.math.ceil
+import kotlin.reflect.KMutableProperty
+import kotlin.reflect.KMutableProperty0
 import kotlin.text.get
 
 object CraftingInstructions : Feature {
     override val id: String = "crafting_instructions"
     override val name: String = "Crafting Instructions"
+    override val description: List<Component> = listOf(
+        Component.literal("Shows a list of instructions to craft a blueprint by Shift+Right clicking on it."),
+        Component.literal("This will open a window including step-by-step instructions on what to spend your gloop on and what to craft, in order to use the minimum gloop required to craft the cosmetic."),
+        Component.literal("The window also shows how much time all the crafting of materials will take.")
+    )
+    override val enabledProperty: KMutableProperty0<Boolean> = Config.values::craftingInstructionsEnabled
+    override val image: Config.ConfigImage = Config.ConfigImage("crafting_instructions.png", 539, 490)
 
-    var tempInfinibag: HashMap<String, xyz.nibblz.galapagos.data.Item> = hashMapOf()
+    var tempInfinibag: HashMap<String, Item> = hashMapOf()
 
     data class BlueprintInfo(
         val rarity: Rarity,
@@ -78,20 +84,31 @@ object CraftingInstructions : Feature {
                 val craftTime = (craftingDuration[material] ?: 0) * count
                 val efficientFusion = 1.0 - (Galapagos.save.stylePerks[PlayerData.StylePerk.EFFICIENT_FUSION]!! * 0.05)
 
-                Component.literal("Craft ${count}x ")
+                var component = Component.literal("Craft ${count}x ")
                     .append(material.getStyledComponent())
-                    .append(Component.literal(if (craftTime != 0) " [${formatTimeString(
-                        (craftTime * efficientFusion).toInt())}]" else "")
+
+                if (Config.values::craftingInstructionsShowCraftTime.get()) {
+                    component = component
+                        .append(Component.literal(if (craftTime != 0) " [${formatTimeString((craftTime * efficientFusion).toInt())}]" else "")
                         .withColor(ChatFormatting.GRAY.color!!))
+                }
+
+                component
             }
             InstructionType.PURCHASE -> {
                 val purchases = purchasesForRawMaterial(material, count)
 
-                Component.literal("Buy ${count}x ")
+                var component = Component.literal("Buy ${count}x ")
                     .append(material.getStyledComponent())
-                    .append(Component.literal(" [${purchases}x purchase${if (purchases == 1) "" else "s"}, ${gloopForRawMaterial(material, count)} ")
-                            .withColor(ChatFormatting.GRAY.color!!))
-                    .append(mccTextureComponent("island_items/infinibag/material/gloop"))
+                    .append(Component.literal(" [${purchases}x purchase${if (purchases == 1) "" else "s"}").withColor(ChatFormatting.GRAY.color!!))
+
+                if (Config.values::craftingInstructionsShowGloop.get()) {
+                    component = component
+                        .append(Component.literal(", ${gloopForRawMaterial(material, count)}").withColor(ChatFormatting.GRAY.color!!))
+                        .append(mccTextureComponent("island_items/infinibag/material/gloop"))
+                }
+
+                component
                     .append(Component.literal("]").withColor(ChatFormatting.GRAY.color!!))
             }
             InstructionType.PURCHASE_IE -> Component.literal("Purchase ${count}x ")
@@ -125,6 +142,7 @@ object CraftingInstructions : Feature {
     }
 
     fun slotClick(screen: ContainerScreen, type: ContainerInput, ci: CallbackInfo, button: Int) {
+        if (!enabledProperty.get()) return
         val slot = (screen as HoveredSlotAccessor).`galapagos$hoveredSlot`() ?: return
         if (!slot.item.itemName.string.contains("Blueprint:") && !slot.item.findLore("Trophies: ") && !slot.item.findLore("Style Shard")) return
         if (slot.item.findLore("Trophies: ") && !slot.item.findLore("Material") ) return
@@ -203,14 +221,13 @@ object CraftingInstructions : Feature {
 
         if (requirementsMet == requirements.size) {
             craftableBlueprints.add(item.itemName.string)
-            Galapagos.logger.info("${item.itemName.string} is craftable")
         } else {
             craftableBlueprints.removeIf { it == item.itemName.string }
-            Galapagos.logger.info("${item.itemName.string} isNOT craftable")
         }
     }
 
     fun tooltipAdd(stack: ItemStack, context: net.minecraft.world.item.Item.TooltipContext, flag: TooltipFlag, components: MutableList<Component>) {
+        if (!enabledProperty.get()) return
         if (!stack.itemName.string.contains("Blueprint:") && !components.any { it.string.contains("Trophies: ") } && !components.any { it.string.contains("Style Shard") } ) return
         if (components.any { it.string.contains("Trophies: ") } && !components.any { it.string.contains("Material") } ) return
         if (components.any { it.string.contains("You already own this item.") }) return
