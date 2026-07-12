@@ -81,7 +81,7 @@ object CraftingInstructions : Feature {
 
                 if (Config.values::craftingInstructionsShowGloop.get()) {
                     component = component
-                        .append(Component.literal(", ${gloopForRawMaterial(material, count)}").withColor(ChatFormatting.GRAY.color!!))
+                        .append(Component.literal(", ${gloopForRawMaterial(material, count)} ").withColor(ChatFormatting.GRAY.color!!))
                         .append(mccTextureComponent("island_items/infinibag/material/gloop"))
                 }
 
@@ -208,6 +208,7 @@ object CraftingInstructions : Feature {
         if (!stack.itemName.string.contains("Blueprint:") && !components.any { it.string.contains("Trophies: ") } && !components.any { it.string.contains("Style Shard") } ) return
         if (components.any { it.string.contains("Trophies: ") } && !components.any { it.string.contains("Material") } ) return
         if (components.any { it.string.contains("You already own this item.") }) return
+        if (components.any { it.string.contains(Glyphs.getGlyph("_fonts/icon/tooltips/material.png")) }) return
         if (craftableBlueprints.contains(stack.itemName.string)) return
 
         var index = components.indexOfFirst { it.string.contains("Click to") && !it.string.contains("Right") && !it.string.contains("Middle") }
@@ -345,6 +346,13 @@ object CraftingInstructions : Feature {
         }
 
         repeat(count) { _ ->
+            if ((tempInfinibag[shardFromRarity(Rarity.entries[shard.rarity.ordinal - 1]).label]?.count ?: 0) >= 2) {
+                tempInfinibag[shardFromRarity(Rarity.entries[shard.rarity.ordinal - 1]).label]!!.count -= 2
+                crafts[shard] = crafts[shard]!! + 1
+                return@repeat
+            }
+
+
             lowestShard = shard to (tempInfinibag[shard.label]?.count ?: 0)
 
             Rarity.entries.forEach {
@@ -368,27 +376,39 @@ object CraftingInstructions : Feature {
                 if (tempInfinibag[upperShard.label] == null) tempInfinibag[upperShard.label] =
                     Item(name = upperShard.label, count = 0, isCosmeticToken = false)
 
+                Galapagos.logger.info("${lowerShard}, ${lowerCount}")
+
                 if (lowerCount == 0) return@forEach
 
                 if (lowerCount % 2 == 0) { // even!
-                    tempInfinibag[lowerShard.label]!!.count -= 2
+                    val craftAmount = lowerCount / 2
+                    Galapagos.logger.info("even amount, craft ${craftAmount}")
 
-                    crafts[upperShard] = crafts[upperShard]!! + 1
-                    tempInfinibag[upperShard.label]!!.count++
+                    tempInfinibag[lowerShard.label]!!.count -= craftAmount * 2
 
-                    if (updateAbove) lowerShards[upperShard] = lowerShards[upperShard]!! + 1
+                    crafts[upperShard] = crafts[upperShard]!! + craftAmount
+                    tempInfinibag[upperShard.label]!!.count += craftAmount
+
+                    if (updateAbove) lowerShards[upperShard] = lowerShards[upperShard]!! + craftAmount
                     lowerShards[lowerShard] = 0
 
+                    Galapagos.logger.info("there is now ${lowerShards[upperShard]} ${upperShard}s")
                 } else { // odd!
+                    val craftAmount = (lowerCount + 1) / 2
+                    Galapagos.logger.info("odd amount, craft ${craftAmount}")
+
                     purchases[lowerShard] = purchases[lowerShard]!! + 1
                     gloop += lowerShard.marketPrice!!
-                    tempInfinibag[lowerShard.label]!!.count--
+                    tempInfinibag[lowerShard.label]!!.count++
 
-                    crafts[upperShard] = crafts[upperShard]!! + 1
-                    tempInfinibag[upperShard.label]!!.count++
+                    crafts[upperShard] = crafts[upperShard]!! + craftAmount
+                    tempInfinibag[upperShard.label]!!.count += craftAmount
+                    tempInfinibag[lowerShard.label]!!.count -= craftAmount * 2
 
-                    if (updateAbove) lowerShards[upperShard] = lowerShards[upperShard]!! + 1
+                    if (updateAbove) lowerShards[upperShard] = lowerShards[upperShard]!! + craftAmount
                     lowerShards[lowerShard] = 0
+
+                    Galapagos.logger.info("there is now ${lowerShards[upperShard]} ${upperShard}s")
                 }
             }
 
