@@ -1,6 +1,5 @@
 package xyz.nibblz.galapagos.features
 
-import dev.isxander.yacl3.api.OptionDescription
 import kotlinx.serialization.Serializable
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback
@@ -12,24 +11,21 @@ import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket
 import net.minecraft.network.protocol.game.ServerboundContainerClosePacket
 import net.minecraft.world.inventory.ContainerInput
-import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
-import net.minecraft.world.item.TooltipFlag
 import xyz.nibblz.galapagos.Galapagos
-import xyz.nibblz.galapagos.util.Glyphs
-import xyz.nibblz.galapagos.util.PlayerData
 import xyz.nibblz.galapagos.config.Config
 import xyz.nibblz.galapagos.events.ContainerCloseEvent
 import xyz.nibblz.galapagos.events.ContainerOpenEvent
 import xyz.nibblz.galapagos.events.SlotClickEvent
 import xyz.nibblz.galapagos.events.SystemChatEvent
-import xyz.nibblz.galapagos.util.findLore
 import xyz.nibblz.galapagos.mixin.accessor.HoveredSlotAccessor
-import xyz.nibblz.galapagos.util.playMccSound
 import xyz.nibblz.galapagos.screens.CoinHistory
-import java.util.EnumMap
-import kotlin.reflect.KMutableProperty
+import xyz.nibblz.galapagos.util.Glyphs
+import xyz.nibblz.galapagos.util.PlayerData
+import xyz.nibblz.galapagos.util.findLore
+import xyz.nibblz.galapagos.util.playMccSound
+import java.util.*
 import kotlin.reflect.KMutableProperty0
 import kotlin.time.Clock
 
@@ -56,11 +52,11 @@ object CoinTracking : Feature {
 
 
     override fun init() {
-        ContainerOpenEvent.EVENT.register { packet -> containerOpen(packet) }
         ContainerCloseEvent.EVENT.register { containerClose() }
         SlotClickEvent.EVENT.register { screen, input, _, button -> slotClick(screen, input, button) }
         SystemChatEvent.EVENT.register { packet -> systemChat(packet) }
-        ItemTooltipCallback.EVENT.register { stack, context, flag, components -> tooltipAdd(stack, context, flag, components) }
+        ContainerOpenEvent.EVENT.register { packet -> containerOpen(packet) }
+        ItemTooltipCallback.EVENT.register { stack, _, _, components -> tooltipAdd(stack, components) }
         ClientTickEvents.END_CLIENT_TICK.register {
             if (!openCoinHistory) return@register
             openCoinHistory = false
@@ -221,22 +217,13 @@ object CoinTracking : Feature {
 
             price = 0
 
-            outgoingSlots.forEach {
+            (outgoingSlots + incomingSlots).forEach {
                 val item = screen.menu.slots[it].item
                 if (item.itemName.string != "Coins") return@forEach
                 val coinString = item.findLore(regex)?.get("coins")?.value ?: return@forEach
                 val coins = coinString.replace(",", "").toIntOrNull() ?: return@forEach
 
-                price -= coins
-            }
-
-            incomingSlots.forEach {
-                val item = screen.menu.slots[it].item
-                if (item.itemName.string != "Coins") return@forEach
-                val coinString = item.findLore(regex)?.get("coins")?.value ?: return@forEach
-                val coins = coinString.replace(",", "").toIntOrNull() ?: return@forEach
-
-                price += coins
+                if (outgoingSlots.contains(it)) price -= coins else price += coins
             }
 
             return
@@ -285,7 +272,7 @@ object CoinTracking : Feature {
         }
     }
 
-    fun tooltipAdd(stack: ItemStack, context: Item.TooltipContext, flag: TooltipFlag, components: MutableList<Component>) {
+    fun tooltipAdd(stack: ItemStack, components: MutableList<Component>) {
         if (!enabledProperty.get()) return
         val screen = Minecraft.getInstance().screen ?: return
         if (!screen.title.string.contains("INFINIBAG")) return

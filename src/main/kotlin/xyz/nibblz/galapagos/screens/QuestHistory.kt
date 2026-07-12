@@ -4,12 +4,7 @@ import io.wispforest.owo.ui.base.BaseOwoScreen
 import io.wispforest.owo.ui.component.UIComponents
 import io.wispforest.owo.ui.container.FlowLayout
 import io.wispforest.owo.ui.container.UIContainers
-import io.wispforest.owo.ui.core.HorizontalAlignment
-import io.wispforest.owo.ui.core.Insets
-import io.wispforest.owo.ui.core.OwoUIAdapter
-import io.wispforest.owo.ui.core.Sizing
-import io.wispforest.owo.ui.core.Surface
-import io.wispforest.owo.ui.core.VerticalAlignment
+import io.wispforest.owo.ui.core.*
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
@@ -20,6 +15,7 @@ import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.Identifier
 import xyz.nibblz.galapagos.Galapagos
+import xyz.nibblz.galapagos.config.Config
 import kotlin.time.Instant
 
 class QuestHistory : BaseOwoScreen<FlowLayout>() {
@@ -52,7 +48,7 @@ class QuestHistory : BaseOwoScreen<FlowLayout>() {
                 )
             )
 
-            val time = if (true) { // todo make this a config thingy later
+            val time = if (!Config.values::twentyFourHourTime.get()) {
                 date.time.format(LocalTime.Format {
                     amPmHour(Padding.NONE)
                     char(':')

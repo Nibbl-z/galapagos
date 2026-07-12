@@ -66,7 +66,7 @@ enum class Material(val label: String, val type: MaterialType, val rarity: Rarit
     OPAL_STYLE_SHARD("Opal Style Shard", MaterialType.STYLE_SHARD, Rarity.MYTHIC, "style_shard_opal");
 
     fun getSpriteLocation(): String {
-        return "island_items/infinibag/${if (this == Material.MATERIAL_SINGULARITY) "component" else "material"}/${this.spriteName}"
+        return "island_items/infinibag/${if (this == MATERIAL_SINGULARITY) "component" else "material"}/${this.spriteName}"
     }
 
     fun getStyledComponent(): MutableComponent {

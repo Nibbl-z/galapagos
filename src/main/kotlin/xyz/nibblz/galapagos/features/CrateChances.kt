@@ -1,6 +1,5 @@
 package xyz.nibblz.galapagos.features
 
-import dev.isxander.yacl3.api.OptionDescription
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback
 import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
@@ -8,37 +7,15 @@ import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.screens.inventory.ContainerScreen
 import net.minecraft.client.renderer.RenderPipelines
 import net.minecraft.network.chat.Component
-import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
 import net.minecraft.resources.Identifier
-import net.minecraft.world.inventory.ContainerInput
 import net.minecraft.world.inventory.Slot
-import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
-import net.minecraft.world.item.TooltipFlag
 import xyz.nibblz.galapagos.Galapagos
-import xyz.nibblz.galapagos.util.Glyphs
 import xyz.nibblz.galapagos.config.Config
-import xyz.nibblz.galapagos.data.BlueprintLootPreview
-import xyz.nibblz.galapagos.data.ConstantIslandData
-import xyz.nibblz.galapagos.data.CosmeticTag
-import xyz.nibblz.galapagos.data.LootPreviewCosmetic
-import xyz.nibblz.galapagos.data.arcaneCoresPerRollTooltip
-import xyz.nibblz.galapagos.data.bonusCoresPerScavenge
-import xyz.nibblz.galapagos.data.getRep
-import xyz.nibblz.galapagos.data.mythicCoresPerRollTooltip
-import xyz.nibblz.galapagos.data.newCosmeticTooltip
-import xyz.nibblz.galapagos.data.newRepTooltip
-import xyz.nibblz.galapagos.data.render
-import xyz.nibblz.galapagos.data.repPerDonation
-import xyz.nibblz.galapagos.data.trophiesPerRollTooltip
-import xyz.nibblz.galapagos.data.update
-import xyz.nibblz.galapagos.events.ContainerCloseEvent
-import xyz.nibblz.galapagos.events.ContainerOpenEvent
-import xyz.nibblz.galapagos.events.ContainerRenderEvent
-import xyz.nibblz.galapagos.events.SlotClickEvent
-import xyz.nibblz.galapagos.events.SlotRenderEvent
+import xyz.nibblz.galapagos.data.*
+import xyz.nibblz.galapagos.events.*
 import xyz.nibblz.galapagos.mixin.accessor.HoveredSlotAccessor
-import kotlin.reflect.KMutableProperty
+import xyz.nibblz.galapagos.util.Glyphs
 import kotlin.reflect.KMutableProperty0
 
 object CrateChances: Feature {
@@ -67,15 +44,15 @@ object CrateChances: Feature {
     var bestExclusiveCosmeticChance: Pair<String, Double> = Pair("", 0.0)
 
     override fun init() {
-        ContainerRenderEvent.EVENT.register { screen, graphics, x, y, w, h -> containerRender(screen, graphics, x, y, w, h) }
+        ContainerRenderEvent.EVENT.register { screen, graphics, x, y, w, _ -> containerRender(screen, graphics, x, y, w) }
         ContainerCloseEvent.EVENT.register { containerClose() }
-        ContainerOpenEvent.EVENT.register { packet -> containerOpen(packet) }
-        SlotClickEvent.EVENT.register { screen, input, _, _ -> slotClick(screen, input) }
-        ItemTooltipCallback.EVENT.register { stack, context, flag, components -> tooltipAdd(stack, context, flag, components) }
+        ContainerOpenEvent.EVENT.register { containerOpen() }
+        SlotClickEvent.EVENT.register { screen, _, _, _ -> slotClick(screen) }
+        ItemTooltipCallback.EVENT.register { stack, _, _, components -> tooltipAdd(stack, components) }
         SlotRenderEvent.EVENT.register { extractor, slot -> slotRender(extractor, slot) }
     }
 
-    fun containerOpen(packet: ClientboundContainerSetContentPacket) {
+    fun containerOpen() {
         val screen = Minecraft.getInstance().screen ?: return
         if (!screen.title.string.contains("CRATE EMPORIUM", false)) return
 
@@ -131,14 +108,14 @@ object CrateChances: Feature {
         currentCrate = null
     }
 
-    fun slotClick(screen: ContainerScreen, input: ContainerInput) {
+    fun slotClick(screen: ContainerScreen) {
         if (!screen.title.string.contains("CRATE EMPORIUM", false)) return
         val slot = (screen as HoveredSlotAccessor).`galapagos$hoveredSlot`() ?: return
 
         currentCrate = slot.item.itemName.string
     }
 
-    fun tooltipAdd(stack: ItemStack, context: Item.TooltipContext, flag: TooltipFlag, components: MutableList<Component>) {
+    fun tooltipAdd(stack: ItemStack, components: MutableList<Component>) {
         if (!enabledProperty.get()) return
         val screen = Minecraft.getInstance().screen ?: return
         if (!screen.title.string.contains("CRATE EMPORIUM", false)) return
@@ -202,7 +179,7 @@ object CrateChances: Feature {
             .append(Component.literal(" ${message.first}").withColor(message.third)))
     }
 
-    fun containerRender(screen: ContainerScreen, graphics: GuiGraphicsExtractor, x: Int, y: Int, w: Int, h: Int) {
+    fun containerRender(screen: ContainerScreen, graphics: GuiGraphicsExtractor, x: Int, y: Int, w: Int) {
         if (!enabledProperty.get()) return
         if (!screen.title.string.contains("LOOT PREVIEW", true)) return
         if (currentCrate == null) return

@@ -1,8 +1,5 @@
 package xyz.nibblz.galapagos.util
 
-import net.minecraft.client.Minecraft
-import net.minecraft.world.item.ItemStack
-import net.minecraft.world.item.TooltipFlag
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.arguments.ArgumentType
 import com.mojang.brigadier.arguments.StringArgumentType
@@ -13,6 +10,7 @@ import com.mojang.brigadier.suggestion.Suggestions
 import com.mojang.brigadier.suggestion.SuggestionsBuilder
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
+import net.minecraft.client.Minecraft
 import net.minecraft.client.resources.sounds.SimpleSoundInstance
 import net.minecraft.client.resources.sounds.SoundInstance
 import net.minecraft.network.chat.Component
@@ -20,6 +18,8 @@ import net.minecraft.network.chat.MutableComponent
 import net.minecraft.network.chat.contents.objects.AtlasSprite
 import net.minecraft.resources.Identifier
 import net.minecraft.sounds.SoundSource
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.TooltipFlag
 import xyz.nibblz.galapagos.data.CosmeticTag
 import xyz.nibblz.galapagos.data.Item
 import java.util.concurrent.CompletableFuture
@@ -100,7 +100,7 @@ class Command(
         fun <T : Any> argument(
             name: String, type: ArgumentType<T>, block: ArgumentBuilder<T>.() -> Unit
         ) {
-            val argNode = ClientCommands.argument<T>(name, type)
+            val argNode = ClientCommands.argument(name, type)
             ArgumentBuilder(argNode).block()
             node.then(argNode)
         }
@@ -140,7 +140,7 @@ class Command(
         fun <U : Any> argument(
             name: String, type: ArgumentType<U>, block: ArgumentBuilder<U>.() -> Unit
         ) {
-            val argNode = ClientCommands.argument<U>(name, type)
+            val argNode = ClientCommands.argument(name, type)
             ArgumentBuilder(argNode).block()
             node.then(argNode)
         }

@@ -6,7 +6,6 @@ import io.wispforest.owo.ui.component.UIComponents
 import io.wispforest.owo.ui.container.FlowLayout
 import io.wispforest.owo.ui.container.UIContainers
 import io.wispforest.owo.ui.core.*
-import io.wispforest.owo.ui.core.Surface
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
@@ -17,10 +16,11 @@ import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.Identifier
 import xyz.nibblz.galapagos.Galapagos
-import xyz.nibblz.galapagos.util.Glyphs
+import xyz.nibblz.galapagos.config.Config
 import xyz.nibblz.galapagos.features.CoinTracking
 import xyz.nibblz.galapagos.features.CoinTracking.getIcon
 import xyz.nibblz.galapagos.features.CoinTracking.getSource
+import xyz.nibblz.galapagos.util.Glyphs
 import kotlin.time.Instant
 
 class CoinHistory : BaseOwoScreen<FlowLayout>() {
@@ -84,7 +84,7 @@ class CoinHistory : BaseOwoScreen<FlowLayout>() {
                 )
             )
 
-            val time = if (true) { // todo make this a config thingy later
+            val time = if (!Config.values::twentyFourHourTime.get()) {
                 date.time.format(LocalTime.Format {
                     amPmHour(Padding.NONE)
                     char(':')

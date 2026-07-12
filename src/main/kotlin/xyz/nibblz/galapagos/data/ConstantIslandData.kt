@@ -1,9 +1,7 @@
 package xyz.nibblz.galapagos.data
 
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import xyz.nibblz.galapagos.Galapagos
 
 object ConstantIslandData {
     @Serializable

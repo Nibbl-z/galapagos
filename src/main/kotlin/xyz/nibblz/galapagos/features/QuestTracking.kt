@@ -1,6 +1,5 @@
 package xyz.nibblz.galapagos.features
 
-import dev.isxander.yacl3.api.OptionDescription
 import kotlinx.serialization.Serializable
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback
@@ -11,23 +10,19 @@ import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket
 import net.minecraft.network.protocol.game.ServerboundContainerClosePacket
-import net.minecraft.world.inventory.ContainerInput
-import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
-import net.minecraft.world.item.TooltipFlag
 import xyz.nibblz.galapagos.Galapagos
-import xyz.nibblz.galapagos.util.Glyphs
 import xyz.nibblz.galapagos.config.Config
 import xyz.nibblz.galapagos.data.Rarity
 import xyz.nibblz.galapagos.events.ContainerCloseEvent
 import xyz.nibblz.galapagos.events.ContainerOpenEvent
 import xyz.nibblz.galapagos.events.SlotClickEvent
 import xyz.nibblz.galapagos.events.SystemChatEvent
-import xyz.nibblz.galapagos.util.findLore
 import xyz.nibblz.galapagos.mixin.accessor.HoveredSlotAccessor
-import xyz.nibblz.galapagos.util.playMccSound
 import xyz.nibblz.galapagos.screens.QuestHistory
-import kotlin.reflect.KMutableProperty
+import xyz.nibblz.galapagos.util.Glyphs
+import xyz.nibblz.galapagos.util.findLore
+import xyz.nibblz.galapagos.util.playMccSound
 import kotlin.reflect.KMutableProperty0
 import kotlin.time.Clock
 
@@ -46,9 +41,9 @@ object QuestTracking : Feature {
     override fun init() {
         ContainerOpenEvent.EVENT.register { packet -> containerOpen(packet) }
         ContainerCloseEvent.EVENT.register { containerClose() }
-        SlotClickEvent.EVENT.register { screen, input, _, button -> slotClick(screen, input, button) }
+        SlotClickEvent.EVENT.register { screen, _, _, button -> slotClick(screen, button) }
         SystemChatEvent.EVENT.register { packet -> systemChat(packet) }
-        ItemTooltipCallback.EVENT.register { stack, context, flag, components -> tooltipAdd(stack, context, flag, components) }
+        ItemTooltipCallback.EVENT.register { stack, _, _, components -> tooltipAdd(stack, components) }
         ClientTickEvents.END_CLIENT_TICK.register {
             if (!openQuestHistory) return@register
             openQuestHistory = false
@@ -149,7 +144,7 @@ object QuestTracking : Feature {
         return QuestingRewardSource.DAILY_QUEST // fallback, i guess
     }
 
-    fun slotClick(screen: ContainerScreen, type: ContainerInput, button: Int) {
+    fun slotClick(screen: ContainerScreen, button: Int) {
         val slot = (screen as HoveredSlotAccessor).`galapagos$hoveredSlot`() ?: return
 
         if (screen.title.string.contains("JOURNAL") || screen.title.string.contains("MAILBOX")) {
@@ -194,7 +189,7 @@ object QuestTracking : Feature {
         }
     }
 
-    fun tooltipAdd(stack: ItemStack, context: Item.TooltipContext, flag: TooltipFlag, components: MutableList<Component>) {
+    fun tooltipAdd(stack: ItemStack, components: MutableList<Component>) {
         if (!enabledProperty.get()) return
         val screen = Minecraft.getInstance().screen ?: return
         if (!screen.title.string.contains("JOURNAL") && !screen.title.string.contains("MAILBOX")) return

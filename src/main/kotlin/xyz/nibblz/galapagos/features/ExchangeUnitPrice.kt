@@ -1,6 +1,5 @@
 package xyz.nibblz.galapagos.features
 
-import dev.isxander.yacl3.api.OptionDescription
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback
 import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
@@ -9,20 +8,16 @@ import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.Style
 import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
-import net.minecraft.world.inventory.ContainerInput
-import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
-import net.minecraft.world.item.TooltipFlag
 import xyz.nibblz.galapagos.Galapagos
-import xyz.nibblz.galapagos.util.Glyphs
 import xyz.nibblz.galapagos.config.Config
 import xyz.nibblz.galapagos.data.Rarity
 import xyz.nibblz.galapagos.events.ContainerOpenEvent
 import xyz.nibblz.galapagos.events.ContainerSetSlotEvent
 import xyz.nibblz.galapagos.events.SlotClickEvent
-import xyz.nibblz.galapagos.util.findLore
 import xyz.nibblz.galapagos.mixin.accessor.HoveredSlotAccessor
-import kotlin.reflect.KMutableProperty
+import xyz.nibblz.galapagos.util.Glyphs
+import xyz.nibblz.galapagos.util.findLore
 import kotlin.reflect.KMutableProperty0
 
 object ExchangeUnitPrice : Feature {
@@ -35,10 +30,10 @@ object ExchangeUnitPrice : Feature {
     override val image: Config.ConfigImage = Config.ConfigImage("exchange_unit.png", 425, 906)
 
     override fun init() {
-        ItemTooltipCallback.EVENT.register { stack, context, flag, components -> tooltipAdd(stack, context, flag, components) }
+        ItemTooltipCallback.EVENT.register { stack, _, _, components -> tooltipAdd(stack, components) }
         ContainerOpenEvent.EVENT.register { packet -> containerOpen(packet) }
         ContainerSetSlotEvent.EVENT.register { packet -> containerSetSlot(packet) }
-        SlotClickEvent.EVENT.register { screen, input, _, _ -> slotClick(screen, input) }
+        SlotClickEvent.EVENT.register { screen, _, _, _ -> slotClick(screen) }
     }
 
     val perUnitPrices: MutableMap<ItemStack, Int> = mutableMapOf()
@@ -131,7 +126,7 @@ object ExchangeUnitPrice : Feature {
         wispEquivalent.clear()
     }
 
-    fun slotClick(screen: ContainerScreen, type: ContainerInput) {
+    fun slotClick(screen: ContainerScreen) {
         if (!screen.title.string.contains("ISLAND EXCHANGE", false)) return
         val slot = (screen as HoveredSlotAccessor).`galapagos$hoveredSlot`() ?: return
 
@@ -144,7 +139,7 @@ object ExchangeUnitPrice : Feature {
         if (slot.item.itemName.string.contains("Previous Page")) clear()
     }
 
-    fun tooltipAdd(item: ItemStack, context: Item.TooltipContext, flag: TooltipFlag, list: MutableList<Component>) {
+    fun tooltipAdd(item: ItemStack, list: MutableList<Component>) {
         if (!enabledProperty.get()) return
         val screen = Minecraft.getInstance().screen ?: return
         if (!screen.title.string.contains("ISLAND EXCHANGE", false)) return

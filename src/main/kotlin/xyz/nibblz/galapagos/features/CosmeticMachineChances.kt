@@ -1,6 +1,5 @@
 package xyz.nibblz.galapagos.features
 
-import dev.isxander.yacl3.api.OptionDescription
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback
 import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
@@ -8,35 +7,17 @@ import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.screens.inventory.ContainerScreen
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.Style
-import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
-import net.minecraft.world.inventory.ContainerInput
-import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
-import net.minecraft.world.item.TooltipFlag
 import xyz.nibblz.galapagos.Galapagos
-import xyz.nibblz.galapagos.util.Glyphs
 import xyz.nibblz.galapagos.config.Config
-import xyz.nibblz.galapagos.data.BlueprintLootPreview
-import xyz.nibblz.galapagos.data.CosmeticTag
-import xyz.nibblz.galapagos.data.LootPreviewCosmetic
-import xyz.nibblz.galapagos.data.Rarity
-import xyz.nibblz.galapagos.data.arcaneCoresPerRollTooltip
-import xyz.nibblz.galapagos.data.bonusCoresPerScavenge
-import xyz.nibblz.galapagos.data.getRep
-import xyz.nibblz.galapagos.data.mythicCoresPerRollTooltip
-import xyz.nibblz.galapagos.data.newCosmeticTooltip
-import xyz.nibblz.galapagos.data.newRepTooltip
-import xyz.nibblz.galapagos.data.render
-import xyz.nibblz.galapagos.data.repPerDonation
-import xyz.nibblz.galapagos.data.trophiesPerRollTooltip
-import xyz.nibblz.galapagos.data.update
+import xyz.nibblz.galapagos.data.*
 import xyz.nibblz.galapagos.events.ContainerCloseEvent
 import xyz.nibblz.galapagos.events.ContainerOpenEvent
 import xyz.nibblz.galapagos.events.ContainerRenderEvent
 import xyz.nibblz.galapagos.events.SlotClickEvent
 import xyz.nibblz.galapagos.mixin.accessor.HoveredSlotAccessor
+import xyz.nibblz.galapagos.util.Glyphs
 import kotlin.math.round
-import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KMutableProperty0
 
 object CosmeticMachineChances : Feature {
@@ -89,11 +70,11 @@ object CosmeticMachineChances : Feature {
     }
 
     override fun init() {
-        ContainerOpenEvent.EVENT.register { packet -> containerOpen(packet) }
+        ContainerOpenEvent.EVENT.register { containerOpen() }
         ContainerCloseEvent.EVENT.register { containerClose() }
-        SlotClickEvent.EVENT.register { screen, input, _, _ -> slotClick(screen, input) }
-        ItemTooltipCallback.EVENT.register { stack, context, flag, components -> tooltipAdd(stack, context, flag, components) }
-        ContainerRenderEvent.EVENT.register { screen, graphics, x, y, w, h -> containerRender(screen, graphics, x, y, w, h) }
+        SlotClickEvent.EVENT.register { screen, _, _, _ -> slotClick(screen) }
+        ItemTooltipCallback.EVENT.register { stack, _, _, components -> tooltipAdd(stack, components) }
+        ContainerRenderEvent.EVENT.register { screen, graphics, x, y, w, _ -> containerRender(screen, graphics, x, y, w) }
     }
 
     var inCosmeticMachine = false
@@ -105,14 +86,14 @@ object CosmeticMachineChances : Feature {
     var basicData = BlueprintLootPreview()
     var ultimateData = BlueprintLootPreview()
 
-    fun slotClick(screen: ContainerScreen, type: ContainerInput) {
+    fun slotClick(screen: ContainerScreen) {
         val slot = (screen as HoveredSlotAccessor).`galapagos$hoveredSlot`() ?: return
 
         if (slot.item.itemName.string.contains("Basic Pull")) isUltimate = false
         if (slot.item.itemName.string.contains("Ultimate Pull")) isUltimate = true
     }
 
-    fun containerOpen(packet: ClientboundContainerSetContentPacket) { updateItems() }
+    fun containerOpen() { updateItems() }
 
     fun updateItems() {
         val screen = Minecraft.getInstance().screen ?: return
@@ -205,7 +186,7 @@ object CosmeticMachineChances : Feature {
                 .append(Component.literal("]").withColor(ChatFormatting.DARK_GRAY.color!!)))
     }
 
-    fun tooltipAdd(item: ItemStack, context: Item.TooltipContext, flag: TooltipFlag, list: MutableList<Component>) {
+    fun tooltipAdd(item: ItemStack, list: MutableList<Component>) {
         if (!enabledProperty.get()) return
         if (!inCosmeticMachine) return
 
@@ -305,7 +286,7 @@ object CosmeticMachineChances : Feature {
         }
     }
 
-    fun containerRender(screen: ContainerScreen, graphics: GuiGraphicsExtractor, x: Int, y: Int, w: Int, h: Int) {
+    fun containerRender(screen: ContainerScreen, graphics: GuiGraphicsExtractor, x: Int, y: Int, w: Int) {
         if (!screen.title.string.contains("LOOT PREVIEW", true)) return
         if (!inCosmeticMachine) return
         if (!enabledProperty.get()) return

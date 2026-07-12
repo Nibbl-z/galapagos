@@ -11,13 +11,7 @@ import net.minecraft.client.gui.layouts.LinearLayout
 import net.minecraft.network.chat.Component
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
-import xyz.nibblz.galapagos.util.Glyphs
-import xyz.nibblz.galapagos.util.PlayerData
-import xyz.nibblz.galapagos.data.CosmeticTag
-import xyz.nibblz.galapagos.data.Item
-import xyz.nibblz.galapagos.data.Material
-import xyz.nibblz.galapagos.data.craftingDuration
-import xyz.nibblz.galapagos.data.materialFromName
+import xyz.nibblz.galapagos.data.*
 import xyz.nibblz.galapagos.features.CraftingInstructions
 import xyz.nibblz.galapagos.features.CraftingInstructions.Instruction
 import xyz.nibblz.galapagos.features.CraftingInstructions.InstructionType
@@ -27,6 +21,8 @@ import xyz.nibblz.galapagos.features.CraftingInstructions.calculateSingularityIn
 import xyz.nibblz.galapagos.features.CraftingInstructions.getComponent
 import xyz.nibblz.galapagos.features.CraftingInstructions.gloopForRawMaterial
 import xyz.nibblz.galapagos.features.CraftingInstructions.tempInfinibag
+import xyz.nibblz.galapagos.util.Glyphs
+import xyz.nibblz.galapagos.util.PlayerData
 import xyz.nibblz.galapagos.util.formatTimeString
 import xyz.nibblz.galapagos.util.mccTextureComponent
 

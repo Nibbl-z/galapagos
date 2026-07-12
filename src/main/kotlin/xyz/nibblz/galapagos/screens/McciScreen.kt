@@ -4,12 +4,7 @@ import io.wispforest.owo.ui.component.UIComponents
 import io.wispforest.owo.ui.container.FlowLayout
 import io.wispforest.owo.ui.container.ScrollContainer
 import io.wispforest.owo.ui.container.UIContainers
-import io.wispforest.owo.ui.core.Color
-import io.wispforest.owo.ui.core.Insets
-import io.wispforest.owo.ui.core.OwoUIGraphics
-import io.wispforest.owo.ui.core.ParentUIComponent
-import io.wispforest.owo.ui.core.Positioning
-import io.wispforest.owo.ui.core.Sizing
+import io.wispforest.owo.ui.core.*
 import io.wispforest.owo.ui.util.NinePatchTexture
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.FontDescription

@@ -1,29 +1,21 @@
 package xyz.nibblz.galapagos.features
 
-import dev.isxander.yacl3.api.OptionDescription
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.screens.inventory.ContainerScreen
 import net.minecraft.network.chat.Component
-import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
 import net.minecraft.util.ARGB
-import net.minecraft.world.inventory.ContainerInput
 import xyz.nibblz.galapagos.Galapagos
-import xyz.nibblz.galapagos.util.Glyphs
 import xyz.nibblz.galapagos.config.Config
-import xyz.nibblz.galapagos.data.CosmeticCore
-import xyz.nibblz.galapagos.data.bonusCoresPerScavenge
-import xyz.nibblz.galapagos.data.coreConversions
-import xyz.nibblz.galapagos.data.coresPerScavenge
-import xyz.nibblz.galapagos.data.repPerDonation
+import xyz.nibblz.galapagos.data.*
 import xyz.nibblz.galapagos.events.ContainerCloseEvent
 import xyz.nibblz.galapagos.events.ContainerOpenEvent
 import xyz.nibblz.galapagos.events.ContainerRenderEvent
 import xyz.nibblz.galapagos.events.SlotClickEvent
 import xyz.nibblz.galapagos.mixin.accessor.HoveredSlotAccessor
-import java.util.EnumMap
+import xyz.nibblz.galapagos.util.Glyphs
+import java.util.*
 import kotlin.math.round
-import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KMutableProperty0
 
 object BlueprintAssemblerInfo : Feature {
@@ -49,9 +41,9 @@ object BlueprintAssemblerInfo : Feature {
 
 
     override fun init() {
-        ContainerOpenEvent.EVENT.register { packet -> containerOpen(packet) }
-        ContainerRenderEvent.EVENT.register { screen, graphics, x, y, w, h -> containerRender(screen, graphics, x, y, w, h) }
-        SlotClickEvent.EVENT.register { screen, input, _, _ -> slotClick(screen, input) }
+        ContainerOpenEvent.EVENT.register { containerOpen() }
+        ContainerRenderEvent.EVENT.register { screen, graphics, x, y, w, _ -> containerRender(screen, graphics, x, y, w) }
+        SlotClickEvent.EVENT.register { screen, _, _, _ -> slotClick(screen) }
         ContainerCloseEvent.EVENT.register { containerClose() }
     }
 
@@ -72,7 +64,7 @@ object BlueprintAssemblerInfo : Feature {
 
     var displayData = false
 
-    fun containerOpen(packet: ClientboundContainerSetContentPacket) {
+    fun containerOpen() {
         val screen = Minecraft.getInstance().screen ?: return
 
         if (!screen.title.string.contains("BLUEPRINT ASSEMBLER") && !screen.title.string.contains("INFINIBAG")) displayData = false
@@ -90,7 +82,7 @@ object BlueprintAssemblerInfo : Feature {
         displayData = false
     }
 
-    fun slotClick(screen: ContainerScreen, input: ContainerInput) {
+    fun slotClick(screen: ContainerScreen) {
         val slot = (screen as HoveredSlotAccessor).`galapagos$hoveredSlot`() ?: return
 
         if (screen.title.string.contains("BLUEPRINT ASSEMBLER") && slot.item.itemName.string == "Select a Blueprint") {
@@ -141,7 +133,7 @@ object BlueprintAssemblerInfo : Feature {
         }
     }
 
-    fun containerRender(screen: ContainerScreen, graphics: GuiGraphicsExtractor, x: Int, y: Int, w: Int, h: Int) {
+    fun containerRender(screen: ContainerScreen, graphics: GuiGraphicsExtractor, x: Int, y: Int, w: Int) {
         if (!enabledProperty.get()) return
         if (!screen.title.string.contains("BLUEPRINT ASSEMBLER") && !displayData) return
 

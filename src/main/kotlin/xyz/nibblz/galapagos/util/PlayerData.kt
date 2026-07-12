@@ -1,5 +1,6 @@
 package xyz.nibblz.galapagos.util
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonArray
@@ -13,24 +14,15 @@ import net.minecraft.world.inventory.ContainerInput
 import net.minecraft.world.inventory.Slot
 import net.minecraft.world.item.ItemStack
 import xyz.nibblz.galapagos.Galapagos
+import xyz.nibblz.galapagos.data.*
 import xyz.nibblz.galapagos.data.Collection
-import xyz.nibblz.galapagos.data.Cosmetic
-import xyz.nibblz.galapagos.data.CosmeticTag
-import xyz.nibblz.galapagos.data.Item
-import xyz.nibblz.galapagos.data.ItemLocation
-import xyz.nibblz.galapagos.data.Rarity
-import xyz.nibblz.galapagos.events.ContainerOpenEvent
-import xyz.nibblz.galapagos.events.ContainerSetSlotEvent
-import xyz.nibblz.galapagos.events.InfinibagUpdateEvent
-import xyz.nibblz.galapagos.events.SlotClickEvent
-import xyz.nibblz.galapagos.events.SystemChatEvent
+import xyz.nibblz.galapagos.events.*
 import xyz.nibblz.galapagos.features.CraftingInstructions.fetchCraftingMaterials
 import xyz.nibblz.galapagos.mixin.accessor.HoveredSlotAccessor
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
-import kotlin.text.get
 
 
 object PlayerData {
@@ -59,7 +51,7 @@ object PlayerData {
     @Serializable
     data class APIItemAsset(
         val name: String,
-        val __typename: String? = null
+        @SerialName("__typename") val typename: String? = null
     )
 
     //// STYLE PERKS
@@ -175,7 +167,7 @@ object PlayerData {
                 val item = Item(
                     name = it.asset.name,
                     count = it.amount,
-                    isCosmeticToken = it.asset.__typename == "CosmeticToken"
+                    isCosmeticToken = it.asset.typename == "CosmeticToken"
                 )
 
                 if (location == "infinibag") Galapagos.save.infinibag[item.name] = item
@@ -341,41 +333,41 @@ object PlayerData {
         val item = slot.item
 
         if (screen.title.string.contains("INFINIBAG")) {
-            handleBlueprintAssemblerInfinibag(slot, item, input)
-            handleVault(slot, item, input)
+            handleBlueprintAssemblerInfinibag(item)
+            handleVault(item, input)
         }
 
         if (screen.title.string.contains("ASSEMBLE THIS BLUEPRINT?")) {
-            handleBlueprintAssembly(slot, item, input)
+            handleBlueprintAssembly(slot)
         }
 
         if (screen.title.string.contains("INFINIVAULT")) {
-            handleVault(slot, item, input)
+            handleVault(item, input)
         }
 
         if (screen.title.string.contains("BLUEPRINT ASSEMBLER") ) {
-            handleMaterialGloopTimeskip(slot, item, input)
+            handleMaterialGloopTimeskip(item, input)
         }
 
         if (screen.title.string.contains("PURCHASE THIS ITEM?")) {
-            handleMaterialGloopSpending(slot, item, input)
+            handleMaterialGloopSpending(item)
         }
 
         if (screen.title.string.contains("FUSION FORGE")) {
-            handleMaterialGloopTimeskip(slot, item, input)
-            handleFusionForgeCraft(slot, item, input)
-            handleFusionForgeClaim(slot, item, input)
+            handleMaterialGloopTimeskip(item, input)
+            handleFusionForgeCraft(item, input)
+            handleFusionForgeClaim(item, input)
         }
 
         if (screen.title.string.contains("CANCEL FORGING?")) {
-            handleFusionForgeCancel(slot, item, input)
+            handleFusionForgeCancel(slot)
         }
 
         // also handles rep gain from scavenging
         if (screen.title.string.contains("SCAVENGING WILL PERMANENTLY")) {
-            handleScavengeConfirm(slot, item, input)
+            handleScavengeConfirm(slot)
         } else if (screen.title.string.contains("SCAVENGING")) {
-            handleScavengeMenu(slot, item, input)
+            handleScavengeMenu(item, input)
         }
 
         InfinibagUpdateEvent.EVENT.invoker().invoke()
@@ -412,7 +404,7 @@ object PlayerData {
         InfinibagUpdateEvent.EVENT.invoker().invoke()
     }
 
-    fun handleBlueprintAssemblerInfinibag(slot: Slot, item: ItemStack, input: ContainerInput) {
+    fun handleBlueprintAssemblerInfinibag(item: ItemStack) {
         if (!item.findLore("Click to Assemble")) return
         if (item.findLore("(Missing materials)")) return
 
@@ -420,6 +412,8 @@ object PlayerData {
         if (materials.isEmpty()) return
 
         // TODO: i have no idea if shift-click to assemble 5x blueprints is a real thing. confirm later!!!
+        // ok I KNOW it exists but i dont know what the tooltip says so i cant implement it rn
+        // and im getting SICK OF IT!!!!!!!!!
 
         itemsInCraftedBlueprint.clear()
         craftedBlueprint = item.itemName.string
@@ -433,7 +427,7 @@ object PlayerData {
         }
     }
 
-    fun handleBlueprintAssembly(slot: Slot, item: ItemStack, input: ContainerInput) {
+    fun handleBlueprintAssembly(slot: Slot) {
         if (slot.index !in 46..48) return
         if (craftedBlueprint == null) return
         if (itemsInCraftedBlueprint.isEmpty()) return
@@ -448,7 +442,7 @@ object PlayerData {
         craftedBlueprint = null
     }
 
-    fun handleVault(slot: Slot, item: ItemStack, input: ContainerInput) {
+    fun handleVault(item: ItemStack, input: ContainerInput) {
         val bag = item.findLore("Left-Click to Vault")
         val vault = item.findLore("Left-Click to Withdraw")
 
@@ -467,7 +461,7 @@ object PlayerData {
         moveItem(item.itemName.string, amount, if (vault) ItemLocation.INFINIBAG else ItemLocation.INFINIVAULT)
     }
 
-    fun handleMaterialGloopTimeskip(slot: Slot, item: ItemStack, input: ContainerInput) {
+    fun handleMaterialGloopTimeskip(item: ItemStack, input: ContainerInput) {
         if (item.itemName.string != "Material Gloop") return
         if (item.findLore("You do not have any active")) return
 
@@ -475,14 +469,14 @@ object PlayerData {
         else decrementItem("Material Gloop", 1)
     }
 
-    fun handleMaterialGloopSpending(slot: Slot, item: ItemStack, input: ContainerInput) {
+    fun handleMaterialGloopSpending(item: ItemStack) {
         val regex = Regex("Cost: [\\d,]+/(?<cost>[\\d,]+) \\[Material Gloop]")
         val cost = item.findLore(regex)?.get("cost")?.value?.toIntOrNull() ?: return
 
         decrementItem("Material Gloop", cost)
     }
 
-    fun handleFusionForgeCraft(slot: Slot, item: ItemStack, input: ContainerInput) {
+    fun handleFusionForgeCraft(item: ItemStack, input: ContainerInput) {
         if (!item.findLore("Click to Forge")) return
         if (item.findLore("Click to Forge (Missing materials)")) return
         if (input == ContainerInput.QUICK_MOVE && item.findLore("(Missing materials)")) return
@@ -501,7 +495,7 @@ object PlayerData {
         }
     }
 
-    fun handleFusionForgeClaim(slot: Slot, item: ItemStack, input: ContainerInput) {
+    fun handleFusionForgeClaim(item: ItemStack, input: ContainerInput) {
         if (item.findLore("Click to Claim Item")) {
             val index = Galapagos.save.fusionForge.indexOfFirst {
                 it.name == item.itemName.string && it.count == item.count
@@ -523,14 +517,14 @@ object PlayerData {
         }
     }
 
-    fun handleFusionForgeCancel(slot: Slot, item: ItemStack, input: ContainerInput) {
+    fun handleFusionForgeCancel(slot: Slot) {
         if (slot.index !in 46..48) return
         if (cancellingForging == null) return
 
         Galapagos.save.fusionForge.removeAt(cancellingForging!!)
     }
 
-    fun handleScavengeConfirm(slot: Slot, item: ItemStack, input: ContainerInput) {
+    fun handleScavengeConfirm(slot: Slot) {
         if (slot.index !in 46..48) return
 
         itemsInScavenging.forEach {
@@ -540,7 +534,7 @@ object PlayerData {
         itemsInScavenging.clear()
     }
 
-    fun handleScavengeMenu(slot: Slot, item: ItemStack, input: ContainerInput) {
+    fun handleScavengeMenu(item: ItemStack, input: ContainerInput) {
         if (item.itemName.string == "Cosmetic Bulk Scavenge") {
             if (item.findLore("Grand Champ")) return
 

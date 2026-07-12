@@ -2,7 +2,6 @@ package xyz.nibblz.galapagos.features
 
 import com.noxcrew.sheeplib.DialogContainer
 import com.noxcrew.sheeplib.dialog.Dialog
-import dev.isxander.yacl3.api.OptionDescription
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback
 import net.minecraft.ChatFormatting
 import net.minecraft.client.gui.screens.inventory.ContainerScreen
@@ -11,38 +10,16 @@ import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
 import net.minecraft.world.inventory.ContainerInput
 import net.minecraft.world.item.ItemStack
-import net.minecraft.world.item.TooltipFlag
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo
 import xyz.nibblz.galapagos.Galapagos
-import xyz.nibblz.galapagos.util.Glyphs
-import xyz.nibblz.galapagos.util.PlayerData
 import xyz.nibblz.galapagos.config.Config
-import xyz.nibblz.galapagos.data.CosmeticTag
-import xyz.nibblz.galapagos.data.Item
-import xyz.nibblz.galapagos.data.Material
-import xyz.nibblz.galapagos.data.Rarity
-import xyz.nibblz.galapagos.data.craftingDuration
-import xyz.nibblz.galapagos.data.getItemRarity
-import xyz.nibblz.galapagos.data.materialFromName
-import xyz.nibblz.galapagos.data.recipes
-import xyz.nibblz.galapagos.data.shardFromRarity
+import xyz.nibblz.galapagos.data.*
 import xyz.nibblz.galapagos.dialogs.CraftingInstructionsDialog
-import xyz.nibblz.galapagos.events.ContainerOpenEvent
-import xyz.nibblz.galapagos.events.ContainerSetSlotEvent
-import xyz.nibblz.galapagos.events.InfinibagUpdateEvent
-import xyz.nibblz.galapagos.events.ScoreboardTitleUpdateEvent
-import xyz.nibblz.galapagos.events.SlotClickEvent
-import xyz.nibblz.galapagos.util.findLore
-import xyz.nibblz.galapagos.util.findLores
-import xyz.nibblz.galapagos.util.formatTimeString
-import xyz.nibblz.galapagos.util.getCosmeticTag
-import xyz.nibblz.galapagos.util.mccTextureComponent
+import xyz.nibblz.galapagos.events.*
 import xyz.nibblz.galapagos.mixin.accessor.HoveredSlotAccessor
-import xyz.nibblz.galapagos.util.playMccSound
+import xyz.nibblz.galapagos.util.*
 import kotlin.math.ceil
-import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KMutableProperty0
-import kotlin.text.get
 
 object CraftingInstructions : Feature {
     override val id: String = "crafting_instructions"
@@ -119,7 +96,7 @@ object CraftingInstructions : Feature {
 
     override fun init() {
         SlotClickEvent.EVENT.register { screen, input, ci, button -> slotClick(screen, input, ci, button) }
-        ItemTooltipCallback.EVENT.register { stack, context, flag, components -> tooltipAdd(stack, context, flag, components) }
+        ItemTooltipCallback.EVENT.register { stack, _, _, components -> tooltipAdd(stack, components) }
         InfinibagUpdateEvent.EVENT.register { infinibagUpdate() }
         ContainerSetSlotEvent.EVENT.register { packet -> setSlot(packet) }
         ContainerOpenEvent.EVENT.register { packet -> openContainer(packet) }
@@ -226,7 +203,7 @@ object CraftingInstructions : Feature {
         }
     }
 
-    fun tooltipAdd(stack: ItemStack, context: net.minecraft.world.item.Item.TooltipContext, flag: TooltipFlag, components: MutableList<Component>) {
+    fun tooltipAdd(stack: ItemStack, components: MutableList<Component>) {
         if (!enabledProperty.get()) return
         if (!stack.itemName.string.contains("Blueprint:") && !components.any { it.string.contains("Trophies: ") } && !components.any { it.string.contains("Style Shard") } ) return
         if (components.any { it.string.contains("Trophies: ") } && !components.any { it.string.contains("Material") } ) return

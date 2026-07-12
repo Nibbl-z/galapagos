@@ -5,18 +5,11 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallba
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents
 import net.minecraft.network.chat.FontDescription
 import net.minecraft.resources.Identifier
-import org.slf4j.LoggerFactory
 import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import xyz.nibblz.galapagos.config.Config
 import xyz.nibblz.galapagos.data.ConstantIslandData
-import xyz.nibblz.galapagos.features.BlueprintAssemblerInfo
-import xyz.nibblz.galapagos.features.CoinTracking
-import xyz.nibblz.galapagos.features.CosmeticMachineChances
-import xyz.nibblz.galapagos.features.CraftingInstructions
-import xyz.nibblz.galapagos.features.CrateChances
-import xyz.nibblz.galapagos.features.ExchangeUnitPrice
-import xyz.nibblz.galapagos.features.Feature
-import xyz.nibblz.galapagos.features.QuestTracking
+import xyz.nibblz.galapagos.features.*
 import xyz.nibblz.galapagos.util.GalapagosCommand
 import xyz.nibblz.galapagos.util.PlayerData
 import xyz.nibblz.galapagos.util.PlayerSave
@@ -60,6 +53,5 @@ object Galapagos : ModInitializer {
 		Save.save()
 	}
 
-	fun id(path: String): Identifier
-		= Identifier.fromNamespaceAndPath(MOD_ID, path)
+	fun id(path: String): Identifier = Identifier.fromNamespaceAndPath(MOD_ID, path)
 }

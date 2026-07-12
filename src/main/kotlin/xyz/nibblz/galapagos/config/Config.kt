@@ -116,6 +116,11 @@ class Config {
     @SerialEntry
     var assemblerInfoArcaneCores: AssemblerCoreInfoType = AssemblerCoreInfoType.CONVERSION
 
+    // Misc
+
+    @SerialEntry
+    var twentyFourHourTime: Boolean = false
+
     companion object {
         val handler: ConfigClassHandler<Config> = ConfigClassHandler.createBuilder(Config::class.java)
             .id(Identifier.fromNamespaceAndPath(Galapagos.MOD_ID, "config"))
@@ -434,6 +439,19 @@ class Config {
                         controller(enumSwitch<AssemblerCoreInfoType> {
                             Component.literal(it.label)
                         })
+                    }
+                }
+
+                groups.register("misc") {
+                    name(Component.literal("Miscellanous"))
+
+                    options.register("24_hour_time") {
+                        name(Component.literal("24-Hour Time"))
+                        description(OptionDescription.of(
+                            Component.literal("Switches timestamps wherever used to be 24-hour time instead of 12-hour time.")
+                        ))
+                        controller(tickBox())
+                        binding(values::twentyFourHourTime, false)
                     }
                 }
             }
