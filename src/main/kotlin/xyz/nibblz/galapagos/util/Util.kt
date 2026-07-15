@@ -238,10 +238,10 @@ fun formatTimeString(seconds: Int): String {
     return "${if (hours > 0) "${hours}h${if (minutes > 0) " " else ""}" else ""}${if (minutes > 0) "${minutes}m" else ""}"
 }
 
-fun playMccSound(path: String) {
+fun playMccSound(path: String, source: SoundSource = SoundSource.PLAYERS) {
     Minecraft.getInstance().soundManager.play(SimpleSoundInstance(
         Identifier.fromNamespaceAndPath("mcc", path),
-        SoundSource.MASTER,
+        source,
         1.0f, 1.0f,
         SoundInstance.createUnseededRandom(),
         false,
