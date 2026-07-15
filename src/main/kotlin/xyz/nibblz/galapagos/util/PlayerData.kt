@@ -5,8 +5,11 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.screens.inventory.ContainerScreen
+import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket
@@ -14,6 +17,7 @@ import net.minecraft.world.inventory.ContainerInput
 import net.minecraft.world.inventory.Slot
 import net.minecraft.world.item.ItemStack
 import xyz.nibblz.galapagos.Galapagos
+import xyz.nibblz.galapagos.config.Config
 import xyz.nibblz.galapagos.data.*
 import xyz.nibblz.galapagos.data.Collection
 import xyz.nibblz.galapagos.events.*
@@ -77,12 +81,7 @@ object PlayerData {
 
     val client: HttpClient? = HttpClient.newHttpClient()
     
-    fun fetchAPI() {
-        if (Galapagos.save.apiKey.isEmpty()) {
-            Galapagos.logger.warn("No API key provided. Some functions of Galapagos will not function!")
-            return
-        }
-
+    fun fetchAPI(): Boolean {
         val graphQL = """
             query fetchPlayerData {
               player(uuid: \"${Minecraft.getInstance().gameProfile.id}\") {
@@ -121,17 +120,63 @@ object PlayerData {
             }
         """.trimIndent().replace("\n", "\\n")
 
-        val request = HttpRequest.newBuilder()
-            .uri(URI.create("https://api.mccisland.net/graphql"))
-            .POST(HttpRequest.BodyPublishers.ofString("{\"query\" : \"$graphQL\"}"))
-            .header("Accept", "application/json")
-            .header("content-type", "application/json")
-            .header("X-API-Key", Galapagos.save.apiKey)
-            .header("User-Agent", "galapagos-mc-mod/${Minecraft.getInstance().gameProfile.id}")
-            .build()
+        val request = if (Config.values::usePersonalApiKey.get()) {
+            HttpRequest.newBuilder()
+                .uri(URI.create("https://api.mccisland.net/graphql"))
+                .POST(HttpRequest.BodyPublishers.ofString("{\"query\" : \"$graphQL\"}"))
+                .header("Accept", "application/json")
+                .header("content-type", "application/json")
+                .header("X-API-Key", Galapagos.save.apiKey)
+                .header("User-Agent", "galapagos-mc-mod/${Minecraft.getInstance().gameProfile.id} (discord/@nibbl_z)")
+                .build()
+        } else {
+            HttpRequest.newBuilder()
+                .uri(URI.create("http://localhost:3137/fetch_api/${Minecraft.getInstance().gameProfile.id}"))
+                .GET()
+                .header("X-MC-UUID", Minecraft.getInstance().gameProfile.id.toString())
+                .build()
+        }
 
-        val response = client?.send(request, HttpResponse.BodyHandlers.ofString()) ?: return
+        val response = try {
+            client?.send(request, HttpResponse.BodyHandlers.ofString()) ?: return false
+        } catch(exception: Exception) {
+            sendGalapagosChatMessage(Component.literal("${if (Config.values::usePersonalApiKey.get()) "MCCI's API" else "Custom API endpoint"} appears to be down. Try again later, and check logs for more information.").withColor(ChatFormatting.RED.color!!))
+            Galapagos.logger.error("API request error: ${exception.message}, ${exception.cause}")
+            return false
+        }
+
+        Galapagos.logger.info(response.body())
         val jsonElement = Json.parseToJsonElement(response.body()).jsonObject
+
+        Galapagos.logger.info(jsonElement["messsage"]?.jsonPrimitive?.content)
+
+        if (jsonElement["message"]?.jsonPrimitive?.content == "Unauthorized") {
+            if (!Config.values::usePersonalApiKey.get()) {
+                sendGalapagosChatMessage(Component.literal("Something went wrong when fetching the custom endpoint. Please report this issue to the developers!").withColor(ChatFormatting.RED.color!!))
+            } else if (Galapagos.save.apiKey.isEmpty()) {
+                sendGalapagosChatMessage(Component.literal("You do not have an API key set! Please set one using /galapagos api set <API_KEY>").withColor(ChatFormatting.RED.color!!))
+            } else {
+                sendGalapagosChatMessage(Component.literal("Your API key is invalid! Please set a valid API key using /galapagos api set <API_KEY>").withColor(ChatFormatting.RED.color!!))
+            }
+
+            return false
+        }
+
+        if (jsonElement["errors"] != null) {
+            sendGalapagosChatMessage(Component.literal("Something went wrong when fetching the MCC Island API. Check log for more information.").withColor(ChatFormatting.RED.color!!))
+            Galapagos.logger.error("MCC Island API error: ${response.body()}")
+            return false
+        }
+
+        if (jsonElement["data"]?.jsonObject["player"]?.jsonObject["collections"] == null) {
+            sendGalapagosChatMessage(Component.literal("You have Collections disabled in your API settings! Please navigate to Pocket Menu -> Settings -> API Settings, and enable Collections. This may take a few minute to update!").withColor(ChatFormatting.RED.color!!))
+            return false
+        }
+
+        if (jsonElement["data"]?.jsonObject["player"]?.jsonObject["infinibag"] == null || jsonElement["data"]?.jsonObject["player"]?.jsonObject["infinivault"] == null) {
+            sendGalapagosChatMessage(Component.literal("You have Infinibag disabled in your API settings! Please navigate to Pocket Menu -> Settings -> API Settings, and enable Infinibag. This may take a few minute to update!").withColor(ChatFormatting.RED.color!!))
+            return false
+        }
 
         val apiCosmeticsString = jsonElement["data"]?.jsonObject["player"]?.jsonObject["collections"]?.jsonObject["cosmetics"]?.jsonArray.toString()
         val apiCosmetics: List<APICosmetic> = Json.decodeFromString(apiCosmeticsString)
@@ -174,6 +219,8 @@ object PlayerData {
                 else Galapagos.save.infinivault[item.name] = item
             }
         }
+
+        return true
     }
 
     //// INFINIBAG/COSMETIC UPDATING
@@ -184,8 +231,6 @@ object PlayerData {
     var craftedBlueprint: String? = null
 
     fun init() {
-        fetchAPI()
-
         ContainerOpenEvent.EVENT.register { packet -> containerOpen(packet) }
         ContainerSetSlotEvent.EVENT.register { packet -> containerSetSlot(packet) }
         SlotClickEvent.EVENT.register { screen, input, _, _ -> slotClick(screen, input) }

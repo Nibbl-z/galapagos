@@ -191,8 +191,6 @@ object CraftingInstructions : Feature {
             val count = it.second
             val savedCount = Galapagos.save.infinibag[material]?.count ?: 0
 
-            Galapagos.logger.info("${item.itemName.string}, $material $count $savedCount")
-
             if (count <= savedCount) requirementsMet++
         }
 

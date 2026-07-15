@@ -19,7 +19,8 @@ data class PlayerSave(
     var infinivault: HashMap<String, Item> = hashMapOf(),
     var fusionForge: MutableList<Item> = mutableListOf(),
     var stylePerks: HashMap<PlayerData.StylePerk, Int> = hashMapOf(),
-    var apiKey: String = ""
+    var apiKey: String = "",
+    var finishedOOBE: Boolean = false
 )
 
 object Save {

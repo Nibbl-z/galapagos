@@ -10,11 +10,14 @@ import com.mojang.brigadier.suggestion.Suggestions
 import com.mojang.brigadier.suggestion.SuggestionsBuilder
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
+import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
 import net.minecraft.client.resources.sounds.SimpleSoundInstance
 import net.minecraft.client.resources.sounds.SoundInstance
 import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.FontDescription
 import net.minecraft.network.chat.MutableComponent
+import net.minecraft.network.chat.Style
 import net.minecraft.network.chat.contents.objects.AtlasSprite
 import net.minecraft.resources.Identifier
 import net.minecraft.sounds.SoundSource
@@ -246,4 +249,25 @@ fun playMccSound(path: String) {
         SoundInstance.Attenuation.NONE,
         0.0, 0.0, 0.0, true
     ))
+}
+
+val galapagosIconComponent: Component =
+    Component.literal("<").withColor(ChatFormatting.GREEN.color!!)
+        .append(Component.literal("\uA000").withStyle(Style.EMPTY
+            .withFont(FontDescription.Resource(Identifier.fromNamespaceAndPath("galapagos", "main")))
+            .withColor(0xFFFFFF)))
+        .append(Component.literal("> ").withColor(ChatFormatting.GREEN.color!!))
+
+fun sendChatMessage(message: Component) {
+    if (Minecraft.getInstance().isSameThread) {
+        Minecraft.getInstance().gui.chat.addClientSystemMessage(message)
+    } else {
+        Minecraft.getInstance().execute {
+            Minecraft.getInstance().gui.chat.addClientSystemMessage(message)
+        }
+    }
+}
+
+fun sendGalapagosChatMessage(message: Component) {
+    sendChatMessage(galapagosIconComponent.copy().append(message))
 }

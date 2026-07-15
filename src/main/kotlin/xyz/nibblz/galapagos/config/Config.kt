@@ -9,6 +9,7 @@ import dev.isxander.yacl3.dsl.binding
 import dev.isxander.yacl3.dsl.enumSwitch
 import dev.isxander.yacl3.dsl.tickBox
 import net.fabricmc.loader.api.FabricLoader
+import net.minecraft.ChatFormatting
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
@@ -22,6 +23,10 @@ class Config {
         val w: Int,
         val h: Int
     )
+
+    // API
+    @SerialEntry
+    var usePersonalApiKey: Boolean = false
 
     // Coin Tracking
     @SerialEntry
@@ -143,6 +148,33 @@ class Config {
 
             categories.register("settings") {
                 name(Component.literal("Settings"))
+
+                groups.register("api") {
+                    name(Component.literal("API"))
+
+                    options.register("api_use_key") {
+                        name(Component.literal("Use Own API Key"))
+                        description(OptionDescription.of(
+                            Component.literal("The MCC Island API is utilized in this mod to fetch cosmetic ownership, infinibag, and infinivault state."),
+                            Component.empty(),
+                            Component.literal("Therefore, please ensure that the Infinibag and Collections APIs are enabled in Pocket Menu->Settings->API Settings for the mod to function!"),
+                            Component.empty(),
+                            Component.literal("If enabled, API features will require the use of your own API key by running the command /galapagos api set <API_KEY>."),
+                            Component.literal("If you do not have an API key, you can generate one at ").append(
+                                Component.literal("https://gateway.noxcrew.com/.").setStyle(Style.EMPTY
+                                    .withUnderlined(true)
+                                    .withColor(ChatFormatting.AQUA.color!!)
+                                )
+                            ),
+                            Component.empty(),
+                            Component.literal("Using your own API key is preferred, as you can make requests much more often."),
+                            Component.empty(),
+                            Component.literal("If you are unable to supply your own API key, a different endpoint will be used, making API calls with the developer's own API key. This means you can make less requests per minute, and uptime of this backend is not guaranteed.")
+                        ))
+                        controller(tickBox())
+                        binding(values::usePersonalApiKey, false)
+                    }
+                }
 
                 groups.register("features") {
                     name(Component.literal("Features"))

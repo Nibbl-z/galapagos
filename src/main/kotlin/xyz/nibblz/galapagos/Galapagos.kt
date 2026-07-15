@@ -9,8 +9,10 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import xyz.nibblz.galapagos.config.Config
 import xyz.nibblz.galapagos.data.ConstantIslandData
+import xyz.nibblz.galapagos.events.JoinMCCIEvent
 import xyz.nibblz.galapagos.features.*
 import xyz.nibblz.galapagos.util.GalapagosCommand
+import xyz.nibblz.galapagos.util.OOBE
 import xyz.nibblz.galapagos.util.PlayerData
 import xyz.nibblz.galapagos.util.PlayerSave
 import xyz.nibblz.galapagos.util.Save
@@ -42,6 +44,12 @@ object Galapagos : ModInitializer {
 		ConstantIslandData.load()
 		registerFeatures()
 		PlayerData.init()
+		OOBE.init()
+
+		JoinMCCIEvent.EVENT.register {
+			if (!save.finishedOOBE) return@register
+			PlayerData.fetchAPI()
+		}
 
 		ClientLifecycleEvents.CLIENT_STOPPING.register {onShutdown()}
 		ClientCommandRegistrationCallback.EVENT.register { dispatcher, _ -> GalapagosCommand.register(dispatcher) }

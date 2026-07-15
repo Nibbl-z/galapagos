@@ -2,6 +2,15 @@
   "providers": [
     {
       "type": "bitmap",
+      "file": "galapagos:chat_icon.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\uA000"
+      ]
+    },
+    {
+      "type": "bitmap",
       "file": "galapagos:font/exclusive_icon.png",
       "ascent": 7,
       "height": 8,

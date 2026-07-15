@@ -122,7 +122,7 @@ class CraftingInstructionsDialog(x: Int, y: Int, val blueprint: CraftingInstruct
 
     override fun layout() = linear(LinearLayout.Orientation.VERTICAL) {
         val font = Minecraft.getInstance().font
-        val efficientFusion = 1.0 - (Galapagos.save.stylePerks[PlayerData.StylePerk.EFFICIENT_FUSION]!! * 0.05)
+        val efficientFusion = 1.0 - ((Galapagos.save.stylePerks[PlayerData.StylePerk.EFFICIENT_FUSION] ?: 0) * 0.05)
 
         instructions.forEach { (material, instructions) ->
             +StringWidget(
@@ -145,6 +145,9 @@ class CraftingInstructionsDialog(x: Int, y: Int, val blueprint: CraftingInstruct
         if (time > 0 && Config.values::craftingInstructionsShowCraftTime.get()) {
             +StringWidget(Component.literal("Total Craft Time: ${formatTimeString((time * efficientFusion).toInt())} ").append(
                 Glyphs.getGlyphComponent("_fonts/icon/time.png")), font)
+        }
+        if (Galapagos.save.stylePerks[PlayerData.StylePerk.EFFICIENT_FUSION] == null) {
+            +StringWidget(Component.literal("(Please open the Style Perks menu for accurate crafting time!)").withColor(ChatFormatting.RED.color!!), font)
         }
 
     }
