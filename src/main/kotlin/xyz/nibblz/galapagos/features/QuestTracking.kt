@@ -6,6 +6,7 @@ import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback
 import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.screens.inventory.ContainerScreen
+import net.minecraft.core.component.DataComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket
@@ -31,7 +32,8 @@ object QuestTracking : Feature {
     override val name: String = "Quest Tracking"
     override val description: List<Component> = listOf(
         Component.literal("Logs all completed quests and daily meter claims, including their rarity as well as if the quest is boosted/glitched/arcane."),
-        Component.literal("To view past quests, right click on the Island Rewards tab at the bottom of the journal."),
+        Component.empty(),
+        Component.literal("To view past quests, click on the info icon at the top-right of the journal."),
         Component.empty(),
         Component.literal("Note: Disabling this feature will NOT disable quest tracking, but will disable the quest history menu.")
     )
@@ -146,9 +148,10 @@ object QuestTracking : Feature {
 
     fun slotClick(screen: ContainerScreen, button: Int) {
         val slot = (screen as HoveredSlotAccessor).`galapagos$hoveredSlot`() ?: return
+        Galapagos.logger.info(" ${slot.item.get(DataComponents.ITEM_MODEL)}")
 
         if (screen.title.string.contains("JOURNAL") || screen.title.string.contains("MAILBOX")) {
-            if (slot.item.itemName.string.contains("Island Rewards") && button == 1) {
+            if (slot.item.itemName.string.contains("Island Rewards") && button == 0 && slot.index == 8) {
                 if (!enabledProperty.get()) return
                 clickedQuestHistory = true
                 playMccSound("ui.click_normal")
@@ -194,6 +197,7 @@ object QuestTracking : Feature {
         val screen = Minecraft.getInstance().screen ?: return
         if (!screen.title.string.contains("JOURNAL") && !screen.title.string.contains("MAILBOX")) return
         if (stack.itemName.string != "Island Rewards") return
+        if (stack.get(DataComponents.ITEM_MODEL)?.path?.contains("blank") == false) return
 
         var index = components.indexOfFirst { it.string.contains("minecraft:") } // if you have f3+h on :P
         if (index == -1) { index = components.size - 1 } // if you dont !
@@ -201,9 +205,9 @@ object QuestTracking : Feature {
         components.add(index, Component.empty())
 
         components.add(index + 1, Component.empty()
-            .append(Glyphs.getGlyphComponent("_fonts/icon/click_action_right.png"))
+            .append(Glyphs.getGlyphComponent("_fonts/icon/click_action_left.png"))
             .append(Component.literal(" > ").withColor(ChatFormatting.DARK_GRAY.color!!))
-            .append(Component.literal("Right-Click to ").withColor(0xecd584))
+            .append(Component.literal("Click to ").withColor(0xecd584))
             .append(Component.literal("View Quest History").withColor(0xfee761)))
     }
 
