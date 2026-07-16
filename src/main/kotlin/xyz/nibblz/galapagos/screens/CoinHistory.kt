@@ -37,6 +37,8 @@ class CoinHistory : BaseOwoScreen<FlowLayout>() {
         var dayLowerHeader: LabelComponent? = null
 
         sortedChanges.forEach {
+            if (it.amount == 0) return@forEach
+
             if (CoinTracking.filter[it.category] == false) return@forEach
 
             val date = Instant.fromEpochSeconds(it.timestamp).toLocalDateTime(TimeZone.currentSystemDefault())

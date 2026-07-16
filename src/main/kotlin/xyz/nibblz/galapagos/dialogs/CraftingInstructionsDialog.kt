@@ -57,8 +57,6 @@ class CraftingInstructionsDialog(x: Int, y: Int, val blueprint: CraftingInstruct
             val count = req.second
             val saveMaterial = tempInfinibag[material.label]
 
-            Galapagos.logger.info("checking requirement $material (${material.label}), i need $count, i have ${saveMaterial?.count ?: 0}")
-
             if (saveMaterial != null) {
                 if (saveMaterial.count >= count) { // already have enough of the material
                     saveMaterial.count -= count

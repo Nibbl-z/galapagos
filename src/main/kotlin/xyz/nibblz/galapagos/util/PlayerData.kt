@@ -145,10 +145,7 @@ object PlayerData {
             return false
         }
 
-        Galapagos.logger.info(response.body())
         val jsonElement = Json.parseToJsonElement(response.body()).jsonObject
-
-        Galapagos.logger.info(jsonElement["messsage"]?.jsonPrimitive?.content)
 
         if (jsonElement["message"]?.jsonPrimitive?.content == "Unauthorized") {
             if (!Config.values::usePersonalApiKey.get()) {
@@ -196,8 +193,6 @@ object PlayerData {
                 isColored = it.chromaPacks?.size == 4
             )
 
-            Galapagos.logger.info(cosmetic.toString())
-
             Galapagos.save.cosmetics[it.cosmetic.name] = cosmetic
         }
 
@@ -244,17 +239,13 @@ object PlayerData {
         if (item.isCosmeticToken) {
             val cosmetic = Galapagos.save.cosmetics[name.dropLast(6)]
             if (cosmetic != null) {
-                Galapagos.logger.info("updating ${cosmetic.name}'s rep, previous: ${cosmetic.donations}")
                 cosmetic.donations = (cosmetic.donations + amount).coerceIn(0, cosmetic.tag.maxDonations)
-                Galapagos.logger.info("updated ${cosmetic.name}'s rep! it is now ${cosmetic.donations}")
             }
         }
 
         if (item.count <= 0) {
             Galapagos.save.infinibag.remove(name)
         }
-
-        Galapagos.logger.info("decrementing $name by $amount")
     }
 
     fun moveItem(name: String, amount: Int, where: ItemLocation) {
@@ -305,8 +296,6 @@ object PlayerData {
 
                 itemsInScavenging.add(item.toDataItem())
             }
-
-            Galapagos.logger.info(itemsInScavenging.toString())
         }
 
         if (screen.title.string.contains("FUSION FORGE")) {
@@ -429,8 +418,6 @@ object PlayerData {
         val name = match.groups["name"]?.value ?: return
         val count = match.groups["count"]?.value?.toIntOrNull() ?: 1
 
-        Galapagos.logger.info("obtained $name x$count")
-
         if (Galapagos.save.cosmetics[name] != null) {
             Galapagos.save.cosmetics[name]!!.isOwned = true
             return
@@ -502,7 +489,6 @@ object PlayerData {
             amount = cleanedString.toInt()
         }
 
-        Galapagos.logger.info("${if (vault) "withdraw" else "vault"} $amount ${item.itemName.string} ${if (vault) "from" else "to"} vault")
         moveItem(item.itemName.string, amount, if (vault) ItemLocation.INFINIBAG else ItemLocation.INFINIVAULT)
     }
 

@@ -44,8 +44,6 @@ object Save {
 
     fun save() {
         val saved = json.encodeToString(Galapagos.save)
-        Galapagos.logger.info(saved)
-        Galapagos.logger.info(path.toString())
 
         Files.createDirectories(path.parent)
         Files.writeString(path, saved)

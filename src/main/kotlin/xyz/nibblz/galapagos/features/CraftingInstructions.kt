@@ -129,7 +129,6 @@ object CraftingInstructions : Feature {
         if (button != 1) return
         if (craftableBlueprints.contains(slot.item.itemName.string)) return
 
-        Galapagos.logger.info(type.toString())
         ci.cancel()
 
         playMccSound("ui.click_normal")
@@ -374,13 +373,10 @@ object CraftingInstructions : Feature {
                 if (tempInfinibag[upperShard.label] == null) tempInfinibag[upperShard.label] =
                     Item(name = upperShard.label, count = 0, isCosmeticToken = false)
 
-                Galapagos.logger.info("${lowerShard}, ${lowerCount}")
-
                 if (lowerCount == 0) return@forEach
 
                 if (lowerCount % 2 == 0) { // even!
                     val craftAmount = lowerCount / 2
-                    Galapagos.logger.info("even amount, craft ${craftAmount}")
 
                     tempInfinibag[lowerShard.label]!!.count -= craftAmount * 2
 
@@ -389,11 +385,8 @@ object CraftingInstructions : Feature {
 
                     if (updateAbove) lowerShards[upperShard] = lowerShards[upperShard]!! + craftAmount
                     lowerShards[lowerShard] = 0
-
-                    Galapagos.logger.info("there is now ${lowerShards[upperShard]} ${upperShard}s")
                 } else { // odd!
                     val craftAmount = (lowerCount + 1) / 2
-                    Galapagos.logger.info("odd amount, craft ${craftAmount}")
 
                     purchases[lowerShard] = purchases[lowerShard]!! + 1
                     gloop += lowerShard.marketPrice!!
@@ -405,8 +398,6 @@ object CraftingInstructions : Feature {
 
                     if (updateAbove) lowerShards[upperShard] = lowerShards[upperShard]!! + craftAmount
                     lowerShards[lowerShard] = 0
-
-                    Galapagos.logger.info("there is now ${lowerShards[upperShard]} ${upperShard}s")
                 }
             }
 

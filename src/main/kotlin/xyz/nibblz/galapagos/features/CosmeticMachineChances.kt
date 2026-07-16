@@ -106,15 +106,12 @@ object CosmeticMachineChances : Feature {
             cosmeticCounts[Pair(it.rarity, it.tag)] = (cosmeticCounts[Pair(it.rarity, it.tag)] ?: 0) + 1
         }
 
-        Galapagos.logger.info(cosmeticCounts.toString())
-
         //<Again!>
         Galapagos.save.cosmetics.forEach { (_, it) ->
             if (it.rarity != Rarity.MYTHIC) {
                 val basicChance = getChance(false, it.rarity, it.tag)
 
                 if (basicChance != null) {
-                    //Galapagos.logger.info("BASIC: ${it.name} - ${basicChance / cosmeticCounts[(Pair(it.rarity, it.tag))]!!}")
                     basicCosmetics[it.name] = LootPreviewCosmetic(
                         chance = basicChance / cosmeticCounts[(Pair(it.rarity, it.tag))]!!,
                         isOwned = it.isOwned,
@@ -131,7 +128,6 @@ object CosmeticMachineChances : Feature {
                 val ultimateChance = getChance(true, it.rarity, it.tag)
 
                 if (ultimateChance != null) {
-                    //Galapagos.logger.info("ULTIMATE: ${it.name} - ${ultimateChance / cosmeticCounts[(Pair(it.rarity, it.tag))]!!}")
                     ultimateCosmetics[it.name] = LootPreviewCosmetic(
                         chance = ultimateChance / cosmeticCounts[(Pair(it.rarity, it.tag))]!!,
                         isOwned = it.isOwned,

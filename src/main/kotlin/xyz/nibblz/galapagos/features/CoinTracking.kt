@@ -122,7 +122,6 @@ object CoinTracking : Feature {
         else Regex("You have sent a trade request to (?<player>.+)\\.")
 
         val player = regex.find(content)?.groups["player"]?.value ?: return
-        Galapagos.logger.info("Trade with $player !!!")
 
         data = player
     }
@@ -141,7 +140,6 @@ object CoinTracking : Feature {
 
             val match = it.findLore(regex) ?: continue
             val priceString = match[0] ?: continue
-            Galapagos.logger.info(match.toString())
             val cleanedPriceString = priceString.value.replace(",", "")
             price = cleanedPriceString.toInt()
 
@@ -161,8 +159,6 @@ object CoinTracking : Feature {
             val priceString = match[0] ?: continue
             val cleanedPriceString = priceString.value.replace(",", "")
             val amountGained = cleanedPriceString.toInt()
-
-            Galapagos.logger.info("$amountGained")
 
             val change = CoinChange(
                 amount = amountGained,
@@ -193,8 +189,6 @@ object CoinTracking : Feature {
     fun slotClick(screen: ContainerScreen, type: ContainerInput, button: Int) {
         val slot = (screen as HoveredSlotAccessor).`galapagos$hoveredSlot`() ?: return
 
-        Galapagos.logger.info("${slot.index}, ${slot.item.itemName.string}, $type")
-
         if (slot.item.itemName.string == "Coins" && screen.title.string.contains("INFINIBAG") && button == 0) {
             if (!enabledProperty.get()) return
             clickedCoinHistory = true
@@ -205,7 +199,6 @@ object CoinTracking : Feature {
         }
 
         if (slot.index in 46..48 && screen.title.string.contains("SCAVENGING WILL PERMANENTLY")) {
-            Galapagos.logger.info("this is a scavenge!")
             category = CoinChangeCategory.SCAVENGE
             return
         }

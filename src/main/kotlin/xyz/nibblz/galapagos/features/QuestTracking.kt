@@ -148,7 +148,6 @@ object QuestTracking : Feature {
 
     fun slotClick(screen: ContainerScreen, button: Int) {
         val slot = (screen as HoveredSlotAccessor).`galapagos$hoveredSlot`() ?: return
-        Galapagos.logger.info(" ${slot.item.get(DataComponents.ITEM_MODEL)}")
 
         if (screen.title.string.contains("JOURNAL") || screen.title.string.contains("MAILBOX")) {
             if (slot.item.itemName.string.contains("Island Rewards") && button == 0 && slot.index == 8) {
@@ -182,8 +181,6 @@ object QuestTracking : Feature {
                     bonus = bonus,
                     timestamp = Clock.System.now().epochSeconds
                 )
-
-                Galapagos.logger.info("$rarity, $bonus, $source")
 
                 Galapagos.save.questHistory.add(reward)
             } else if (slot.item.itemName.string.contains("Daily Meter")) {
@@ -237,7 +234,6 @@ object QuestTracking : Feature {
 
         val source = QuestingRewardSource.DAILY_METER
 
-        Galapagos.logger.info("$rarity, $bonus, $source")
         val reward = QuestingReward(
             rarity = rarity,
             source = source,
