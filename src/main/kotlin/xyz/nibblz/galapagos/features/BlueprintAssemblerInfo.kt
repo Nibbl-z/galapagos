@@ -4,7 +4,9 @@ import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.screens.inventory.ContainerScreen
 import net.minecraft.network.chat.Component
+import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
 import net.minecraft.util.ARGB
+import net.minecraft.world.item.ItemStack
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
 import xyz.nibblz.galapagos.data.*
@@ -22,7 +24,7 @@ object BlueprintAssemblerInfo : Feature {
     override val id: String = "blueprint_assembler_info"
     override val name: String = "Blueprint Assembler Info"
     override val description: List<Component> = listOf(
-        Component.literal("Displays more statistics inside of the Blueprint Assembler menu, including:"),
+        Component.literal("Displays statistics of current blueprints in Blueprint Assembler menu as well as all blueprints in the infinibag, including:"),
         Component.literal("- New style trophies"),
         Component.literal("- New royal reputation"),
         Component.literal("- Average cosmetic cores from scavenging, including ")
@@ -41,7 +43,7 @@ object BlueprintAssemblerInfo : Feature {
 
 
     override fun init() {
-        ContainerOpenEvent.EVENT.register { containerOpen() }
+        ContainerOpenEvent.EVENT.register { packet -> containerOpen(packet) }
         ContainerRenderEvent.EVENT.register { screen, graphics, x, y, w, _ -> containerRender(screen, graphics, x, y, w) }
         SlotClickEvent.EVENT.register { screen, _, _, _ -> slotClick(screen) }
         ContainerCloseEvent.EVENT.register { containerClose() }
@@ -64,17 +66,15 @@ object BlueprintAssemblerInfo : Feature {
 
     var displayData = false
 
-    fun containerOpen() {
+    fun containerOpen(packet: ClientboundContainerSetContentPacket) {
         val screen = Minecraft.getInstance().screen ?: return
 
         if (!screen.title.string.contains("BLUEPRINT ASSEMBLER") && !screen.title.string.contains("INFINIBAG")) displayData = false
 
         if (screen.title.string.contains("BLUEPRINT ASSEMBLER")) {
-            cosmeticCoreSettings.forEach {
-                Galapagos.logger.info("${it.key} ${it.value.get()}")
-            }
-
-            updateData()
+            updateData(false, packet.items)
+        } else if (screen.title.string.contains("INFINIBAG")) {
+            updateData(true)
         }
     }
 
@@ -90,45 +90,61 @@ object BlueprintAssemblerInfo : Feature {
         }
     }
 
-    fun updateData() {
+    fun updateData(fromBag: Boolean, items: List<ItemStack> = listOf()) {
         directCores = CosmeticCore.entries.associateWithTo(EnumMap(CosmeticCore::class.java)) { 0.0 }
         convertedCores = CosmeticCore.entries.associateWithTo(EnumMap(CosmeticCore::class.java)) { 0.0 }
         repTrophies = 0
         newCosmeticTrophies = 0
 
-        Galapagos.save.infinibag.forEach { (_, item) ->
-            if (!item.name.contains("Blueprint: ")) return@forEach
-            val cosmetic = Galapagos.save.cosmetics[item.name.dropLast(6).drop(11)] ?: return@forEach
+        if (fromBag) {
+            Galapagos.save.infinibag.forEach { (_, item) ->
+                if (!item.name.contains("Blueprint: ")) return@forEach
+                val cosmetic = Galapagos.save.cosmetics[item.name.dropLast(6).drop(11)] ?: return@forEach
 
-            var owned = cosmetic.isOwned
-            var donations = cosmetic.donations
+                updateDataOfCosmetic(cosmetic, item.count)
+            }
+        } else {
+            val slots = listOf(19, 20, 21, 22, 23, 24, 25)
 
-            repeat(item.count) {
-                if (!cosmetic.isOwned && !owned) {
-                    newCosmeticTrophies += cosmetic.rarity.trophies
-                    owned = true
-                    return@repeat
-                }
+            slots.forEach {
+                val item = items[it]
+                if (!item.itemName.string.contains("Token")) return@forEach
+                val cosmetic = Galapagos.save.cosmetics[item.itemName.string.dropLast(6)] ?: return@forEach
 
-                if (owned && cosmetic.donations != cosmetic.tag.maxDonations) {
-                    repTrophies += cosmetic.repPerDonation()
-                    donations++
-                }
+                updateDataOfCosmetic(cosmetic, item.count)
+            }
+        }
+    }
 
-                if (!owned) return@repeat
-                directCores[cosmetic.tag.core] = directCores[cosmetic.tag.core]!! + cosmetic.coresPerScavenge()
-                directCores[cosmetic.tag.bonusCore] = directCores[cosmetic.tag.bonusCore]!! + cosmetic.bonusCoresPerScavenge()
+    fun updateDataOfCosmetic(cosmetic: Cosmetic, count: Int) {
+        var owned = cosmetic.isOwned
+        var donations = cosmetic.donations
 
-                convertedCores[cosmetic.tag.core] = convertedCores[cosmetic.tag.core]!! + cosmetic.coresPerScavenge()
-                convertedCores[cosmetic.tag.bonusCore] = convertedCores[cosmetic.tag.bonusCore]!! + cosmetic.bonusCoresPerScavenge()
+        repeat(count) {
+            if (!cosmetic.isOwned && !owned) {
+                newCosmeticTrophies += cosmetic.rarity.trophies
+                owned = true
+                return@repeat
+            }
 
-                convertedCores.forEach coreConversion@{ (core, _) ->
-                    val coreConversion = coreConversions[cosmetic.tag.core to core]
-                    if (coreConversion != null) convertedCores[core] = (convertedCores[core] ?: 0.0) + coreConversion * cosmetic.coresPerScavenge()
+            if (owned && cosmetic.donations != cosmetic.tag.maxDonations) {
+                repTrophies += cosmetic.repPerDonation()
+                donations++
+            }
 
-                    val bonusCoreConversion = coreConversions[cosmetic.tag.bonusCore to core]
-                    if (bonusCoreConversion != null) convertedCores[core] = (convertedCores[core] ?: 0.0) + bonusCoreConversion * cosmetic.bonusCoresPerScavenge()
-                }
+            if (!owned) return@repeat
+            directCores[cosmetic.tag.core] = directCores[cosmetic.tag.core]!! + cosmetic.coresPerScavenge()
+            directCores[cosmetic.tag.bonusCore] = directCores[cosmetic.tag.bonusCore]!! + cosmetic.bonusCoresPerScavenge()
+
+            convertedCores[cosmetic.tag.core] = convertedCores[cosmetic.tag.core]!! + cosmetic.coresPerScavenge()
+            convertedCores[cosmetic.tag.bonusCore] = convertedCores[cosmetic.tag.bonusCore]!! + cosmetic.bonusCoresPerScavenge()
+
+            convertedCores.forEach coreConversion@{ (core, _) ->
+                val coreConversion = coreConversions[cosmetic.tag.core to core]
+                if (coreConversion != null) convertedCores[core] = (convertedCores[core] ?: 0.0) + coreConversion * cosmetic.coresPerScavenge()
+
+                val bonusCoreConversion = coreConversions[cosmetic.tag.bonusCore to core]
+                if (bonusCoreConversion != null) convertedCores[core] = (convertedCores[core] ?: 0.0) + bonusCoreConversion * cosmetic.bonusCoresPerScavenge()
             }
         }
     }
