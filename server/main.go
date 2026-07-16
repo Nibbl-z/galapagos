@@ -55,6 +55,8 @@ func main() {
 
 	apiKey := os.Getenv("NOXCREW_API_KEY")
 
+	gin.SetMode(gin.ReleaseMode)
+
 	router := gin.Default()
 
 	router.Use(RateLimiter())
