@@ -131,7 +131,7 @@ object PlayerData {
                 .build()
         } else {
             HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:3137/fetch_api/${Minecraft.getInstance().gameProfile.id}"))
+                .uri(URI.create("https://galapagos.nibbles.hackclub.app/fetch_api/${Minecraft.getInstance().gameProfile.id}"))
                 .GET()
                 .header("X-MC-UUID", Minecraft.getInstance().gameProfile.id.toString())
                 .build()
