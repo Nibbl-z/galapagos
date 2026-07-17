@@ -475,7 +475,7 @@ class Config {
                 }
 
                 groups.register("misc") {
-                    name(Component.literal("Miscellanous"))
+                    name(Component.literal("Miscellaneous"))
 
                     options.register("24_hour_time") {
                         name(Component.literal("24-Hour Time"))
