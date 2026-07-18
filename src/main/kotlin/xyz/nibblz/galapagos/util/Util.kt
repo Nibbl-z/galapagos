@@ -26,6 +26,7 @@ import net.minecraft.world.item.TooltipFlag
 import xyz.nibblz.galapagos.data.CosmeticTag
 import xyz.nibblz.galapagos.data.Item
 import java.util.concurrent.CompletableFuture
+import kotlin.math.floor
 
 // stealing from devcmb stealing from pe3ep part 1
 // https://github.com/pe3ep/Trident/blob/master/src/main/kotlin/cc/pe3epwithyou/trident/state/MCCIState.kt
@@ -270,4 +271,37 @@ fun sendChatMessage(message: Component) {
 
 fun sendGalapagosChatMessage(message: Component) {
     sendChatMessage(galapagosIconComponent.copy().append(message))
+}
+
+fun mcciProgressBar(percent: Double, segments: Int): MutableComponent {
+    val percent = percent.coerceIn(0.0..1.0)
+
+    val component: MutableComponent = Component.empty()
+
+    val outOf = segments * 5
+    val filled = (percent * outOf)
+    val hasHalf = filled != floor(filled)
+
+    var i = 0
+
+    repeat(floor(filled).toInt()) {
+        component.append(Glyphs.getGlyphComponent("_fonts/icon/progress_counter/full.png"))
+        i++
+        if (i % 5 == 0) component.append(Component.literal("\uE001").withStyle(Style.EMPTY.withFont(FontDescription.Resource(Identifier.withDefaultNamespace("padding")))))
+    }
+
+    if (hasHalf) {
+        component.append(Glyphs.getGlyphComponent("_fonts/icon/progress_counter/half.png"))
+        i++
+        if (i % 5 == 0) component.append(Component.literal("\uE001").withStyle(Style.EMPTY.withFont(FontDescription.Resource(Identifier.withDefaultNamespace("padding")))))
+    }
+
+    repeat(outOf - floor(filled).toInt() - (if (hasHalf) 1 else 0)) {
+        component.append(Glyphs.getGlyphComponent("_fonts/icon/progress_counter/empty.png"))
+        i++
+        if (i == outOf) return@repeat
+        if (i % 5 == 0) component.append(Component.literal("\uE001").withStyle(Style.EMPTY.withFont(FontDescription.Resource(Identifier.withDefaultNamespace("padding")))))
+    }
+
+    return component
 }

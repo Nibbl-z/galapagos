@@ -31,7 +31,8 @@ object Galapagos : ModInitializer {
 		CosmeticMachineChances,
 		ExchangeUnitPrice,
 		CraftingInstructions,
-		BlueprintAssemblerInfo
+		BlueprintAssemblerInfo,
+		WeeklyVaultInfo
 	)
 
 	fun registerFeatures() {
