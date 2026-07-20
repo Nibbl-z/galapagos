@@ -4,12 +4,14 @@ import com.noxcrew.sheeplib.DialogContainer
 import com.noxcrew.sheeplib.dialog.Dialog
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback
 import net.minecraft.ChatFormatting
+import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.screens.inventory.ContainerScreen
 import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
 import net.minecraft.world.inventory.ContainerInput
 import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.TooltipFlag
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
@@ -43,7 +45,8 @@ object CraftingInstructions : Feature {
     enum class InstructionType {
         CRAFT,
         PURCHASE,
-        PURCHASE_IE
+        PURCHASE_IE,
+        ANVIL
     }
 
     data class Instruction(
@@ -91,6 +94,8 @@ object CraftingInstructions : Feature {
             InstructionType.PURCHASE_IE -> Component.literal("Purchase ${count}x ")
                 .append(material.getStyledComponent())
                 .append(Component.literal(" from Island Exchange").withColor(0xFFFFFF))
+
+            InstructionType.ANVIL -> Component.literal("Scavenge ${count}x Arcane Cosmetic Token${if (count == 1) "" else "s"}")
         }
     }
 
@@ -118,19 +123,55 @@ object CraftingInstructions : Feature {
         }
     }
 
+    fun hasValidInstructions(item: ItemStack): Boolean {
+        val screen = Minecraft.getInstance().screen ?: return false
+        if (screen !is ContainerScreen) return false
+
+        return hasValidInstructions(item.itemName.string, item.getTooltipLines(
+            net.minecraft.world.item.Item.TooltipContext.EMPTY,
+            Minecraft.getInstance().player,
+            TooltipFlag.Default.NORMAL
+        ), screen)
+    }
+
+    fun hasValidInstructions(item: ItemStack, lore: List<Component>): Boolean {
+        val screen = Minecraft.getInstance().screen ?: return false
+        if (screen !is ContainerScreen) return false
+
+        return hasValidInstructions(item.itemName.string, lore, screen)
+    }
+
+    fun hasValidInstructions(name: String, lore: List<Component>, screen: ContainerScreen): Boolean {
+        if (screen.title.string.contains("STYLE PERKS")) {
+            //if (!PlayerData.StylePerk.entries.any { it.label == name }) return false
+            if (findLoreFromList(lore, "Reach Style Level")) return false
+        } else {
+            if (!name.contains("Blueprint:") && !findLoreFromList(lore, "Trophies: ") && !findLoreFromList(lore, "Style Shard")) return false
+            if (findLoreFromList(lore, "You already own this item.")) return false
+            if (craftableBlueprints.contains(name)) return false
+            if (findLoreFromList(lore, Glyphs.getGlyph("_fonts/icon/tooltips/material.png"))) return false
+        }
+
+        if (
+            !findLoreFromList(lore, "Crafting Materials:")
+            && !findLoreFromList(lore, "Upgrade Cost:")
+            && !findLoreFromList(lore, "Cost:")
+        ) return false
+
+        return true
+    }
+
     fun slotClick(screen: ContainerScreen, type: ContainerInput, ci: CallbackInfo, button: Int) {
         if (!enabledProperty.get()) return
         val slot = (screen as HoveredSlotAccessor).`galapagos$hoveredSlot`() ?: return
-        if (!slot.item.itemName.string.contains("Blueprint:") && !slot.item.findLore("Trophies: ") && !slot.item.findLore("Style Shard")) return
-        if (slot.item.findLore("Trophies: ") && !slot.item.findLore("Material") ) return
         if (type != ContainerInput.QUICK_MOVE) return
+        if (button != 1) return
+        if (!hasValidInstructions(slot.item)) return
+
         val requirements = fetchCraftingMaterials(slot.item)
         if (requirements.isEmpty()) return
-        if (button != 1) return
-        if (craftableBlueprints.contains(slot.item.itemName.string)) return
 
         ci.cancel()
-
         playMccSound("ui.click_normal")
 
         if (openBlueprints[slot.item.itemName.string] != null) {
@@ -144,11 +185,14 @@ object CraftingInstructions : Feature {
             slot.item.getCosmeticTag()
         }
 
+        val perkName = Regex("(?<perk>.+) ").find(slot.item.itemName.string)?.groups["perk"]?.value
+        val stylePerk = PlayerData.StylePerk.entries.find { it.label == perkName }
+
         val dialog = CraftingInstructionsDialog(10, 10, BlueprintInfo(
             slot.item.getItemRarity() ?: Rarity.COMMON,
             tag,
             slot.item.itemName.string,
-        ))
+        ), stylePerk)
 
         dialog.requirements = requirements.sortedByDescending {
             val material = materialFromName(it.first) ?: throw IllegalStateException("Crafting recipe calls for ${it.first}, which is not a valid material")
@@ -202,11 +246,7 @@ object CraftingInstructions : Feature {
 
     fun tooltipAdd(stack: ItemStack, components: MutableList<Component>) {
         if (!enabledProperty.get()) return
-        if (!stack.itemName.string.contains("Blueprint:") && !components.any { it.string.contains("Trophies: ") } && !components.any { it.string.contains("Style Shard") } ) return
-        if (components.any { it.string.contains("Trophies: ") } && !components.any { it.string.contains("Material") } ) return
-        if (components.any { it.string.contains("You already own this item.") }) return
-        if (components.any { it.string.contains(Glyphs.getGlyph("_fonts/icon/tooltips/material.png")) }) return
-        if (craftableBlueprints.contains(stack.itemName.string)) return
+        if (!hasValidInstructions(stack, components)) return
 
         var index = components.indexOfFirst { it.string.contains("Click to") && !it.string.contains("Right") && !it.string.contains("Middle") }
         if (index != -1) index++
@@ -230,7 +270,11 @@ object CraftingInstructions : Feature {
         if (matches.isEmpty()) {
             val altRegex = Regex("(?<count>\\d+)/(?<price>\\d+) \\[(?<name>.+)]") // shows up on secret styles/fancypants
             matches = item.findLores(altRegex)
+        }
 
+        if (matches.isEmpty()) {
+            val altRegex = Regex("\\[(?<name>.+?)] (?<count>\\d+)/(?<price>\\d+)") // shows up on style perks dear god noxcrew be consistent :sob:
+            matches = item.findLores(altRegex)
             if (matches.isEmpty()) return listOf()
         }
 

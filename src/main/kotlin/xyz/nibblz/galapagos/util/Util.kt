@@ -189,6 +189,16 @@ fun ItemStack.findLore(string: String): Boolean {
     return false
 }
 
+fun findLoreFromList(components: List<Component>, string: String): Boolean {
+    components.forEach {
+        if (it.string.contains(string)) {
+            return true
+        }
+    }
+
+    return false
+}
+
 fun ItemStack.findLores(regex: Regex): List<MatchGroupCollection> {
     val lore = this.getTooltipLines(
         net.minecraft.world.item.Item.TooltipContext.EMPTY,

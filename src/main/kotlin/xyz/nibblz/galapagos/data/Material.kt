@@ -11,6 +11,7 @@ enum class MaterialType {
     SINGULARITY,
     STYLE_SOUL,
     STYLE_SHARD,
+    ARCANE_ANVIL
 }
 
 enum class Material(val label: String, val type: MaterialType, val rarity: Rarity, val spriteName: String, val marketPrice: Int? = null, val marketCount: Int? = null) {
@@ -54,6 +55,7 @@ enum class Material(val label: String, val type: MaterialType, val rarity: Rarit
 
     MATERIAL_SINGULARITY("Material Singularity", MaterialType.SINGULARITY, Rarity.MYTHIC, "material_singularity", 900, 1),
     STYLE_SOUL("Style Soul", MaterialType.STYLE_SOUL, Rarity.MYTHIC, "style_soul"),
+    ARCANE_ANVIL("Arcane Anvil", MaterialType.ARCANE_ANVIL, Rarity.MYTHIC, "arcane_anvil"),
 
     RUBY_STYLE_SHARD("Ruby Style Shard", MaterialType.STYLE_SHARD, Rarity.MYTHIC, "style_shard_ruby"),
     AMBER_STYLE_SHARD("Amber Style Shard", MaterialType.STYLE_SHARD, Rarity.MYTHIC, "style_shard_amber"),
@@ -67,6 +69,9 @@ enum class Material(val label: String, val type: MaterialType, val rarity: Rarit
 
     fun getSpriteLocation(): String {
         return "island_items/infinibag/${if (this == MATERIAL_SINGULARITY) "component" else "material"}/${this.spriteName}"
+        // ok genuinely WHY is the material singularity sprite in a SEPERATE folder from all the other materials
+        // what is COMPONENT?? why does the folder ONLY have material singularity???????????
+        // WHYYYYYYYYYYY!!!!!!!!!!
     }
 
     fun getStyledComponent(): MutableComponent {

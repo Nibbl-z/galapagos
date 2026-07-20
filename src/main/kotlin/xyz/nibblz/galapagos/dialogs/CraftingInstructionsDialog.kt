@@ -26,7 +26,7 @@ import xyz.nibblz.galapagos.util.PlayerData
 import xyz.nibblz.galapagos.util.formatTimeString
 import xyz.nibblz.galapagos.util.mccTextureComponent
 
-class CraftingInstructionsDialog(x: Int, y: Int, val blueprint: CraftingInstructions.BlueprintInfo) : Dialog(x, y), Themed by GalapagosTheme {
+class CraftingInstructionsDialog(x: Int, y: Int, val blueprint: CraftingInstructions.BlueprintInfo, stylePerk: PlayerData.StylePerk? = null) : Dialog(x, y), Themed by GalapagosTheme {
     val instructions: HashMap<Material, List<Instruction>> = hashMapOf()
     val materialStatus: HashMap<Material, Pair<Int, Int>> = hashMapOf()
     var requirements: List<Pair<String, Int>> = listOf()
@@ -84,11 +84,21 @@ class CraftingInstructionsDialog(x: Int, y: Int, val blueprint: CraftingInstruct
                 instructions[material] = singularityData.first
                 gloop += singularityData.second
             } else if (material.label.contains("Style Soul") || material.label.contains("Style Shard")) {
-                instructions[material] = listOf(Instruction(
-                    type = InstructionType.PURCHASE_IE,
-                    material = material,
-                    count = required
-                ))
+                instructions[material] = listOf(
+                    Instruction(
+                        type = InstructionType.PURCHASE_IE,
+                        material = material,
+                        count = required
+                    )
+                )
+            } else if (material == Material.ARCANE_ANVIL) {
+                instructions[material] = listOf(
+                    Instruction(
+                        type = InstructionType.ANVIL,
+                        material = material,
+                        count = required
+                    )
+                )
             } else { // Standard material
                 instructions[material] = listOf(Instruction(
                     type = InstructionType.PURCHASE,
@@ -154,8 +164,17 @@ class CraftingInstructionsDialog(x: Int, y: Int, val blueprint: CraftingInstruct
         CraftingInstructions.openBlueprints.remove(blueprint.name)
     }
 
-    override val title = TextTitleWidget(this,
-        mccTextureComponent("island_items/infinibag/blueprint/cosmetic_${if (blueprint.type == CosmeticTag.STANDARD) "" else "${blueprint.type.name.lowercase()}_"}${blueprint.rarity.name.lowercase()}")
-            .append(Component.literal(" ${blueprint.name}").withColor(blueprint.rarity.color))
-    )
+    override val title = if (stylePerk == null) {
+        TextTitleWidget(this,
+            mccTextureComponent("island_items/infinibag/blueprint/cosmetic_${if (blueprint.type == CosmeticTag.STANDARD) "" else "${blueprint.type.name.lowercase()}_"}${blueprint.rarity.name.lowercase()}")
+                .append(Component.literal(" ${blueprint.name}").withColor(blueprint.rarity.color))
+        )
+    } else {
+        TextTitleWidget(this,
+            mccTextureComponent(stylePerk.sprite.dropLast(4)) // its like a damn 50% chance if you need the .png istg...
+                .append(Component.literal(" ${stylePerk.label}"))
+                .append(Component.literal(" (Level ${(Galapagos.save.stylePerks[stylePerk] ?: 0) + 1})")
+                    .withColor(ChatFormatting.GRAY.color!!))
+        )
+    }
 }
