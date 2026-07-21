@@ -1,4 +1,4 @@
-package xyz.nibblz.galapagos.util
+package xyz.nibblz.galapagos.core
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement
@@ -20,10 +20,12 @@ import xyz.nibblz.galapagos.events.ContainerSetSlotEvent
 import xyz.nibblz.galapagos.events.JoinMCCIEvent
 import xyz.nibblz.galapagos.events.SlotRenderEvent
 import xyz.nibblz.galapagos.screens.Intro
+import xyz.nibblz.galapagos.util.onIsland
+import xyz.nibblz.galapagos.util.sendGalapagosChatMessage
 import kotlin.math.sin
 
-object OOBE {
-    fun init() {
+object OOBE : CoreFeature {
+    override fun init() {
         if (Galapagos.save.finishedOOBE) return
 
         JoinMCCIEvent.EVENT.register { closedInitialContainer = false }
@@ -109,7 +111,10 @@ object OOBE {
         if (state == OOBEState.API_SETTINGS_GOOD && !hasAPIKey) {
             active = false
             Galapagos.save.finishedOOBE = true
-            sendGalapagosChatMessage(Component.literal("It may take a few minutes for API changes to go into effect. If an error occurs, run /galapagos api manualFetch after a few minutes!").withColor(ChatFormatting.AQUA.color!!))
+            sendGalapagosChatMessage(
+                Component.literal("It may take a few minutes for API changes to go into effect. If an error occurs, run /galapagos api manualFetch after a few minutes!")
+                    .withColor(ChatFormatting.AQUA.color!!)
+            )
             PlayerData.fetchAPI()
             return
         }
@@ -138,7 +143,9 @@ object OOBE {
             }
             OOBEState.SETTINGS -> {
                 graphics.text(Minecraft.getInstance().font, "Navigate to", x + 10, y - 53, ARGB.opaque(0xFFFFFF))
-                graphics.text(Minecraft.getInstance().font, "API Settings...", x + 70, y - 53, ARGB.opaque(ChatFormatting.AQUA.color!!))
+                graphics.text(
+                    Minecraft.getInstance().font, "API Settings...", x + 70, y - 53, ARGB.opaque(
+                        ChatFormatting.AQUA.color!!))
             }
             OOBEState.API_SETTINGS, OOBEState.API_SETTINGS_GOOD -> {
                 when {
@@ -148,16 +155,24 @@ object OOBE {
                     }
                     collectionEnabled && !infinibagEnabled -> {
                         graphics.text(Minecraft.getInstance().font, "Enable ", x + 10, y - 53, ARGB.opaque(0xFFFFFF))
-                        graphics.text(Minecraft.getInstance().font, "Infinibag...", x + 47, y - 53, ARGB.opaque(ChatFormatting.AQUA.color!!))
+                        graphics.text(
+                            Minecraft.getInstance().font, "Infinibag...", x + 47, y - 53, ARGB.opaque(
+                                ChatFormatting.AQUA.color!!))
                     }
                     !collectionEnabled && infinibagEnabled -> {
                         graphics.text(Minecraft.getInstance().font, "Enable ", x + 10, y - 53, ARGB.opaque(0xFFFFFF))
-                        graphics.text(Minecraft.getInstance().font, "Collections...", x + 47, y - 53, ARGB.opaque(ChatFormatting.AQUA.color!!))
+                        graphics.text(
+                            Minecraft.getInstance().font, "Collections...", x + 47, y - 53, ARGB.opaque(
+                                ChatFormatting.AQUA.color!!))
                     }
                     else -> {
                         graphics.text(Minecraft.getInstance().font, "Enable ", x + 10, y - 53, ARGB.opaque(0xFFFFFF))
-                        graphics.text(Minecraft.getInstance().font, "Collections and", x + 47, y - 53, ARGB.opaque(ChatFormatting.AQUA.color!!))
-                        graphics.text(Minecraft.getInstance().font, "Infinibag...", x + 10, y - 43, ARGB.opaque(ChatFormatting.AQUA.color!!))
+                        graphics.text(
+                            Minecraft.getInstance().font, "Collections and", x + 47, y - 53, ARGB.opaque(
+                                ChatFormatting.AQUA.color!!))
+                        graphics.text(
+                            Minecraft.getInstance().font, "Infinibag...", x + 10, y - 43, ARGB.opaque(
+                                ChatFormatting.AQUA.color!!))
                     }
                 }
             }
@@ -227,7 +242,9 @@ object OOBE {
                 OOBEState.SET_API_KEY -> {
                     graphics.fill(10, 10, 340, 50, ARGB.color(0.5f, 0x000000))
                     graphics.text(Minecraft.getInstance().font, "Lastly, set your API key by running", 20, 20, ARGB.opaque(0xFFFFFF))
-                    graphics.text(Minecraft.getInstance().font, "/galapagos api set <API_KEY>!", 20, 35, ARGB.opaque(ChatFormatting.AQUA.color!!))
+                    graphics.text(
+                        Minecraft.getInstance().font, "/galapagos api set <API_KEY>!", 20, 35, ARGB.opaque(
+                            ChatFormatting.AQUA.color!!))
                 }
                 else -> {}
             }

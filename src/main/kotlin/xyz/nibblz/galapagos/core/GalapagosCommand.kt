@@ -1,6 +1,7 @@
-package xyz.nibblz.galapagos.util
+package xyz.nibblz.galapagos.core
 
 import com.mojang.brigadier.CommandDispatcher
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
 import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
@@ -10,8 +11,14 @@ import xyz.nibblz.galapagos.config.Config
 import xyz.nibblz.galapagos.screens.CoinHistory
 import xyz.nibblz.galapagos.screens.Intro
 import xyz.nibblz.galapagos.screens.QuestHistory
+import xyz.nibblz.galapagos.util.Command
+import xyz.nibblz.galapagos.util.sendGalapagosChatMessage
 
-object GalapagosCommand {
+object GalapagosCommand : CoreFeature {
+    override fun init() {
+        ClientCommandRegistrationCallback.EVENT.register { dispatcher, _ -> register(dispatcher) }
+    }
+
     fun register(dispatcher: CommandDispatcher<FabricClientCommandSource>) {
         Command("galapagos") {
             literal("api") {
@@ -21,17 +28,25 @@ object GalapagosCommand {
                             val key = it.getArgument("key", String::class.java)
                             Galapagos.save.apiKey = key
 
-                            sendGalapagosChatMessage(Component.literal("API key has been set!").withColor(ChatFormatting.AQUA.color!!))
+                            sendGalapagosChatMessage(
+                                Component.literal("API key has been set!").withColor(ChatFormatting.AQUA.color!!)
+                            )
                             Config.values::usePersonalApiKey.set(true)
 
                             if (OOBE.state == OOBE.OOBEState.SET_API_KEY) {
-                                sendGalapagosChatMessage(Component.literal("If you just enabled your API settings, you may have to try again in a few minutes by running /galapagos api manualFetch!").withColor(ChatFormatting.BLUE.color!!))
+                                sendGalapagosChatMessage(
+                                    Component.literal("If you just enabled your API settings, you may have to try again in a few minutes by running /galapagos api manualFetch!")
+                                        .withColor(ChatFormatting.BLUE.color!!)
+                                )
                                 Galapagos.save.finishedOOBE = true
                                 OOBE.active = false
                             }
 
                             val status = PlayerData.fetchAPI()
-                            if (status) sendGalapagosChatMessage(Component.literal("Successfully updated player state from API!").withColor(ChatFormatting.AQUA.color!!))
+                            if (status) sendGalapagosChatMessage(
+                                Component.literal("Successfully updated player state from API!")
+                                    .withColor(ChatFormatting.AQUA.color!!)
+                            )
                         }
                     }
                 }
@@ -41,15 +56,23 @@ object GalapagosCommand {
                         Galapagos.save.apiKey = ""
                         Config.values::usePersonalApiKey.set(false)
 
-                        sendGalapagosChatMessage(Component.literal("API key has been removed! The custom API endpoint will now be used instead.").withColor(ChatFormatting.AQUA.color!!))
+                        sendGalapagosChatMessage(
+                            Component.literal("API key has been removed! The custom API endpoint will now be used instead.")
+                                .withColor(ChatFormatting.AQUA.color!!)
+                        )
                     }
                 }
 
                 literal("manualFetch") {
                     executes {
-                        sendGalapagosChatMessage(Component.literal("Fetching MCC Island API...").withColor(ChatFormatting.AQUA.color!!))
+                        sendGalapagosChatMessage(
+                            Component.literal("Fetching MCC Island API...").withColor(ChatFormatting.AQUA.color!!)
+                        )
                         val status = PlayerData.fetchAPI()
-                        if (status) sendGalapagosChatMessage(Component.literal("Successfully updated player state from API!").withColor(ChatFormatting.AQUA.color!!))
+                        if (status) sendGalapagosChatMessage(
+                            Component.literal("Successfully updated player state from API!")
+                                .withColor(ChatFormatting.AQUA.color!!)
+                        )
                     }
                 }
             }

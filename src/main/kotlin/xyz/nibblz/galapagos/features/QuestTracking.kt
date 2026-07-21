@@ -23,7 +23,7 @@ import xyz.nibblz.galapagos.mixin.accessor.HoveredSlotAccessor
 import xyz.nibblz.galapagos.screens.QuestHistory
 import xyz.nibblz.galapagos.util.Glyphs
 import xyz.nibblz.galapagos.util.findLore
-import xyz.nibblz.galapagos.util.playMccSound
+import xyz.nibblz.galapagos.util.playMcciSound
 import kotlin.reflect.KMutableProperty0
 import kotlin.time.Clock
 
@@ -54,19 +54,19 @@ object QuestTracking : Feature {
         }
     }
 
-    enum class QuestingRewardSource(val label: String) {
-        DAILY_QUEST("Daily Quest"),
-        WEEKLY_QUEST("Weekly Quest"),
-        QUEST_SCROLL("Quest Scroll"),
-        DAILY_METER("Daily Meter"),
-        WEEKLY_VAULT("Weekly Vault")
+    enum class QuestingRewardSource(val label: String, val mult: Int) {
+        DAILY_QUEST("Daily Quest", 1),
+        WEEKLY_QUEST("Weekly Quest", 5),
+        QUEST_SCROLL("Quest Scroll", 1),
+        DAILY_METER("Daily Meter", 1),
+        WEEKLY_VAULT("Weekly Vault", 1)
     }
 
-    enum class QuestingRewardBonus(val label: String) {
-        NONE(""),
-        BOOSTED("Boosted"),
-        GLITCHED("Glitched"),
-        ARCANE("Arcane")
+    enum class QuestingRewardBonus(val label: String, val mult: Int) {
+        NONE("", 1),
+        BOOSTED("Boosted", 2),
+        GLITCHED("Glitched", 2),
+        ARCANE("Arcane", 10)
     }
 
     @Serializable
@@ -99,9 +99,22 @@ object QuestTracking : Feature {
                 QuestingRewardSource.WEEKLY_VAULT -> "Weekly Vault"
             }
         }
+
+        fun getExpectedChatMessage(): String {
+            val count = when(source) {
+                QuestingRewardSource.DAILY_QUEST,
+                QuestingRewardSource.WEEKLY_QUEST,
+                QuestingRewardSource.QUEST_SCROLL,
+                QuestingRewardSource.WEEKLY_VAULT -> source.mult * bonus.mult
+                QuestingRewardSource.DAILY_METER -> source.mult * bonus.mult * if (hasMccPlus) 2 else 1
+            }
+
+            return "[${rarity.label} Reward Crate]${if (count > 1) " x${count}" else ""}"
+        }
     }
 
     var checkDailyMeter = false
+    var clickedQuest: QuestingReward? = null
     var hasMccPlus = false
     var clickedQuestHistory = false
     var openQuestHistory = false
@@ -153,8 +166,8 @@ object QuestTracking : Feature {
             if (slot.item.itemName.string.contains("Island Rewards") && button == 0 && slot.index == 8) {
                 if (!enabledProperty.get()) return
                 clickedQuestHistory = true
-                playMccSound("ui.click_normal")
-                playMccSound("ui.quest_complete")
+                playMcciSound("ui.click_normal")
+                playMcciSound("ui.quest_complete")
                 Minecraft.getInstance().connection!!.send(ServerboundContainerClosePacket(Minecraft.getInstance().player!!.containerMenu.containerId))
                 return
             }
@@ -175,14 +188,12 @@ object QuestTracking : Feature {
                     }
                 }
 
-                val reward = QuestingReward(
+                clickedQuest = QuestingReward(
                     rarity = rarity,
                     source = source,
                     bonus = bonus,
                     timestamp = Clock.System.now().epochSeconds
                 )
-
-                Galapagos.save.questHistory.add(reward)
             } else if (slot.item.itemName.string.contains("Daily Meter")) {
                 checkDailyMeter = true
             }
@@ -209,39 +220,48 @@ object QuestTracking : Feature {
     }
 
     fun systemChat(packet: ClientboundSystemChatPacket) {
-        if (!checkDailyMeter) return
-        if (!packet.content.string.contains("Reward Crate", false)) return
+        if (clickedQuest != null) {
+            if (!packet.content.string.contains(clickedQuest?.getExpectedChatMessage() ?: "")) return
+            Galapagos.save.questHistory.add(clickedQuest!!)
+            clickedQuest = null
+        }
 
-        var rarity: Rarity = Rarity.COMMON
+        if (checkDailyMeter) {
+            if (!packet.content.string.contains("Reward Crate", false)) return
 
-        Rarity.entries.forEach {
-            if (packet.content.string.contains(it.name, true)) {
-                rarity = it
+            var rarity: Rarity = Rarity.COMMON
+
+            Rarity.entries.forEach {
+                if (packet.content.string.contains(it.name, true)) {
+                    rarity = it
+                }
             }
+
+            val regex = Regex("\\d+")
+            val match = regex.find(packet.content.string) ?: return
+
+            val count = match.groups[0]?.value?.toInt()
+            val bonus = when(count) {
+                1 -> QuestingRewardBonus.NONE
+                2 -> if (hasMccPlus) QuestingRewardBonus.NONE else QuestingRewardBonus.GLITCHED
+                4 -> QuestingRewardBonus.GLITCHED
+                10, 20 -> QuestingRewardBonus.ARCANE
+                else -> QuestingRewardBonus.NONE
+            }
+
+            val source = QuestingRewardSource.DAILY_METER
+
+            Galapagos.logger.info("$rarity $count $bonus")
+
+            val reward = QuestingReward(
+                rarity = rarity,
+                source = source,
+                bonus = bonus,
+                timestamp = Clock.System.now().epochSeconds
+            )
+
+            Galapagos.save.questHistory.add(reward)
+            checkDailyMeter = false
         }
-
-        val regex = Regex("\\d+")
-        val match = regex.find(packet.content.string) ?: return
-
-        val count = match.groups[0]?.value?.toInt()
-        val bonus = when(count) {
-            1 -> QuestingRewardBonus.NONE
-            2 -> if (hasMccPlus) QuestingRewardBonus.NONE else QuestingRewardBonus.GLITCHED
-            4 -> QuestingRewardBonus.GLITCHED
-            10, 20 -> QuestingRewardBonus.ARCANE
-            else -> QuestingRewardBonus.NONE
-        }
-
-        val source = QuestingRewardSource.DAILY_METER
-
-        val reward = QuestingReward(
-            rarity = rarity,
-            source = source,
-            bonus = bonus,
-            timestamp = Clock.System.now().epochSeconds
-        )
-
-        Galapagos.save.questHistory.add(reward)
-        checkDailyMeter = false
     }
 }

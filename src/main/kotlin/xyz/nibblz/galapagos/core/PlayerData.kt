@@ -1,4 +1,4 @@
-package xyz.nibblz.galapagos.util
+package xyz.nibblz.galapagos.core
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -18,18 +18,30 @@ import net.minecraft.world.inventory.Slot
 import net.minecraft.world.item.ItemStack
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
-import xyz.nibblz.galapagos.data.*
 import xyz.nibblz.galapagos.data.Collection
-import xyz.nibblz.galapagos.events.*
-import xyz.nibblz.galapagos.features.CraftingInstructions.fetchCraftingMaterials
+import xyz.nibblz.galapagos.data.Cosmetic
+import xyz.nibblz.galapagos.data.CosmeticTag
+import xyz.nibblz.galapagos.data.Item
+import xyz.nibblz.galapagos.data.ItemLocation
+import xyz.nibblz.galapagos.data.Rarity
+import xyz.nibblz.galapagos.events.ContainerOpenEvent
+import xyz.nibblz.galapagos.events.ContainerSetSlotEvent
+import xyz.nibblz.galapagos.events.InfinibagUpdateEvent
+import xyz.nibblz.galapagos.events.JoinMCCIEvent
+import xyz.nibblz.galapagos.events.SlotClickEvent
+import xyz.nibblz.galapagos.events.SystemChatEvent
+import xyz.nibblz.galapagos.features.CraftingInstructions
 import xyz.nibblz.galapagos.mixin.accessor.HoveredSlotAccessor
+import xyz.nibblz.galapagos.util.findLore
+import xyz.nibblz.galapagos.util.sendGalapagosChatMessage
+import xyz.nibblz.galapagos.util.toDataItem
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
+import kotlin.text.get
 
-
-object PlayerData {
+object PlayerData : CoreFeature {
     @Serializable
     data class APICosmeticData(
         val trophies: Int,
@@ -80,7 +92,7 @@ object PlayerData {
     }
 
     val client: HttpClient? = HttpClient.newHttpClient()
-    
+
     fun fetchAPI(): Boolean {
         val graphQL = """
             query fetchPlayerData {
@@ -140,7 +152,10 @@ object PlayerData {
         val response = try {
             client?.send(request, HttpResponse.BodyHandlers.ofString()) ?: return false
         } catch(exception: Exception) {
-            sendGalapagosChatMessage(Component.literal("${if (Config.values::usePersonalApiKey.get()) "MCCI's API" else "Custom API endpoint"} appears to be down. Try again later, and check logs for more information.").withColor(ChatFormatting.RED.color!!))
+            sendGalapagosChatMessage(
+                Component.literal("${if (Config.values::usePersonalApiKey.get()) "MCCI's API" else "Custom API endpoint"} appears to be down. Try again later, and check logs for more information.")
+                    .withColor(ChatFormatting.RED.color!!)
+            )
             Galapagos.logger.error("API request error: ${exception.message}, ${exception.cause}")
             return false
         }
@@ -149,34 +164,52 @@ object PlayerData {
 
         if (jsonElement["message"]?.jsonPrimitive?.content == "Unauthorized") {
             if (!Config.values::usePersonalApiKey.get()) {
-                sendGalapagosChatMessage(Component.literal("Something went wrong when fetching the custom endpoint. Please report this issue to the developers!").withColor(ChatFormatting.RED.color!!))
+                sendGalapagosChatMessage(
+                    Component.literal("Something went wrong when fetching the custom endpoint. Please report this issue to the developers!")
+                        .withColor(ChatFormatting.RED.color!!)
+                )
             } else if (Galapagos.save.apiKey.isEmpty()) {
-                sendGalapagosChatMessage(Component.literal("You do not have an API key set! Please set one using /galapagos api set <API_KEY>").withColor(ChatFormatting.RED.color!!))
+                sendGalapagosChatMessage(
+                    Component.literal("You do not have an API key set! Please set one using /galapagos api set <API_KEY>")
+                        .withColor(ChatFormatting.RED.color!!)
+                )
             } else {
-                sendGalapagosChatMessage(Component.literal("Your API key is invalid! Please set a valid API key using /galapagos api set <API_KEY>").withColor(ChatFormatting.RED.color!!))
+                sendGalapagosChatMessage(
+                    Component.literal("Your API key is invalid! Please set a valid API key using /galapagos api set <API_KEY>")
+                        .withColor(ChatFormatting.RED.color!!)
+                )
             }
 
             return false
         }
 
         if (jsonElement["errors"] != null) {
-            sendGalapagosChatMessage(Component.literal("Something went wrong when fetching the MCC Island API. Check log for more information.").withColor(ChatFormatting.RED.color!!))
+            sendGalapagosChatMessage(
+                Component.literal("Something went wrong when fetching the MCC Island API. Check log for more information.")
+                    .withColor(ChatFormatting.RED.color!!)
+            )
             Galapagos.logger.error("MCC Island API error: ${response.body()}")
             return false
         }
 
         if (jsonElement["data"]?.jsonObject["player"]?.jsonObject["collections"] == null) {
-            sendGalapagosChatMessage(Component.literal("You have Collections disabled in your API settings! Please navigate to Pocket Menu -> Settings -> API Settings, and enable Collections. This may take a few minute to update!").withColor(ChatFormatting.RED.color!!))
+            sendGalapagosChatMessage(
+                Component.literal("You have Collections disabled in your API settings! Please navigate to Pocket Menu -> Settings -> API Settings, and enable Collections. This may take a few minute to update!")
+                    .withColor(ChatFormatting.RED.color!!)
+            )
             return false
         }
 
         if (jsonElement["data"]?.jsonObject["player"]?.jsonObject["infinibag"] == null || jsonElement["data"]?.jsonObject["player"]?.jsonObject["infinivault"] == null) {
-            sendGalapagosChatMessage(Component.literal("You have Infinibag disabled in your API settings! Please navigate to Pocket Menu -> Settings -> API Settings, and enable Infinibag. This may take a few minute to update!").withColor(ChatFormatting.RED.color!!))
+            sendGalapagosChatMessage(
+                Component.literal("You have Infinibag disabled in your API settings! Please navigate to Pocket Menu -> Settings -> API Settings, and enable Infinibag. This may take a few minute to update!")
+                    .withColor(ChatFormatting.RED.color!!)
+            )
             return false
         }
 
         val apiCosmeticsString = jsonElement["data"]?.jsonObject["player"]?.jsonObject["collections"]?.jsonObject["cosmetics"]?.jsonArray.toString()
-        val apiCosmetics: List<APICosmetic> = Json.decodeFromString(apiCosmeticsString)
+        val apiCosmetics: List<APICosmetic> = Json.Default.decodeFromString(apiCosmeticsString)
 
         apiCosmetics.forEach {
             val collection = Collection.entries.find { entry -> entry.label == it.cosmetic.collection } ?: return@forEach
@@ -201,7 +234,7 @@ object PlayerData {
 
         listOf("infinibag", "infinivault").forEach { location ->
             val apiItemsString = jsonElement["data"]?.jsonObject["player"]?.jsonObject[location]?.jsonArray.toString()
-            val apiItems: List<APIItem> = Json.decodeFromString(apiItemsString)
+            val apiItems: List<APIItem> = Json.Default.decodeFromString(apiItemsString)
 
             apiItems.forEach {
                 val item = Item(
@@ -225,11 +258,15 @@ object PlayerData {
     var cancellingForging: Int? = null
     var craftedBlueprint: String? = null
 
-    fun init() {
+    override fun init() {
         ContainerOpenEvent.EVENT.register { packet -> containerOpen(packet) }
         ContainerSetSlotEvent.EVENT.register { packet -> containerSetSlot(packet) }
         SlotClickEvent.EVENT.register { screen, input, _, _ -> slotClick(screen, input) }
         SystemChatEvent.EVENT.register { packet -> systemChat(packet) }
+        JoinMCCIEvent.EVENT.register {
+            if (!Galapagos.save.finishedOOBE) return@register
+            fetchAPI()
+        }
     }
 
     fun decrementItem(name: String, amount: Int) {
@@ -311,11 +348,13 @@ object PlayerData {
                 if (item.itemName.string == "Select a Recipe") return@forEach
                 if (item.itemName.string == "Locked Forge Slot") return@forEach
 
-                Galapagos.save.fusionForge.add(Item(
-                    name = item.itemName.string,
-                    count = item.count,
-                    isCosmeticToken = false
-                ))
+                Galapagos.save.fusionForge.add(
+                    Item(
+                        name = item.itemName.string,
+                        count = item.count,
+                        isCosmeticToken = false
+                    )
+                )
             }
         }
 
@@ -440,7 +479,7 @@ object PlayerData {
         if (!item.findLore("Click to Assemble")) return
         if (item.findLore("(Missing materials)")) return
 
-        val materials = fetchCraftingMaterials(item)
+        val materials = CraftingInstructions.fetchCraftingMaterials(item)
         if (materials.isEmpty()) return
 
         // TODO: i have no idea if shift-click to assemble 5x blueprints is a real thing. confirm later!!!
@@ -451,11 +490,13 @@ object PlayerData {
         craftedBlueprint = item.itemName.string
 
         materials.forEach {
-            itemsInCraftedBlueprint.add(Item(
-                name = it.first,
-                count = it.second,
-                isCosmeticToken = false
-            ))
+            itemsInCraftedBlueprint.add(
+                Item(
+                    name = it.first,
+                    count = it.second,
+                    isCosmeticToken = false
+                )
+            )
         }
     }
 
@@ -512,13 +553,15 @@ object PlayerData {
         if (item.findLore("Click to Forge (Missing materials)")) return
         if (input == ContainerInput.QUICK_MOVE && item.findLore("(Missing materials)")) return
 
-        Galapagos.save.fusionForge.add(Item(
-            name = item.itemName.string,
-            count = if (input == ContainerInput.QUICK_MOVE) 5 else 1,
-            isCosmeticToken = false
-        ))
+        Galapagos.save.fusionForge.add(
+            Item(
+                name = item.itemName.string,
+                count = if (input == ContainerInput.QUICK_MOVE) 5 else 1,
+                isCosmeticToken = false
+            )
+        )
 
-        val materials = fetchCraftingMaterials(item)
+        val materials = CraftingInstructions.fetchCraftingMaterials(item)
         if (materials.isEmpty()) return
 
         materials.forEach {

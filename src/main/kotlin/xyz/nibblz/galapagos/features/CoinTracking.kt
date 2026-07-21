@@ -22,9 +22,9 @@ import xyz.nibblz.galapagos.events.SystemChatEvent
 import xyz.nibblz.galapagos.mixin.accessor.HoveredSlotAccessor
 import xyz.nibblz.galapagos.screens.CoinHistory
 import xyz.nibblz.galapagos.util.Glyphs
-import xyz.nibblz.galapagos.util.PlayerData
+import xyz.nibblz.galapagos.core.PlayerData
 import xyz.nibblz.galapagos.util.findLore
-import xyz.nibblz.galapagos.util.playMccSound
+import xyz.nibblz.galapagos.util.playMcciSound
 import java.util.*
 import kotlin.reflect.KMutableProperty0
 import kotlin.time.Clock
@@ -193,8 +193,8 @@ object CoinTracking : Feature {
             Galapagos.logger.info("click coins")
             if (!enabledProperty.get()) return
             clickedCoinHistory = true
-            playMccSound("ui.click_normal")
-            playMccSound("ui.pickup_coins")
+            playMcciSound("ui.click_normal")
+            playMcciSound("ui.pickup_coins")
             Minecraft.getInstance().connection!!.send(ServerboundContainerClosePacket(Minecraft.getInstance().player!!.containerMenu.containerId))
             return
         }

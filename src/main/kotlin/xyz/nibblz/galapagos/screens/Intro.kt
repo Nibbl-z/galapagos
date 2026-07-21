@@ -13,7 +13,7 @@ import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.ClickEvent
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.Style
-import xyz.nibblz.galapagos.util.OOBE
+import xyz.nibblz.galapagos.core.OOBE
 import java.net.URI
 
 class Intro : BaseOwoScreen<FlowLayout>() {

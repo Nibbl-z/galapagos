@@ -1,4 +1,4 @@
-package xyz.nibblz.galapagos.util
+package xyz.nibblz.galapagos.core
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -10,26 +10,31 @@ import xyz.nibblz.galapagos.features.CoinTracking
 import xyz.nibblz.galapagos.features.QuestTracking
 import java.nio.file.Files
 
-@Serializable
-data class PlayerSave(
-    var coinChanges: MutableList<CoinTracking.CoinChange> = mutableListOf(),
-    var questHistory: MutableList<QuestTracking.QuestingReward> = mutableListOf(),
-    var cosmetics: HashMap<String, Cosmetic> = hashMapOf(),
-    var infinibag: HashMap<String, Item> = hashMapOf(),
-    var infinivault: HashMap<String, Item> = hashMapOf(),
-    var fusionForge: MutableList<Item> = mutableListOf(),
-    var stylePerks: HashMap<PlayerData.StylePerk, Int> = hashMapOf(),
-    var apiKey: String = "",
-    var finishedOOBE: Boolean = false
-)
-
-object Save {
+object Save : CoreFeature {
     private val path = FabricLoader.getInstance().configDir.resolve(Galapagos.MOD_ID).resolve("save.json")
     private val json = Json {
         prettyPrint = true
         encodeDefaults = true
         ignoreUnknownKeys = true
     }
+
+    @Serializable
+    data class PlayerSave(
+        var coinChanges: MutableList<CoinTracking.CoinChange> = mutableListOf(),
+        var questHistory: MutableList<QuestTracking.QuestingReward> = mutableListOf(),
+        var cosmetics: HashMap<String, Cosmetic> = hashMapOf(),
+        var infinibag: HashMap<String, Item> = hashMapOf(),
+        var infinivault: HashMap<String, Item> = hashMapOf(),
+        var fusionForge: MutableList<Item> = mutableListOf(),
+        var stylePerks: HashMap<PlayerData.StylePerk, Int> = hashMapOf(),
+        var apiKey: String = "",
+        var finishedOOBE: Boolean = false
+    )
+
+    override fun init() {
+        load()
+    }
+
     fun load() {
         if (!Files.exists(path)) return
 

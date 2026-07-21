@@ -15,6 +15,7 @@ import net.minecraft.world.item.TooltipFlag
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
+import xyz.nibblz.galapagos.core.PlayerData
 import xyz.nibblz.galapagos.data.*
 import xyz.nibblz.galapagos.dialogs.CraftingInstructionsDialog
 import xyz.nibblz.galapagos.events.*
@@ -85,7 +86,7 @@ object CraftingInstructions : Feature {
                 if (Config.values::craftingInstructionsShowGloop.get()) {
                     component = component
                         .append(Component.literal(", ${gloopForRawMaterial(material, count)} ").withColor(ChatFormatting.GRAY.color!!))
-                        .append(mccTextureComponent("island_items/infinibag/material/gloop"))
+                        .append(mcciTextureComponent("island_items/infinibag/material/gloop"))
                 }
 
                 component
@@ -172,7 +173,7 @@ object CraftingInstructions : Feature {
         if (requirements.isEmpty()) return
 
         ci.cancel()
-        playMccSound("ui.click_normal")
+        playMcciSound("ui.click_normal")
 
         if (openBlueprints[slot.item.itemName.string] != null) {
             openBlueprints[slot.item.itemName.string]!!.close()

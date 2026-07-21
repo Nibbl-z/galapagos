@@ -22,9 +22,9 @@ import xyz.nibblz.galapagos.features.CraftingInstructions.getComponent
 import xyz.nibblz.galapagos.features.CraftingInstructions.gloopForRawMaterial
 import xyz.nibblz.galapagos.features.CraftingInstructions.tempInfinibag
 import xyz.nibblz.galapagos.util.Glyphs
-import xyz.nibblz.galapagos.util.PlayerData
+import xyz.nibblz.galapagos.core.PlayerData
 import xyz.nibblz.galapagos.util.formatTimeString
-import xyz.nibblz.galapagos.util.mccTextureComponent
+import xyz.nibblz.galapagos.util.mcciTextureComponent
 
 class CraftingInstructionsDialog(x: Int, y: Int, val blueprint: CraftingInstructions.BlueprintInfo, stylePerk: PlayerData.StylePerk? = null) : Dialog(x, y), Themed by GalapagosTheme {
     val instructions: HashMap<Material, List<Instruction>> = hashMapOf()
@@ -134,7 +134,7 @@ class CraftingInstructionsDialog(x: Int, y: Int, val blueprint: CraftingInstruct
 
         instructions.forEach { (material, instructions) ->
             +StringWidget(
-                mccTextureComponent(material.getSpriteLocation())
+                mcciTextureComponent(material.getSpriteLocation())
                     .append(Component.literal(" ${material.label}:").withColor(material.rarity.color))
                     .append(Component.literal(" [${materialStatus[material]!!.first}/${materialStatus[material]!!.second}]").withColor(
                         ChatFormatting.GRAY.color!!)),
@@ -148,7 +148,7 @@ class CraftingInstructionsDialog(x: Int, y: Int, val blueprint: CraftingInstruct
             +StringWidget(Component.literal(""), font)
         }
         if (Config.values::craftingInstructionsShowGloop.get()) {
-            +StringWidget(Component.literal("Total Gloop: $gloop ").append(mccTextureComponent("island_items/infinibag/material/gloop")), font)
+            +StringWidget(Component.literal("Total Gloop: $gloop ").append(mcciTextureComponent("island_items/infinibag/material/gloop")), font)
         }
         if (time > 0 && Config.values::craftingInstructionsShowCraftTime.get()) {
             +StringWidget(Component.literal("Total Craft Time: ${formatTimeString((time * efficientFusion).toInt())} ").append(
@@ -166,12 +166,12 @@ class CraftingInstructionsDialog(x: Int, y: Int, val blueprint: CraftingInstruct
 
     override val title = if (stylePerk == null) {
         TextTitleWidget(this,
-            mccTextureComponent("island_items/infinibag/blueprint/cosmetic_${if (blueprint.type == CosmeticTag.STANDARD) "" else "${blueprint.type.name.lowercase()}_"}${blueprint.rarity.name.lowercase()}")
+            mcciTextureComponent("island_items/infinibag/blueprint/cosmetic_${if (blueprint.type == CosmeticTag.STANDARD) "" else "${blueprint.type.name.lowercase()}_"}${blueprint.rarity.name.lowercase()}")
                 .append(Component.literal(" ${blueprint.name}").withColor(blueprint.rarity.color))
         )
     } else {
         TextTitleWidget(this,
-            mccTextureComponent(stylePerk.sprite.dropLast(4)) // its like a damn 50% chance if you need the .png istg...
+            mcciTextureComponent(stylePerk.sprite.dropLast(4)) // its like a damn 50% chance if you need the .png istg...
                 .append(Component.literal(" ${stylePerk.label}"))
                 .append(Component.literal(" (Level ${(Galapagos.save.stylePerks[stylePerk] ?: 0) + 1})")
                     .withColor(ChatFormatting.GRAY.color!!))

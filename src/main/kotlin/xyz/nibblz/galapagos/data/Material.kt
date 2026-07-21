@@ -2,7 +2,7 @@ package xyz.nibblz.galapagos.data
 
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
-import xyz.nibblz.galapagos.util.mccTextureComponent
+import xyz.nibblz.galapagos.util.mcciTextureComponent
 
 enum class MaterialType {
     NONE,
@@ -75,7 +75,7 @@ enum class Material(val label: String, val type: MaterialType, val rarity: Rarit
     }
 
     fun getStyledComponent(): MutableComponent {
-        return mccTextureComponent(this.getSpriteLocation())
+        return mcciTextureComponent(this.getSpriteLocation())
             .append(Component.literal(" ${this.label}").withColor(this.rarity.color))
     }
 }
