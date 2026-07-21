@@ -27,8 +27,8 @@ repositories {
 		name = "Xander Maven"
 	}
 
-	maven("https://maven.terraformersmc.com/") {
-		name = "Terraformers"
+	maven("https://maven.gnomecraft.net/releases") {
+		name = "Gnomecraft"
 	}
 }
 
