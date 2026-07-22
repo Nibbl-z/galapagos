@@ -371,93 +371,96 @@ object CraftingInstructions : Feature {
         return instructions to gloop
     }
 
-    fun calculatePowerShardInstructions(shard: Material, count: Int): Pair<List<Instruction>, Int> { // hello and welcome to ~~recursion~~NVM hell
+    fun calculatePowerShardInstructions(requiredShard: Material, count: Int): Pair<List<Instruction>, Int> {
         val instructions: MutableList<Instruction> = mutableListOf()
+        var gloop = 0
 
         val purchases: HashMap<Material, Int> = hashMapOf()
         val crafts: HashMap<Material, Int> = hashMapOf()
-
-        var gloop = 0
-
-        val lowerShards: MutableMap<Material, Int> = mutableMapOf()
-        var lowestShard: Pair<Material, Int>
 
         Rarity.entries.forEach {
             purchases[shardFromRarity(it)] = 0
             crafts[shardFromRarity(it)] = 0
         }
 
-        repeat(count) { _ ->
-            if ((tempInfinibag[shardFromRarity(Rarity.entries[shard.rarity.ordinal - 1]).label]?.count ?: 0) >= 2) {
-                tempInfinibag[shardFromRarity(Rarity.entries[shard.rarity.ordinal - 1]).label]!!.count -= 2
-                crafts[shard] = crafts[shard]!! + 1
-                return@repeat
-            }
+        val lowerRarity = requiredShard.rarity.ordinal - 1
 
+        //Galapagos.logger.info("--- START POWER SHARD INFO ---")
+        // keeping the debug logs here but commented in case it breaks again (OH BELIEEEVE ME IT WILL...)
+        repeat(count) {
+            //Galapagos.logger.info("- START REPEAT FOR SHARD $it -")
 
-            lowestShard = shard to (tempInfinibag[shard.label]?.count ?: 0)
+            var currentRarity = requiredShard.rarity.ordinal - 1
+            var mustPurchase = false
 
-            Rarity.entries.forEach {
-                if (it.ordinal >= shard.rarity.ordinal) return@forEach
-                val lowerShard = shardFromRarity(it)
-                lowerShards[lowerShard] = tempInfinibag[lowerShard.label]?.count ?: 0
+            while(true) {
+                val shard = shardFromRarity(Rarity.entries[currentRarity])
+                val shardAbove = shardFromRarity(Rarity.entries[(currentRarity + 1).coerceIn(0..5)])
+                //Galapagos.logger.info("${shard} ${shardAbove} ${currentRarity}")
+                val item = tempInfinibag[shard.label]!!
+                val itemAbove = tempInfinibag[shardAbove.label]!!
 
-                if (lowerShards[lowerShard]!! > 0 && it.ordinal < lowestShard.first.rarity.ordinal) {
-                    lowestShard = lowerShard to lowerShards[lowerShard]!!
-                }
-            }
+                //Galapagos.logger.info("current: $currentRarity , $shard , x${item.count}")
 
-            lowerShards.forEach { (lowerShard, lowerCount) ->
-                var updateAbove = true
-                val upperShard = shardFromRarity(Rarity.entries[lowerShard.rarity.ordinal + 1])
-
-                if (lowerShards[upperShard] == null) updateAbove = false
-
-                if (tempInfinibag[lowerShard.label] == null) tempInfinibag[lowerShard.label] =
-                    Item(name = lowerShard.label, count = 0, isCosmeticToken = false)
-                if (tempInfinibag[upperShard.label] == null) tempInfinibag[upperShard.label] =
-                    Item(name = upperShard.label, count = 0, isCosmeticToken = false)
-
-                if (lowerCount == 0) return@forEach
-
-                if (lowerCount % 2 == 0) { // even!
-                    val craftAmount = lowerCount / 2
-
-                    tempInfinibag[lowerShard.label]!!.count -= craftAmount * 2
-
-                    crafts[upperShard] = crafts[upperShard]!! + craftAmount
-                    tempInfinibag[upperShard.label]!!.count += craftAmount
-
-                    if (updateAbove) lowerShards[upperShard] = lowerShards[upperShard]!! + craftAmount
-                    lowerShards[lowerShard] = 0
-                } else { // odd!
-                    val craftAmount = (lowerCount + 1) / 2
-
-                    purchases[lowerShard] = purchases[lowerShard]!! + 1
-                    gloop += lowerShard.marketPrice!!
-                    tempInfinibag[lowerShard.label]!!.count++
-
-                    crafts[upperShard] = crafts[upperShard]!! + craftAmount
-                    tempInfinibag[upperShard.label]!!.count += craftAmount
-                    tempInfinibag[lowerShard.label]!!.count -= craftAmount * 2
-
-                    if (updateAbove) lowerShards[upperShard] = lowerShards[upperShard]!! + craftAmount
-                    lowerShards[lowerShard] = 0
-                }
-            }
-
-            if (lowestShard.first == shard) {
-                if (shard == Material.MYTHIC_POWER_SHARD) {
-                    // w hard coding :heart:
+                if (requiredShard == Material.MYTHIC_POWER_SHARD && shard == requiredShard && mustPurchase) {
+                    //Galapagos.logger.info("No other shards, must purchase (mythic edition)")
                     purchases[Material.LEGENDARY_POWER_SHARD] = purchases[Material.LEGENDARY_POWER_SHARD]!! + 2
                     gloop += Material.LEGENDARY_POWER_SHARD.marketPrice!! * 2
                     crafts[Material.MYTHIC_POWER_SHARD] = crafts[Material.MYTHIC_POWER_SHARD]!! + 1
-                } else {
-                    purchases[shard] = purchases[shard]!! + 1
-                    gloop += shard.marketPrice!!
+                    break
+                } else if (shard == requiredShard && mustPurchase) {
+                    //Galapagos.logger.info("No other shards, must purchase")
+                    purchases[requiredShard] = purchases[requiredShard]!! + 1
+                    gloop += requiredShard.marketPrice!!
+
+                    break
+                }
+
+                if (item.count >= 2) {
+                    //Galapagos.logger.info("Upcrafting ${item.name} to ${itemAbove.name}")
+                    item.count -= 2
+                    crafts[shardAbove] = crafts[shardAbove]!! + 1
+                    itemAbove.count++
+
+                    // if the rarity of this shard is the one right below what's needed
+                    if (currentRarity == lowerRarity) break
+
+                    currentRarity++
+                } else { // cant upcraft
+                    if (item.count == 1 && mustPurchase) { // if theres nothing below available to upcraft, purchase a shard and go back
+                        //Galapagos.logger.info("Buying 1 ${item.name}")
+                        purchases[shard] = purchases[shard]!! + 1
+                        gloop += shard.marketPrice!!
+                        item.count++
+                        continue
+                    }
+
+                    if (shard == Material.COMMON_POWER_SHARD && item.count == 0) { // determines if theres nothing else to craft so itll start going back up
+                        //Galapagos.logger.info("Determined purchase is necessary")
+                        mustPurchase = true
+                        currentRarity++
+                    } else if (!mustPurchase) {
+                        if (shard == Material.COMMON_POWER_SHARD) {
+                            purchases[shard] = purchases[shard]!! + 1
+                            gloop += shard.marketPrice!!
+                            item.count++
+                            continue
+                        } else {
+                            // look downward
+                            currentRarity--
+                        }
+
+                    } else {
+                        // look upward more
+                        currentRarity++
+                    }
                 }
             }
+
+            //Galapagos.logger.info("- END REPEAT FOR SHARD $it -")
         }
+
+       // Galapagos.logger.info("--- END POWER SHARD INFO ---")
 
         Rarity.entries.forEach {
             val shard = shardFromRarity(it)

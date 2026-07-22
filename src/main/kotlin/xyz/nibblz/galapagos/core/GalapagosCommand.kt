@@ -1,6 +1,7 @@
 package xyz.nibblz.galapagos.core
 
 import com.mojang.brigadier.CommandDispatcher
+import com.mojang.brigadier.arguments.IntegerArgumentType
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
 import net.minecraft.ChatFormatting
@@ -8,6 +9,7 @@ import net.minecraft.client.Minecraft
 import net.minecraft.network.chat.Component
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
+import xyz.nibblz.galapagos.data.Item
 import xyz.nibblz.galapagos.screens.CoinHistory
 import xyz.nibblz.galapagos.screens.Intro
 import xyz.nibblz.galapagos.screens.QuestHistory
@@ -142,6 +144,36 @@ object GalapagosCommand : CoreFeature {
                             Minecraft.getInstance().gui.chat.addClientSystemMessage(
                                 Component.literal(Galapagos.save.infinibag[nameArg]!!.toString())
                             )
+                        }
+                    }
+                }
+
+                literal("setbagitem") {
+                    argument("name") {
+                        suggests { _, builder ->
+                            Galapagos.save.infinibag.keys.forEach { builder.suggest(it) }
+                            builder.buildFuture()
+                        }
+
+                        argument("count", IntegerArgumentType.integer()) {
+                            executes {
+                                val nameArg = it.getArgument("name", String::class.java)
+                                val countArg = it.getArgument("count", Int::class.java)
+                                if (Galapagos.save.infinibag[nameArg] == null) {
+                                    Galapagos.save.infinibag[nameArg] = Item(
+                                        name = nameArg,
+                                        count = countArg,
+                                        isCosmeticToken = false
+                                    )
+                                } else {
+                                    Galapagos.save.infinibag[nameArg]!!.count = countArg
+                                }
+
+
+                                Minecraft.getInstance().gui.chat.addClientSystemMessage(
+                                    Component.literal(Galapagos.save.infinibag[nameArg]!!.toString())
+                                )
+                            }
                         }
                     }
                 }

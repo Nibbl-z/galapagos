@@ -4,6 +4,7 @@ import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback
 import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
 import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.Style
 import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
 import net.minecraft.world.item.ItemStack
 import xyz.nibblz.galapagos.Galapagos
@@ -16,9 +17,13 @@ import kotlin.reflect.KMutableProperty0
 object WeeklyVaultInfo : Feature {
     override val id: String = "weekly_vault_info"
     override val name: String = "Weekly Vault Info"
-    override val description: List<Component> = listOf()
+    override val description: List<Component> = listOf(
+        Component.literal("Shows a progress bar on the weekly vault's tooltip showing the overall progress towards a max vault."),
+        Component.empty(),
+        Component.literal("This feature is still WIP, more additions are planned").withStyle(Style.EMPTY.withItalic(true))
+    )
     override val enabledProperty: KMutableProperty0<Boolean> = Config.values::weeklyVaultInfoEnabled
-    override val image: Config.ConfigImage = Config.ConfigImage("quest_tracking.png", 1097, 465)
+    override val image: Config.ConfigImage = Config.ConfigImage("weekly_vault_info.png", 468, 474)
 
     val xpPerLevel: HashMap<IntRange, Int> = hashMapOf(
         1..5 to 500,

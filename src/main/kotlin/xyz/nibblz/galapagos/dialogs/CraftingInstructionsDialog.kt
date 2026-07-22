@@ -35,8 +35,16 @@ class CraftingInstructionsDialog(x: Int, y: Int, val blueprint: CraftingInstruct
 
     fun calculateInstructions() {
         tempInfinibag.clear()
-        Galapagos.save.infinibag.forEach { (name, item) ->
-            tempInfinibag[name] = item.clone()
+//        Galapagos.save.infinibag.forEach { (name, item) ->
+//            tempInfinibag[name] = item.clone()
+//        }
+
+        Material.entries.forEach {
+            tempInfinibag[it.label] = Item(
+                name = it.label,
+                count = Galapagos.save.infinibag[it.label]?.count ?: 0,
+                isCosmeticToken = false
+            )
         }
 
         Galapagos.save.fusionForge.forEach {
