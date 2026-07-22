@@ -160,7 +160,16 @@ object PlayerData : CoreFeature {
             return false
         }
 
-        val jsonElement = Json.parseToJsonElement(response.body()).jsonObject
+        val jsonElement = try {
+            Json.parseToJsonElement(response.body()).jsonObject
+        } catch(exception: Exception) {
+            sendGalapagosChatMessage(
+                Component.literal("${if (Config.values::usePersonalApiKey.get()) "MCCI's API" else "Custom API endpoint"} appears to be down. Try again later, and check logs for more information.")
+                    .withColor(ChatFormatting.RED.color!!)
+            )
+            Galapagos.logger.error("API request error: ${exception.message}, ${exception.cause}")
+            return false
+        }
 
         if (jsonElement["message"]?.jsonPrimitive?.content == "Unauthorized") {
             if (!Config.values::usePersonalApiKey.get()) {
