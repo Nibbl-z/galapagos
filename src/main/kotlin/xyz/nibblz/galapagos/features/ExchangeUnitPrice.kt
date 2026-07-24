@@ -93,6 +93,10 @@ object ExchangeUnitPrice : Feature {
                 }
                 else -> 1
             }
+
+            if (stars >= 1 && !item.findLore("None")) { // its GOTTA have an elim effect then. Hopefully.
+                wispEquivalent[item] = wispEquivalent[item]!! + 2
+            }
         } else {
             if (item.findLore("wardrobe") && !item.findLore(Glyphs.getGlyph("_fonts/icon/tooltips/collector.png"))) {
                 soulEquivalent[item] = when(rarity) {
