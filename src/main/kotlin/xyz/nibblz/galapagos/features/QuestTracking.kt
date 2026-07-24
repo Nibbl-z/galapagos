@@ -141,11 +141,11 @@ object QuestTracking : Feature {
 
     fun containerOpen(packet: ClientboundContainerSetContentPacket) {
         val screen = Minecraft.getInstance().screen ?: return
-        if (!screen.title.string.contains("ISLAND REWARDS")) return
-
-        val favorites = packet.items[43]
-        if (favorites.findLore("Click to Select Favorites")) {
-            hasMccPlus = true
+        if (screen.title.string.contains("ISLAND REWARDS")) {
+            val favorites = packet.items[43]
+            if (favorites.findLore("Click to Select Favorites")) {
+                hasMccPlus = true
+            }
         }
 
         if (checkWeeklyVault && screen.title.string.contains("SUMMARY")) {
