@@ -43,6 +43,7 @@ object WeeklyVaultInfo : Feature {
     var claims = 0
     var maxClaims = 20
     var progress = 0
+    var daysLeft = 7
 
     fun claimXP(claim: Int): Int {
         xpPerLevel.forEach { (range, xp) ->
@@ -73,6 +74,10 @@ object WeeklyVaultInfo : Feature {
         return xp
     }
 
+    fun getXpPerDay(): Int {
+        return (getMaxXPNeeded() - getTotalXP()) / daysLeft
+    }
+
     override fun init() {
         ContainerOpenEvent.EVENT.register { packet -> containerOpen(packet) }
         ItemTooltipCallback.EVENT.register { stack, _, _, components -> tooltipAdd(stack, components) }
@@ -94,9 +99,10 @@ object WeeklyVaultInfo : Feature {
 
         Galapagos.logger.info("$claims + $progress XP / $maxClaims ")
         Galapagos.logger.info("${getTotalXP()} / ${getMaxXPNeeded()}")
+
+        val daysMatch = vault.findLore(Regex("Claimable in: (?<days>\\d)d"))
+        daysLeft = daysMatch?.get("days")?.value?.toIntOrNull() ?: 1
     }
-
-
 
     fun tooltipAdd(stack: ItemStack, components: MutableList<Component>) {
         val screen = Minecraft.getInstance().screen ?: return
@@ -117,6 +123,11 @@ object WeeklyVaultInfo : Feature {
                 .append(Component.literal("%,d".format(getTotalXP())).withColor(ChatFormatting.WHITE.color!!))
                 .append(Component.literal("/" + "%,d".format(getMaxXPNeeded())).withColor(ChatFormatting.DARK_GRAY.color!!))
                 .append(Component.literal(" XP").withColor(ChatFormatting.GRAY.color!!))
+        )
+
+        components.add(progressIndex + 2,
+                Component.literal("~" + "%,d".format(getXpPerDay())).withColor(ChatFormatting.WHITE.color!!)
+                .append(Component.literal(" XP needed per day").withColor(ChatFormatting.GRAY.color!!))
         )
     }
 }
