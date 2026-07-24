@@ -21,8 +21,10 @@ import xyz.nibblz.galapagos.events.SlotClickEvent
 import xyz.nibblz.galapagos.events.SystemChatEvent
 import xyz.nibblz.galapagos.mixin.accessor.HoveredSlotAccessor
 import xyz.nibblz.galapagos.screens.QuestHistory
+import xyz.nibblz.galapagos.screens.VaultHistory
 import xyz.nibblz.galapagos.util.Glyphs
 import xyz.nibblz.galapagos.util.findLore
+import xyz.nibblz.galapagos.util.getItemCount
 import xyz.nibblz.galapagos.util.playMcciSound
 import kotlin.reflect.KMutableProperty0
 import kotlin.time.Clock
@@ -31,11 +33,11 @@ object QuestTracking : Feature {
     override val id: String = "quest_tracking"
     override val name: String = "Quest Tracking"
     override val description: List<Component> = listOf(
-        Component.literal("Logs all completed quests and daily meter claims, including their rarity as well as if the quest is boosted/glitched/arcane."),
+        Component.literal("Logs all completed quests and daily meter claims, including their rarity as well as if the quest is boosted/glitched/arcane. Weekly vaults are also tracked, showing how many of each crate was earned, as well as how many claims were stored in the vault."),
         Component.empty(),
-        Component.literal("To view past quests, click on the info icon at the top-right of the journal."),
+        Component.literal("To view past quests, click on the info icon at the top-right of the journal. To view past weekly vaults, click on the weekly vault."),
         Component.empty(),
-        Component.literal("Note: Disabling this feature will NOT disable quest tracking, but will disable the quest history menu.")
+        Component.literal("Note: Disabling this feature will NOT disable quest tracking, but will disable the quest/vault history menu.")
     )
     override val enabledProperty: KMutableProperty0<Boolean> = Config.values::questTrackingEnabled
     override val image: Config.ConfigImage = Config.ConfigImage("quest_tracking.png", 1097, 465)
@@ -47,10 +49,17 @@ object QuestTracking : Feature {
         SystemChatEvent.EVENT.register { packet -> systemChat(packet) }
         ItemTooltipCallback.EVENT.register { stack, _, _, components -> tooltipAdd(stack, components) }
         ClientTickEvents.END_CLIENT_TICK.register {
-            if (!openQuestHistory) return@register
-            openQuestHistory = false
-            // im getting sick of it for the new disease
-            Minecraft.getInstance().setScreen(QuestHistory())
+            if (openQuestHistory) {
+                openQuestHistory = false
+                // im getting sick of it plain old disease
+                Minecraft.getInstance().setScreen(QuestHistory())
+            }
+
+            if (openVaultHistory) {
+                openVaultHistory = false
+                // its not my life but i will live it how i please
+                Minecraft.getInstance().setScreen(VaultHistory())
+            }
         }
     }
 
@@ -59,7 +68,6 @@ object QuestTracking : Feature {
         WEEKLY_QUEST("Weekly Quest", 5),
         QUEST_SCROLL("Quest Scroll", 1),
         DAILY_METER("Daily Meter", 1),
-        WEEKLY_VAULT("Weekly Vault", 1)
     }
 
     enum class QuestingRewardBonus(val label: String, val mult: Int) {
@@ -86,7 +94,6 @@ object QuestTracking : Feature {
                 }
                 QuestingRewardSource.QUEST_SCROLL -> "island_items/infinibag/quest_scroll/${rarity.name.lowercase()}.png"
                 QuestingRewardSource.DAILY_METER -> "island_interface/quest_log/daily/daily_meter_4.png"
-                QuestingRewardSource.WEEKLY_VAULT -> "island_interface/quest_log/meters/daily_vault_full.png" // mhm, the "daily vault"
             }
         }
 
@@ -96,7 +103,6 @@ object QuestTracking : Feature {
                 QuestingRewardSource.WEEKLY_QUEST,
                 QuestingRewardSource.DAILY_METER -> "${rarity.label}${if (bonus != QuestingRewardBonus.NONE) " ${bonus.label}" else ""} ${source.label}"
                 QuestingRewardSource.QUEST_SCROLL -> "${rarity.label} ${source.label}"
-                QuestingRewardSource.WEEKLY_VAULT -> "Weekly Vault"
             }
         }
 
@@ -105,7 +111,6 @@ object QuestTracking : Feature {
                 QuestingRewardSource.DAILY_QUEST,
                 QuestingRewardSource.WEEKLY_QUEST,
                 QuestingRewardSource.QUEST_SCROLL,
-                QuestingRewardSource.WEEKLY_VAULT -> source.mult * bonus.mult
                 QuestingRewardSource.DAILY_METER -> source.mult * bonus.mult * if (hasMccPlus) 2 else 1
             }
 
@@ -113,11 +118,26 @@ object QuestTracking : Feature {
         }
     }
 
+    @Serializable
+    data class WeeklyVault(
+        var timestamp: Long = 0,
+        var rewards: HashMap<Rarity, Int> = hashMapOf(),
+        var anomalies: Int = 0, // yea because there's a chance for more than 1 anomaly. I $$$$ING WISH!!!!!!! I LOve anomaly anomaly yum
+        // yum yum i loveanomaliyies iarcane anomly arcanee:3anomallyyyyy mmmm arcane anaomalyyyyy
+        // I'm fine.
+        var claims: Int = 0,
+        var maxClaims: Int = 20
+    )
+
     var checkDailyMeter = false
+    var checkWeeklyVault = false
     var clickedQuest: QuestingReward? = null
     var hasMccPlus = false
+
     var clickedQuestHistory = false
     var openQuestHistory = false
+    var clickedVaultHistory = false
+    var openVaultHistory = false
 
     fun containerOpen(packet: ClientboundContainerSetContentPacket) {
         val screen = Minecraft.getInstance().screen ?: return
@@ -127,12 +147,41 @@ object QuestTracking : Feature {
         if (favorites.findLore("Click to Select Favorites")) {
             hasMccPlus = true
         }
+
+        if (checkWeeklyVault && screen.title.string.contains("SUMMARY")) {
+            checkWeeklyVault = false
+            // TODO: MAKE SURE THIS WORKS! IT IS COMPLETELY UNTESTED!
+            // and it SURE AS HELL BETTER WORK THE FIRST TIME because then i'll have to wait a week, aka 0.05 modrinth review periods
+
+            val vault = WeeklyVault(
+                timestamp = Clock.System.now().epochSeconds,
+                claims = WeeklyVaultInfo.claims,
+                maxClaims = WeeklyVaultInfo.maxClaims
+            )
+
+            packet.items.forEach {
+                if (it.itemName.string == "Arcane Anomaly") {
+                    vault.anomalies++
+                } else {
+                    val rarity = Rarity.entries.find { rarity -> it.itemName.string.contains(rarity.label) } ?: Rarity.COMMON
+                    vault.rewards[rarity] = it.getItemCount()
+                }
+            }
+
+            Galapagos.save.weeklyVaultHistory.add(vault)
+        }
     }
 
     fun containerClose() {
-        if (!clickedQuestHistory) return
-        clickedQuestHistory = false
-        openQuestHistory = true
+        if (clickedQuestHistory) {
+            clickedQuestHistory = false
+            openQuestHistory = true
+        }
+
+        if (clickedVaultHistory) {
+            clickedVaultHistory = false
+            openVaultHistory = true
+        }
     }
 
     fun getQuestBonus(item: ItemStack): QuestingRewardBonus {
@@ -154,7 +203,6 @@ object QuestTracking : Feature {
         if (item.itemName.string.contains("Weekly Quest")) return QuestingRewardSource.WEEKLY_QUEST
         if (item.itemName.string.contains("Quest Scroll")) return QuestingRewardSource.QUEST_SCROLL
         if (item.itemName.string.contains("Daily Meter")) return QuestingRewardSource.DAILY_METER
-        if (item.itemName.string.contains("Weekly Vault")) return QuestingRewardSource.WEEKLY_VAULT
 
         return QuestingRewardSource.DAILY_QUEST // fallback, i guess
     }
@@ -177,6 +225,14 @@ object QuestTracking : Feature {
 
         val source = getRewardSource(slot.item)
 
+        if (slot.item.itemName.string == "Weekly Vault" && !slot.item.findLore("Click to Claim")) {
+            if (!enabledProperty.get()) return
+            clickedVaultHistory = true
+            playMcciSound("ui.click_normal")
+            Minecraft.getInstance().connection!!.send(ServerboundContainerClosePacket(Minecraft.getInstance().player!!.containerMenu.containerId))
+            return
+        }
+
         if (slot.item.findLore("Click to Claim")) {
             if (slot.item.itemName.string.contains("Quest")) {
                 var rarity: Rarity = Rarity.COMMON
@@ -196,6 +252,8 @@ object QuestTracking : Feature {
                 )
             } else if (slot.item.itemName.string.contains("Daily Meter")) {
                 checkDailyMeter = true
+            } else if (slot.item.itemName.string.contains("Weekly Vault")) {
+                checkWeeklyVault = true
             }
         }
     }
@@ -204,19 +262,32 @@ object QuestTracking : Feature {
         if (!enabledProperty.get()) return
         val screen = Minecraft.getInstance().screen ?: return
         if (!screen.title.string.contains("JOURNAL") && !screen.title.string.contains("MAILBOX")) return
-        if (stack.itemName.string != "Island Rewards") return
-        if (stack.get(DataComponents.ITEM_MODEL)?.path?.contains("blank") == false) return
 
-        var index = components.indexOfFirst { it.string.contains("minecraft:") } // if you have f3+h on :P
-        if (index == -1) { index = components.size - 1 } // if you dont !
+        if (stack.itemName.string == "Island Rewards" && stack.get(DataComponents.ITEM_MODEL)?.path?.contains("blank") == false) {
+            var index = components.indexOfFirst { it.string.contains("minecraft:") } // if you have f3+h on :P
+            if (index == -1) { index = components.size - 1 } // if you dont !
 
-        components.add(index, Component.empty())
+            components.add(index, Component.empty())
 
-        components.add(index + 1, Component.empty()
-            .append(Glyphs.getGlyphComponent("_fonts/icon/click_action_left.png"))
-            .append(Component.literal(" > ").withColor(ChatFormatting.DARK_GRAY.color!!))
-            .append(Component.literal("Click to ").withColor(0xecd584))
-            .append(Component.literal("View Quest History").withColor(0xfee761)))
+            components.add(index + 1, Component.empty()
+                .append(Glyphs.getGlyphComponent("_fonts/icon/click_action_left.png"))
+                .append(Component.literal(" > ").withColor(ChatFormatting.DARK_GRAY.color!!))
+                .append(Component.literal("Click to ").withColor(0xecd584))
+                .append(Component.literal("View Quest History").withColor(0xfee761)))
+        }
+
+        if (stack.itemName.string == "Weekly Vault" && !components.any {it.string.contains("Click to Claim")}) {
+            var index = components.indexOfFirst { it.string.contains("minecraft:") } // if you have f3+h on :P
+            if (index == -1) { index = components.size - 1 } // if you dont !
+
+            components.add(index, Component.empty())
+
+            components.add(index + 1, Component.empty()
+                .append(Glyphs.getGlyphComponent("_fonts/icon/click_action_left.png"))
+                .append(Component.literal(" > ").withColor(ChatFormatting.DARK_GRAY.color!!))
+                .append(Component.literal("Click to ").withColor(0xecd584))
+                .append(Component.literal("View Vault History").withColor(0xfee761)))
+        }
     }
 
     fun systemChat(packet: ClientboundSystemChatPacket) {

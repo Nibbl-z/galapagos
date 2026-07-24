@@ -22,6 +22,7 @@ object Save : CoreFeature {
     data class PlayerSave(
         var coinChanges: MutableList<CoinTracking.CoinChange> = mutableListOf(),
         var questHistory: MutableList<QuestTracking.QuestingReward> = mutableListOf(),
+        var weeklyVaultHistory: MutableList<QuestTracking.WeeklyVault> = mutableListOf(),
         var cosmetics: HashMap<String, Cosmetic> = hashMapOf(),
         var infinibag: HashMap<String, Item> = hashMapOf(),
         var infinivault: HashMap<String, Item> = hashMapOf(),

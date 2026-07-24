@@ -68,17 +68,20 @@ fun ItemStack.findLores(regex: Regex): List<MatchGroupCollection> {
     return matches
 }
 
-fun ItemStack.toDataItem(): Item {
-    val name = this.itemName.string
-
+fun ItemStack.getItemCount(): Int {
     val regex = Regex("Amount: (?<amount>[\\d,]+)")
     val amountString = this.findLore(regex)?.get("amount")?.value ?: this.count.toString()
     val cleanedString = amountString.replace(",", "")
-    val count = cleanedString.toInt()
+
+    return cleanedString.toInt()
+}
+
+fun ItemStack.toDataItem(): Item {
+    val name = this.itemName.string
 
     return Item(
         name = name,
-        count = count,
+        count = this.getItemCount(),
         isCosmeticToken = name.contains("Token") && !name.contains("Blueprint:") && !name.contains("MCC+")
     )
 }

@@ -13,6 +13,7 @@ import xyz.nibblz.galapagos.data.Item
 import xyz.nibblz.galapagos.screens.CoinHistory
 import xyz.nibblz.galapagos.screens.Intro
 import xyz.nibblz.galapagos.screens.QuestHistory
+import xyz.nibblz.galapagos.screens.VaultHistory
 import xyz.nibblz.galapagos.util.Command
 import xyz.nibblz.galapagos.util.sendGalapagosChatMessage
 
@@ -92,6 +93,14 @@ object GalapagosCommand : CoreFeature {
                     executes {
                         Minecraft.getInstance().execute {
                             Minecraft.getInstance().setScreen(CoinHistory())
+                        }
+                    }
+                }
+
+                literal("vaulthistory") {
+                    executes {
+                        Minecraft.getInstance().execute {
+                            Minecraft.getInstance().setScreen(VaultHistory())
                         }
                     }
                 }
