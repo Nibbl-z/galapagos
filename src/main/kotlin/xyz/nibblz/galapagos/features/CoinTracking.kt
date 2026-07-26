@@ -6,6 +6,7 @@ import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback
 import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.screens.inventory.ContainerScreen
+import net.minecraft.core.component.DataComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket
@@ -54,6 +55,7 @@ object CoinTracking : Feature {
     override fun init() {
         ContainerCloseEvent.EVENT.register { containerClose() }
         SlotClickEvent.EVENT.register { screen, input, _, button -> slotClick(screen, input, button) }
+        //AnvilSlotClickEvent.EVENT.register { screen, input, _, button -> anvilSlotClick(screen, input, button) }
         SystemChatEvent.EVENT.register { packet -> systemChat(packet) }
         ContainerOpenEvent.EVENT.register { packet -> containerOpen(packet) }
         ItemTooltipCallback.EVENT.register { stack, _, _, components -> tooltipAdd(stack, components) }
@@ -72,6 +74,7 @@ object CoinTracking : Feature {
     var clickedCoinHistory = false
     var openCoinHistory = false
     var summaryOpened = false
+    var bidding = false
 
     val filter = CoinChangeCategory.entries.associateWithTo(EnumMap(CoinChangeCategory::class.java)) {true}
 
@@ -86,8 +89,6 @@ object CoinTracking : Feature {
     fun containerOpen(packet: ClientboundContainerSetContentPacket) {
         val screen = Minecraft.getInstance().screen ?: return
 
-
-
         if (screen.title.string.contains("USING COINS?")) {
             handleCoinPurchase(packet)
         }
@@ -100,6 +101,10 @@ object CoinTracking : Feature {
 
         if (screen.title.string.contains("PLAYER TRADE")) {
             category = CoinChangeCategory.TRADING
+        }
+
+        if (screen.title.string.contains("BID ON THIS ITEM?")) {
+            data = packet.items[28].itemName.string
         }
     }
 
@@ -168,7 +173,11 @@ object CoinTracking : Feature {
             val cleanedPriceString = priceString.value.replace(",", "")
             price = cleanedPriceString.toInt()
 
-            category = if (it.itemName.string == "Purchase Confirmation") CoinChangeCategory.ISLAND_EXCHANGE else CoinChangeCategory.ITEM
+            category = when {
+                it.itemName.string == "Purchase Confirmation" -> CoinChangeCategory.ISLAND_EXCHANGE
+                packet.items[28].findLore("Trophies: ") -> CoinChangeCategory.COSMETIC
+                else -> CoinChangeCategory.ITEM
+            }
 
             break
         }
@@ -187,7 +196,6 @@ object CoinTracking : Feature {
 
     fun slotClick(screen: ContainerScreen, type: ContainerInput, button: Int) {
         val slot = (screen as HoveredSlotAccessor).`galapagos$hoveredSlot`() ?: return
-
 
         if (slot.item.itemName.string == "Coins" && screen.title.string.contains("INFINIBAG") && button == 0) {
             Galapagos.logger.info("click coins")
@@ -254,7 +262,7 @@ object CoinTracking : Feature {
         }
 
         // appears when clicking buy button
-        if (slot.index in 46..48 && !screen.title.string.contains("SUMMARY")) {
+        if (slot.index in 46..48 && !screen.title.string.contains("SUMMARY") && !screen.title.string.contains("BID ON THIS ITEM?")) {
             Galapagos.logger.info("clicked the button")
             if (dataCount > 1) {
                 price *= dataCount
@@ -271,7 +279,56 @@ object CoinTracking : Feature {
             Galapagos.save.coinChanges.add(change)
             resetData()
         }
+
+        if (slot.index in 46..48 && screen.title.string.contains("BID ON THIS ITEM?")) {
+            val buttonSprite = screen.menu.slots[49].item.get(DataComponents.ITEM_MODEL)?.path ?: ""
+
+            if (button == 1 && buttonSprite.contains("bid/button")) {
+                bidding = true
+            }
+
+            if (!buttonSprite.contains("confirm/button")) return
+
+            val quickBidMatch = slot.item.findLore(Regex("Bid Amount: \\D+(?<coins>[\\d,]+)"))?.get("coins")?.value ?: return
+            val quickBid = quickBidMatch.replace(",", "").toIntOrNull() ?: return
+            Galapagos.logger.info("$data, $quickBid")
+
+            val change = CoinChange(
+                amount = -quickBid,
+                timestamp = Clock.System.now().epochSeconds,
+                category = CoinChangeCategory.BID,
+                data = data,
+                dataCount = dataCount
+            )
+
+            Galapagos.save.coinChanges.add(change)
+            resetData()
+        }
+
+
     }
+
+    // leaving this here out of spite
+    // so APPARENTLY. this is COMPLETELY UNNECESSARY!!!! because then its just the same confirm thing after
+    // Bye bye half an hour!
+//    fun anvilSlotClick(screen: AnvilScreen, input: ContainerInput, button: Int) {
+//        val slot = (screen as HoveredSlotAccessor).`galapagos$hoveredSlot`() ?: return
+//        val name = (screen.menu as AnvilMenuAccessor).`galapagos$getItemName`() ?: return
+//        val buttonSprite = screen.menu.slots[7].item.get(DataComponents.ITEM_MODEL)?.path ?: ""
+//
+//        if (slot.index in 4..6 && bidding && buttonSprite.contains("bid/button")) {
+//            val change = CoinChange(
+//                amount = -shortenedNumberToInt(name),
+//                timestamp = Clock.System.now().epochSeconds,
+//                category = CoinChangeCategory.BID,
+//                data = data,
+//                dataCount = dataCount
+//            )
+//
+//            Galapagos.save.coinChanges.add(change)
+//            resetData()
+//        }
+//    }
 
     fun tooltipAdd(stack: ItemStack, components: MutableList<Component>) {
         if (!enabledProperty.get()) return
@@ -307,6 +364,7 @@ object CoinTracking : Feature {
         MAILBOX("Mailbox"),
         TRADING("Trading"),
         ITEM("Items"),
+        COSMETIC("Cosmetics"),
         STYLE_PERK("Style Perks", true), // these are hidden because i havent implemented them yet :steamhappy: ill do it later
         BID("Auction Bid", true),
         SCAVENGE("Scavenging"),
@@ -341,6 +399,7 @@ object CoinTracking : Feature {
 
                 else -> "island_interface/generic/question_mark.png"
             }
+            CoinChangeCategory.COSMETIC -> "island_interface/wardrobe/hat/icon.png"
             CoinChangeCategory.STYLE_PERK -> {
                 val perk = PlayerData.StylePerk.valueOf(this.data)
                 perk.sprite
@@ -358,6 +417,7 @@ object CoinTracking : Feature {
             CoinChangeCategory.MAILBOX -> this.data
             CoinChangeCategory.TRADING -> "Trade with ${this.data}"
             CoinChangeCategory.ITEM -> "${this.data}${if (this.dataCount > 1) " x${this.dataCount}" else ""}"
+            CoinChangeCategory.COSMETIC -> this.data
             CoinChangeCategory.STYLE_PERK -> {
                 val perk = PlayerData.StylePerk.valueOf(this.data)
                 "Upgraded ${perk.label} to level ${this.dataCount}"

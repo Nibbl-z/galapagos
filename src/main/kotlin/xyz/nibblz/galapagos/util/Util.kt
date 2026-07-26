@@ -15,3 +15,17 @@ fun formatTimeString(seconds: Int): String {
 
     return "${if (hours > 0) "${hours}h${if (minutes > 0) " " else ""}" else ""}${if (minutes > 0) "${minutes}m" else ""}"
 }
+
+//fun shortenedNumberToInt(number: String): Int {
+//    val input = number.uppercase()
+//
+//    if (input.endsWith("K")) {
+//        return input.removeSuffix("K").toFloatOrNull()?.times(1000)?.toInt() ?: 0
+//    }
+//
+//    if (input.endsWith("M")) {
+//        return input.removeSuffix("M").toFloatOrNull()?.times(1000000)?.toInt() ?: 0
+//    }
+//
+//    return number.toIntOrNull() ?: 0
+//}

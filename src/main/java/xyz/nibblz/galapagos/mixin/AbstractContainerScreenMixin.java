@@ -3,6 +3,7 @@ package xyz.nibblz.galapagos.mixin;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.AnvilScreen;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;
 import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
@@ -12,6 +13,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import xyz.nibblz.galapagos.events.AnvilSlotClickEvent;
 import xyz.nibblz.galapagos.events.ContainerRenderEvent;
 import xyz.nibblz.galapagos.events.SlotClickEvent;
 import xyz.nibblz.galapagos.events.SlotRenderEvent;
@@ -39,10 +41,17 @@ public class AbstractContainerScreenMixin {
         // ^ for whatever reason, double clicking fast will run this function twice, and then AGAIN with pickup all. i dont want that. PMO!!!
 
         ContainerScreen screen = Minecraft.getInstance().screen instanceof ContainerScreen s ? s : null;
-        if (!UtilKt.onIsland()) return;
-        if (screen == null) return;
+        AnvilScreen anvilScreen = Minecraft.getInstance().screen instanceof AnvilScreen s ? s : null;
 
-        SlotClickEvent.INSTANCE.getEVENT().invoker().invoke(screen, containerInput, ci, buttonNum);
+        if (!UtilKt.onIsland()) return;
+
+        if (screen != null) {
+            SlotClickEvent.INSTANCE.getEVENT().invoker().invoke(screen, containerInput, ci, buttonNum);
+        }
+
+        if (anvilScreen != null) {
+            AnvilSlotClickEvent.INSTANCE.getEVENT().invoker().invoke(anvilScreen, containerInput, ci, buttonNum);
+        }
     }
 
     @Inject(method = "extractRenderState", at = @At("TAIL"))
