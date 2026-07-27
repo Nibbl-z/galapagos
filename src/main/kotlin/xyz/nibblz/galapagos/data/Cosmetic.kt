@@ -15,14 +15,19 @@ enum class CosmeticTag(val maxDonations: Int, val core: CosmeticCore, val bonusC
 }
 
 @Serializable
-enum class Collection(val label: String) {
-    ELEMENTAL("Elemental"),
-    STANDARD_GAME("Standard Game"),
-    EXCLUSIVE_GAME("Exclusive Game"),
-    EXCLUSIVE_SEASON("Exclusive Season"),
-    EXCLUSIVE_VARIETY("Exclusive Variety"),
-    GATE("Gate"),
-    FISHING("Fishing")
+enum class CosmeticCollection(val label: String, val sprite: String, val bonus: Int) {
+    ELEMENTAL("Elemental", "island_interface/crate_machine/pool/nature", 200),
+    STANDARD_GAME("Standard Game", "island_items/game_pass/tgttos/1", 100),
+    EXCLUSIVE_GAME("Exclusive Game", "island_items/game_pass/hitw/2", 200),
+    EXCLUSIVE_SEASON("Exclusive Season", "island_items/infinibag/seasonal/token_s1", 300),
+    EXCLUSIVE_VARIETY("Exclusive Variety", "island_items/infinibag/seasonal/token_variety", 100),
+    GATE("Gate", "island_interface/navigator/arcane_gate", 100),
+    FISHING("Fishing", "island_interface/fishing/perk_icon/speedy_rod", 100),
+    PARTICLE("Particle", "island_interface/wardrobe/aura/icon", 50),
+    BASIC_VENDOR("Basic Vendor", "island_interface/navigtor/pose", 50),
+    ADVANCED_VENDOR("Advanced Vendor", "island_interface/wardrobe/pose_one", 100),
+    TRIUMPH_VENDOR("Triumph Vendor", "island_interface/wardrobe/pose_two", 200),
+    SPECIAL("Special", "island_interface/wardrobe/flag_golden", 0)
 }
 
 enum class CosmeticCore(val label: String, val color: Int, val glyph: String) {
@@ -53,7 +58,7 @@ val coreConversions: HashMap<Pair<CosmeticCore, CosmeticCore>, Double> = hashMap
 @Serializable
 data class Cosmetic(
     val name: String,
-    val collection: Collection,
+    val collection: CosmeticCollection,
     val tag: CosmeticTag,
     var isOwned: Boolean,
     var donations: Int,

@@ -18,7 +18,7 @@ import net.minecraft.world.inventory.Slot
 import net.minecraft.world.item.ItemStack
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
-import xyz.nibblz.galapagos.data.Collection
+import xyz.nibblz.galapagos.data.CosmeticCollection
 import xyz.nibblz.galapagos.data.Cosmetic
 import xyz.nibblz.galapagos.data.CosmeticTag
 import xyz.nibblz.galapagos.data.Item
@@ -28,6 +28,7 @@ import xyz.nibblz.galapagos.events.ContainerOpenEvent
 import xyz.nibblz.galapagos.events.ContainerSetSlotEvent
 import xyz.nibblz.galapagos.events.InfinibagUpdateEvent
 import xyz.nibblz.galapagos.events.JoinMCCIEvent
+import xyz.nibblz.galapagos.events.RoyalReputationIncreaseEvent
 import xyz.nibblz.galapagos.events.SlotClickEvent
 import xyz.nibblz.galapagos.events.SystemChatEvent
 import xyz.nibblz.galapagos.features.CraftingInstructions
@@ -47,7 +48,8 @@ object PlayerData : CoreFeature {
         val trophies: Int,
         val name: String,
         val collection: String,
-        val type: String
+        val type: String,
+        val isBonusTrophies: Boolean? = false
     )
 
     @Serializable
@@ -55,7 +57,7 @@ object PlayerData : CoreFeature {
         val cosmetic: APICosmeticData,
         val chromaPacks: List<String>? = null,
         val owned: Boolean,
-        val donationsMade: Int? = null
+        val donationsMade: Int? = null,
     )
 
     @Serializable
@@ -104,6 +106,7 @@ object PlayerData : CoreFeature {
                       name
                       collection
                       type
+                      isBonusTrophies
                     }
                     chromaPacks
                     owned
@@ -221,7 +224,9 @@ object PlayerData : CoreFeature {
         val apiCosmetics: List<APICosmetic> = Json.Default.decodeFromString(apiCosmeticsString)
 
         apiCosmetics.forEach {
-            val collection = Collection.entries.find { entry -> entry.label == it.cosmetic.collection } ?: return@forEach
+            val collection = CosmeticCollection.entries.find { entry -> entry.label == it.cosmetic.collection } ?: return@forEach
+            if (it.cosmetic.isBonusTrophies == true) return@forEach
+            if (it.cosmetic.trophies == 0) return@forEach
             val tag = CosmeticTag.valueOf(it.cosmetic.type)
 
             val cosmetic = Cosmetic(
@@ -285,6 +290,7 @@ object PlayerData : CoreFeature {
         if (item.isCosmeticToken) {
             val cosmetic = Galapagos.save.cosmetics[name.dropLast(6)]
             if (cosmetic != null) {
+                RoyalReputationIncreaseEvent.EVENT.invoker().invoke(cosmetic.name, amount.coerceIn(0, cosmetic.tag.maxDonations - cosmetic.donations))
                 cosmetic.donations = (cosmetic.donations + amount).coerceIn(0, cosmetic.tag.maxDonations)
             }
         }
@@ -406,8 +412,6 @@ object PlayerData : CoreFeature {
         } else {
             location[data.name] = data
         }
-
-
     }
 
     fun slotClick(screen: ContainerScreen, input: ContainerInput) {

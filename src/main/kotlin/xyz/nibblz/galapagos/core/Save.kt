@@ -8,6 +8,7 @@ import xyz.nibblz.galapagos.data.Cosmetic
 import xyz.nibblz.galapagos.data.Item
 import xyz.nibblz.galapagos.features.CoinTracking
 import xyz.nibblz.galapagos.features.QuestTracking
+import xyz.nibblz.galapagos.features.TrophyTracking
 import java.nio.file.Files
 
 object Save : CoreFeature {
@@ -20,6 +21,7 @@ object Save : CoreFeature {
 
     @Serializable
     data class PlayerSave(
+        var trophyHistory: MutableList<TrophyTracking.TrophyGain> = mutableListOf(),
         var coinChanges: MutableList<CoinTracking.CoinChange> = mutableListOf(),
         var questHistory: MutableList<QuestTracking.QuestingReward> = mutableListOf(),
         var weeklyVaultHistory: MutableList<QuestTracking.WeeklyVault> = mutableListOf(),

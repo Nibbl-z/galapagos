@@ -104,6 +104,10 @@ class Config {
     @SerialEntry
     var weeklyVaultInfoEnabled: Boolean = true
 
+    // Trophy Tracking
+    @SerialEntry
+    var trophyTrackingEnabled: Boolean = true
+
     enum class AssemblerCoreInfoType(val label: String, val description: String) {
         DISABLED("Disabled", "Disables showing info of this core type."),
         ENABLED("Enabled", "Shows only how many of this core type will directly be earned from scavenging."),

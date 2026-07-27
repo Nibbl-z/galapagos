@@ -8,6 +8,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import xyz.nibblz.galapagos.config.Config
 import xyz.nibblz.galapagos.core.CoreFeature
+import xyz.nibblz.galapagos.core.DataCollection
 import xyz.nibblz.galapagos.core.GalapagosCommand
 import xyz.nibblz.galapagos.data.ConstantIslandData
 import xyz.nibblz.galapagos.features.*
@@ -30,14 +31,16 @@ object Galapagos : ModInitializer {
 		ExchangeUnitPrice,
 		CraftingInstructions,
 		BlueprintAssemblerInfo,
-		WeeklyVaultInfo
+		WeeklyVaultInfo,
+		TrophyTracking
 	)
 
 	val coreFeatures: List<CoreFeature> = listOf(
 		Save,
 		PlayerData,
 		OOBE,
-		GalapagosCommand
+		GalapagosCommand,
+		DataCollection
 	)
 
 	fun registerFeatures() {

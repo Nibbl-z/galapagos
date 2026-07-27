@@ -54,6 +54,15 @@ object CosmeticMachineChances : Feature {
     const val ULTIMATE_EXCLUSIVE_CHANCE = 0.3
     const val ULTIMATE_ARCANE_CHANCE = 0.01
 
+    val COLLECTIONS_IN_MACHINE: List<CosmeticCollection> = listOf(
+        CosmeticCollection.ELEMENTAL,
+        CosmeticCollection.STANDARD_GAME,
+        CosmeticCollection.EXCLUSIVE_GAME,
+        CosmeticCollection.EXCLUSIVE_SEASON,
+        CosmeticCollection.EXCLUSIVE_VARIETY,
+        CosmeticCollection.GATE
+    )
+
     fun getChance(isUltimate: Boolean, rarity: Rarity, tag: CosmeticTag): Double? {
         return if (isUltimate) {
             ULTIMATE_CHANCES[rarity]?.times(when(tag) {
@@ -103,11 +112,14 @@ object CosmeticMachineChances : Feature {
         val cosmeticCounts: HashMap<Pair<Rarity, CosmeticTag>, Int> = hashMapOf()
 
         Galapagos.save.cosmetics.forEach { (_, it) ->
+            if (it.collection !in COLLECTIONS_IN_MACHINE) return@forEach
             cosmeticCounts[Pair(it.rarity, it.tag)] = (cosmeticCounts[Pair(it.rarity, it.tag)] ?: 0) + 1
         }
 
         //<Again!>
         Galapagos.save.cosmetics.forEach { (_, it) ->
+            if (it.collection !in COLLECTIONS_IN_MACHINE) return@forEach
+
             if (it.rarity != Rarity.MYTHIC) {
                 val basicChance = getChance(false, it.rarity, it.tag)
 
