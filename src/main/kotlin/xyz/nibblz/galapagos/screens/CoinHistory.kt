@@ -42,6 +42,7 @@ class CoinHistory : BaseOwoScreen<FlowLayout>() {
             if (CoinTracking.filter[it.category] == false) return@forEach
 
             val date = Instant.fromEpochSeconds(it.timestamp).toLocalDateTime(TimeZone.currentSystemDefault())
+
             if (previousDay != date.day) {
                 dayGain = 0
                 dayLoss = 0

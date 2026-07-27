@@ -229,6 +229,7 @@ object QuestTracking : Feature {
             if (!enabledProperty.get()) return
             clickedVaultHistory = true
             playMcciSound("ui.click_normal")
+            playMcciSound("ui.explosion_rare")
             Minecraft.getInstance().connection!!.send(ServerboundContainerClosePacket(Minecraft.getInstance().player!!.containerMenu.containerId))
             return
         }

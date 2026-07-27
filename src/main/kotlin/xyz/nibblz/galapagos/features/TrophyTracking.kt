@@ -1,9 +1,14 @@
 package xyz.nibblz.galapagos.features
 
 import kotlinx.serialization.Serializable
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
+import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback
+import net.minecraft.ChatFormatting
+import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.screens.inventory.ContainerScreen
 import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket
+import net.minecraft.network.protocol.game.ServerboundContainerClosePacket
 import net.minecraft.world.item.ItemStack
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
@@ -12,11 +17,15 @@ import xyz.nibblz.galapagos.data.CosmeticCollection
 import xyz.nibblz.galapagos.data.FishingResearch
 import xyz.nibblz.galapagos.data.FishingUpgrade
 import xyz.nibblz.galapagos.data.repPerDonation
+import xyz.nibblz.galapagos.events.ContainerCloseEvent
 import xyz.nibblz.galapagos.events.RoyalReputationIncreaseEvent
 import xyz.nibblz.galapagos.events.SlotClickEvent
 import xyz.nibblz.galapagos.events.SystemChatEvent
 import xyz.nibblz.galapagos.mixin.accessor.HoveredSlotAccessor
+import xyz.nibblz.galapagos.screens.TrophyHistory
+import xyz.nibblz.galapagos.util.Glyphs
 import xyz.nibblz.galapagos.util.findLore
+import xyz.nibblz.galapagos.util.playMcciSound
 import kotlin.reflect.KMutableProperty0
 import kotlin.time.Clock
 
@@ -31,25 +40,32 @@ object TrophyTracking : Feature {
         SlotClickEvent.EVENT.register { screen, _, _, _ -> slotClick(screen) }
         SystemChatEvent.EVENT.register { packet -> systemChat(packet) }
         RoyalReputationIncreaseEvent.EVENT.register { cosmetic, count -> royalReputationIncrease(cosmetic, count) }
+        ItemTooltipCallback.EVENT.register { stack, _, _, components -> tooltipAdd(stack, components) }
+        ContainerCloseEvent.EVENT.register { containerClose() }
+        ClientTickEvents.END_CLIENT_TICK.register {
+            if (!openTrophyHistory) return@register
+            openTrophyHistory = false
+            Minecraft.getInstance().setScreen(TrophyHistory()) // A-A-AND I GET JUST WHAT I NEED !!!
+        }
     }
 
-    enum class TrophyType(label: String, sprite: String) {
-        SKILL("Skill", "red"),
-        STYLE("Style", "purple"),
-        ANGLER("Angler", "blue")
+    enum class TrophyType(val label: String, val sprite: String, val color: Int) {
+        SKILL("Skill", "red", 0xff4a4a),
+        STYLE("Style", "purple", 0xa347ff),
+        ANGLER("Angler", "blue", 0x44aafc)
     }
 
-    enum class TrophySource(type: TrophyType) {
-        CLAIM_BADGE(TrophyType.SKILL),
+    enum class TrophySource(val type: TrophyType, val sprite: String) {
+        CLAIM_BADGE(TrophyType.SKILL, "_fonts/icon/badges_small"),
 
-        CLAIM_COSMETIC(TrophyType.STYLE),
-        ROYAL_REPUTATION(TrophyType.STYLE),
-        MAX_CHROMA(TrophyType.STYLE),
-        COLLECTION_BONUS(TrophyType.STYLE),
+        CLAIM_COSMETIC(TrophyType.STYLE, "_fonts/icon/hat_small"),
+        ROYAL_REPUTATION(TrophyType.STYLE, "_fonts/icon/royal_reputation"),
+        MAX_CHROMA(TrophyType.STYLE, "_fonts/icon/chroma_pack_small"),
+        COLLECTION_BONUS(TrophyType.STYLE, "_fonts/icon/arcane_gate"),
 
-        CLAIM_FISH(TrophyType.ANGLER),
-        CLAIM_RESEARCH(TrophyType.ANGLER),
-        UPGRADE_PURCHASE(TrophyType.ANGLER)
+        CLAIM_FISH(TrophyType.ANGLER, "_fonts/icon/fish_fish"),
+        CLAIM_RESEARCH(TrophyType.ANGLER, "island_interface/badges/general/loyalist_pink_parrots"), // uuuaaughhh
+        UPGRADE_PURCHASE(TrophyType.ANGLER, "_fonts/icon/fishing_perk/xp_magnet")
     }
 
     @Serializable
@@ -69,7 +85,7 @@ object TrophyTracking : Feature {
                 TrophySource.MAX_CHROMA -> "Obtained all chromas on $data"
                 TrophySource.COLLECTION_BONUS -> "Collection bonus ($dataCount/5) for ${CosmeticCollection.valueOf(data).label}"
                 TrophySource.CLAIM_FISH -> "Discovered $data"
-                TrophySource.CLAIM_RESEARCH -> "Claimed ${FishingResearch.valueOf(data).label} Research (Level $dataCount)"
+                TrophySource.CLAIM_RESEARCH -> "Claimed ${FishingResearch.valueOf(data).label} (Level $dataCount)"
                 TrophySource.UPGRADE_PURCHASE -> "Purchased ${FishingUpgrade.valueOf(data).label} (Level $dataCount)"
             }
         }
@@ -94,8 +110,18 @@ object TrophyTracking : Feature {
     var upgradingPerk: FishingUpgrade? = null
     var upgradingPerkLevel = 0
 
+    var clickedTrophyHistory = false
+    var openTrophyHistory = false
+
     fun slotClick(screen: ContainerScreen) {
         val slot = (screen as HoveredSlotAccessor).`galapagos$hoveredSlot`() ?: return
+
+        if (slot.item.itemName.string == "Crown Level" && screen.title.string.contains("MY PROFILE")) {
+            clickedTrophyHistory = true
+            playMcciSound("ui.click_normal")
+            playMcciSound("ui.experience_receive")
+            Minecraft.getInstance().connection!!.send(ServerboundContainerClosePacket(Minecraft.getInstance().player!!.containerMenu.containerId))
+        }
 
         // handles CLAIM_COSMETIC + COLLECTION_BONUS
         if (Galapagos.save.cosmetics[slot.item.itemName.string] != null && slot.item.findLore("Click to Claim!")) { // its so eager. Claim!
@@ -122,6 +148,45 @@ object TrophyTracking : Feature {
         if (upgradingPerk != null && screen.title.string.contains("PURCHASE THIS UPGRADE?") && slot.index in 46..48) {
             handleUpgradePurchase()
         }
+
+        // handles CLAIM_BADGE
+        if (slot.item.findLore("Click to Claim!") && screen.title.string.contains("GAME PROGRESSION")) {
+            handleClaimBadge(slot.item)
+        }
+
+        // handles CLAIM_FISH
+        if (
+            slot.item.findLore("Click to Claim Trophies") &&
+            (
+                slot.item.findLore(Glyphs.getGlyph("_fonts/icon/tooltips/fish.png"))
+                || slot.item.findLore(Glyphs.getGlyph("_fonts/icon/tooltips/crab.png"))
+            )
+        ) {
+            handleClaimFish(slot.item)
+        }
+    }
+
+    fun containerClose() {
+        if (!clickedTrophyHistory) return
+        clickedTrophyHistory = false
+        openTrophyHistory = true
+    }
+
+    fun tooltipAdd(stack: ItemStack, components: MutableList<Component>) {
+        val screen = Minecraft.getInstance().screen ?: return
+        if (stack.itemName.string != "Crown Level") return
+        if (!screen.title.string.contains("MY PROFILE")) return
+
+        var index = components.indexOfFirst { it.string.contains("minecraft:") } // if you have f3+h on :P
+        if (index == -1) { index = components.size - 1 } // if you dont !
+
+        components.add(index, Component.empty())
+
+        components.add(index + 1, Component.empty()
+            .append(Glyphs.getGlyphComponent("_fonts/icon/click_action_left.png"))
+            .append(Component.literal(" > ").withColor(ChatFormatting.DARK_GRAY.color!!))
+            .append(Component.literal("Click to ").withColor(0xecd584))
+            .append(Component.literal("View Trophy History").withColor(0xfee761)))
     }
 
     fun systemChat(packet: ClientboundSystemChatPacket) {
@@ -233,6 +298,69 @@ object TrophyTracking : Feature {
         upgradingPerk = null
     }
 
+    fun handleClaimBadge(item: ItemStack) {
+        // im not writing a damn function to convert any roman numeral when it only goes up to 10 okayyy :P
+        val romanNumerals: HashMap<String, Int> = hashMapOf(
+            "I" to 1,
+            "II" to 2,
+            "III" to 3,
+            "IV" to 4,
+            "V" to 5,
+            "VI" to 6,
+            "VII" to 7,
+            "VIII" to 8,
+            "IX" to 9,
+            "X" to 10
+        )
+
+        var stage = 1
+        var badge = item.itemName.string
+
+        romanNumerals.forEach { (roman, number) ->
+            if (item.itemName.string.endsWith(" $roman")) {
+                stage = number
+                badge = item.itemName.string.dropLast(" $roman".length)
+            }
+        }
+
+        val trophies = item.findLore(Regex("Stage Trophies:.+?(?<trophies>\\d+)"))?.get("trophies")?.value?.toIntOrNull() ?: 0
+
+        val badgeTrophyGain = TrophyGain(
+            type = TrophyType.SKILL,
+            source = TrophySource.CLAIM_BADGE,
+            trophies = trophies,
+            timestamp = Clock.System.now().epochSeconds,
+            data = badge,
+            dataCount = stage
+        )
+
+        Galapagos.save.trophyHistory.add(badgeTrophyGain)
+    }
+
+    fun handleClaimFish(item: ItemStack) {
+        val fishName = ConstantIslandData.data.fishSprites.keys.find { item.itemName.string.contains(it) } ?: return
+        val weight = when(item.findLore(Regex("New Weight: (?<weight>.+)"))?.get("weight")?.value) {
+            "Average" -> 1
+            "Large" -> 2
+            "Massive" -> 3
+            "Gargantuan" -> 4
+            "Colossal" -> 4
+            else -> 1
+        }
+        val trophies = item.findLore(Regex("Trophies Earned:.+?(?<trophies>\\d+)"))?.get("trophies")?.value?.toIntOrNull() ?: 0
+
+        val fishTrophyGain = TrophyGain(
+            type = TrophyType.ANGLER,
+            source = TrophySource.CLAIM_FISH,
+            trophies = trophies,
+            timestamp = Clock.System.now().epochSeconds,
+            data = fishName,
+            dataCount = weight
+        )
+
+        Galapagos.save.trophyHistory.add(fishTrophyGain)
+    }
+
     fun royalReputationIncrease(cosmeticName: String, count: Int) {
         val cosmetic = Galapagos.save.cosmetics[cosmeticName] ?: return
 
@@ -247,4 +375,6 @@ object TrophyTracking : Feature {
 
         Galapagos.save.trophyHistory.add(repTrophyGain)
     }
+
+
 }
