@@ -11,12 +11,12 @@ You'll need...
 
 ## Features
 
-All features can be toggled in the settings, so you can pick and choose what is helpful to you for your trophy hunting journey!
+**All features can be toggled in the settings, so you can pick and choose what is helpful to you for your trophy hunting journey!**
 
 ### Crafting Instructions
 ![Crafting Instructions Example](https://cdn.modrinth.com/data/cached_images/b2b6c30033fef3472cdb815ecab1433c7e4bdd42.png)
 
-Shift-Right-Clicking on a blueprint or cosmetic vendor will open a window with a list of instructions on how to optimally craft said cosmetic, as well as how much material gloop and crafting time it will take!
+Shift-Right-Clicking on a blueprint, a cosmetic from a vendor, or a style perk will open a window with a list of instructions on how to optimally craft the item, as well as how much material gloop and crafting time it will take!
 
 ### Coin History
 ![Coin History Example](https://cdn.modrinth.com/data/cached_images/bdafd30faa9f64b8f69d2efce587210ddfeabeab.png)
@@ -28,6 +28,11 @@ Logs all coin gains and losses, as well as where the change in coins came from, 
 
 Logs all completed quests, daily meter claims, and weekly vaults, allowing you to view all the quests you've completed today, as well as any past quests!
 
+### Trophy History
+![Trophy History Example](https://cdn.modrinth.com/data/cached_images/2f0441137f96bd06b7327c4983e001923b330f39.png)
+
+Logs all trophy gains, including the type of trophies (Skill, Style, or Angler), what source the trophies were earned from, as well as how many trophies were earned! Trophies are split up by day, showing a summary of how many trophies of each type/category were earned!
+
 ### Crate & Cosmetic Machine Chances + Extra Stats
 ![Crate Chances Example](https://cdn.modrinth.com/data/cached_images/be356e5afdbe2c34fcace5c956bd37203a4eba86.png)
 ![Cosmetic Machine Chances Example](https://cdn.modrinth.com/data/cached_images/a4c55cb355599f2400b04dbe9e301172c79632b5.png)
@@ -35,11 +40,11 @@ Logs all completed quests, daily meter claims, and weekly vaults, allowing you t
 In the Crate Emporium and Cosmetic Machine, the following info is shown:
 - New cosmetic chance
 - New royal reputation chance
-- Total style trophies gained
+- Total style trophies gained 
 - Total royal reputation gained
 - Average mythic cores
 - Average arcane cores
-  per crate or per cosmetic machine pull
+per crate or per cosmetic machine pull
 
 The highest cosmetic/rep chance for both standard and exclusive crates are also highlighted in the Crate Emporium menu! Crates with all cosmetics earned/all royal reputation earned also have an icon in the corner of the crate to signify that!
 
@@ -56,6 +61,11 @@ It will also show how many of each cosmetic core you will earn on average, as we
 ![Island Exchange Unit Price + Style Soul/Weapon Wisp Equivalent example](https://cdn.modrinth.com/data/cached_images/cf2ff75a1d488138585cbc21fab085223c3695ae.png)
 
 On the tooltips of Island Exchange listings, unit price is shown if the listing contains multiple of an item, and the equivalent in style souls or weapon wisps when scavenging the listing will also be shown!
+
+### Weekly Vault Info
+![Weekly Vault Info Example](https://cdn.modrinth.com/data/cached_images/6b39e9b24ce3cd53c2933b30f74099ff38f1bc0e.png)
+
+On the tooltip of the Weekly Vault, another progress bar is shown to show overall progress towards a max vault, as well as the average XP you'll need per day to reach a max vault!
 
 ---
 
