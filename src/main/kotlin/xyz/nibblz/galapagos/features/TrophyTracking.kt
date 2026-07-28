@@ -32,9 +32,15 @@ import kotlin.time.Clock
 object TrophyTracking : Feature {
     override val id: String = "trophy_tracking"
     override val name: String = "Trophy Tracking"
-    override val description: List<Component> = listOf()
+    override val description: List<Component> = listOf(
+        Component.literal("Logs all trophy gains, stating the type of trophies earned (Skill, Style, and Angler), how the trophies were obtained, and the amount of trophies earned."),
+        Component.empty(),
+        Component.literal("To view trophy history, click on the Crown Level icon in My Profile."),
+        Component.empty(),
+        Component.literal("Note: Disabling this feature will NOT disable trophy tracking, but will disable the trophy history menu.")
+    )
     override val enabledProperty: KMutableProperty0<Boolean> = Config.values::trophyTrackingEnabled
-    override val image: Config.ConfigImage = Config.ConfigImage("quest_tracking.png", 1097, 465)
+    override val image: Config.ConfigImage = Config.ConfigImage("trophy_tracking.png", 1044, 561)
 
     override fun init() {
         SlotClickEvent.EVENT.register { screen, _, _, _ -> slotClick(screen) }
@@ -117,6 +123,7 @@ object TrophyTracking : Feature {
         val slot = (screen as HoveredSlotAccessor).`galapagos$hoveredSlot`() ?: return
 
         if (slot.item.itemName.string == "Crown Level" && screen.title.string.contains("MY PROFILE")) {
+            if (!enabledProperty.get()) return
             clickedTrophyHistory = true
             playMcciSound("ui.click_normal")
             playMcciSound("ui.experience_receive")
@@ -142,7 +149,6 @@ object TrophyTracking : Feature {
         if (FishingUpgrade.entries.any { slot.item.itemName.string.contains(it.label) } && slot.item.findLore("Click to Upgrade")) {
             upgradingPerk = FishingUpgrade.entries.find { slot.item.itemName.string.contains(it.label) }
             upgradingPerkLevel = Regex("(?<level>[\\d,]+)/").find(slot.item.itemName.string)?.groups["level"]?.value?.toIntOrNull()?.plus(1) ?: return
-            Galapagos.logger.info("$upgradingPerk , $upgradingPerkLevel")
         }
 
         if (upgradingPerk != null && screen.title.string.contains("PURCHASE THIS UPGRADE?") && slot.index in 46..48) {
@@ -173,6 +179,7 @@ object TrophyTracking : Feature {
     }
 
     fun tooltipAdd(stack: ItemStack, components: MutableList<Component>) {
+        if (!enabledProperty.get()) return
         val screen = Minecraft.getInstance().screen ?: return
         if (stack.itemName.string != "Crown Level") return
         if (!screen.title.string.contains("MY PROFILE")) return
@@ -208,13 +215,10 @@ object TrophyTracking : Feature {
             dataCount = 0
         )
 
-        Galapagos.logger.info("$trophyGain")
-
         Galapagos.save.trophyHistory.add(trophyGain)
 
         val collectionItem = screen.menu.slots[4].item
         val collection = CosmeticCollection.entries.find { it.label == collectionItem.itemName.string.dropLast(" Collection Completion Reward".length) } ?: return
-        Galapagos.logger.info(collection.name)
 
         if (collection == CosmeticCollection.SPECIAL) return
 

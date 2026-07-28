@@ -79,7 +79,6 @@ object CoinTracking : Feature {
     val filter = CoinChangeCategory.entries.associateWithTo(EnumMap(CoinChangeCategory::class.java)) {true}
 
     fun resetData() {
-        Galapagos.logger.info("resetting data")
         price = 0
         category = CoinChangeCategory.UNKNOWN
         data = ""
@@ -132,7 +131,7 @@ object CoinTracking : Feature {
             val regex = Regex("You receive: Coins x(?<coins>[\\d,]+)")
             val match = regex.find(packet.content.string)?.groups["coins"]?.value ?: return
             val coins = match.replace(",", "").toIntOrNull() ?: return
-            Galapagos.logger.info("#detecting zhat Coin from reward crate probably")
+
             val change = CoinChange(
                 amount = coins,
                 timestamp = Clock.System.now().epochSeconds,
@@ -198,7 +197,6 @@ object CoinTracking : Feature {
         val slot = (screen as HoveredSlotAccessor).`galapagos$hoveredSlot`() ?: return
 
         if (slot.item.itemName.string == "Coins" && screen.title.string.contains("INFINIBAG") && button == 0) {
-            Galapagos.logger.info("click coins")
             if (!enabledProperty.get()) return
             clickedCoinHistory = true
             playMcciSound("ui.click_normal")
@@ -208,13 +206,11 @@ object CoinTracking : Feature {
         }
 
         if (slot.index in 46..48 && screen.title.string.contains("SCAVENGING WILL PERMANENTLY")) {
-            Galapagos.logger.info("click scavenge")
             category = CoinChangeCategory.SCAVENGE
             return
         }
 
         if (slot.index in 64..66 && screen.title.string.contains("PLAYER TRADE")) {
-            Galapagos.logger.info("click tradeing")
             val outgoingSlots = listOf(28, 29, 30, 37, 38, 39, 46, 47, 48)
             val incomingSlots = listOf(32, 33, 34, 41, 42, 43, 50, 51, 52)
             val regex = Regex("Amount: (?<coins>[\\d,]+)")
@@ -235,13 +231,11 @@ object CoinTracking : Feature {
 
         if (price == 0 && data.isEmpty()) {
             if (slot.item.itemName.string.contains("Reward Crate")) {
-                Galapagos.logger.info("click reward crate")
                 category = CoinChangeCategory.REWARD_CRATE
                 data = slot.item.itemName.string.dropLast(13) // data only takes in rarity, so remove the " Reward Crate" suffix
             }
 
             if (screen.title.string.contains("MAILBOX")) {
-                Galapagos.logger.info("click mailox")
                 if (slot.item.itemName.string.contains("Listing Coin Delivery")) {
                     category = CoinChangeCategory.ISLAND_EXCHANGE
 
@@ -254,8 +248,6 @@ object CoinTracking : Feature {
                 }
             }
 
-            Galapagos.logger.info("clicked the $dataCount , $data , $category")
-
             dataCount = if (type == ContainerInput.QUICK_MOVE) fetchShiftClickAmount(slot.item) else 1
 
             return
@@ -263,7 +255,6 @@ object CoinTracking : Feature {
 
         // appears when clicking buy button
         if (slot.index in 46..48 && !screen.title.string.contains("SUMMARY") && !screen.title.string.contains("BID ON THIS ITEM?")) {
-            Galapagos.logger.info("clicked the button")
             if (dataCount > 1) {
                 price *= dataCount
             }
@@ -291,7 +282,6 @@ object CoinTracking : Feature {
 
             val quickBidMatch = slot.item.findLore(Regex("Bid Amount: \\D+(?<coins>[\\d,]+)"))?.get("coins")?.value ?: return
             val quickBid = quickBidMatch.replace(",", "").toIntOrNull() ?: return
-            Galapagos.logger.info("$data, $quickBid")
 
             val change = CoinChange(
                 amount = -quickBid,
@@ -304,8 +294,6 @@ object CoinTracking : Feature {
             Galapagos.save.coinChanges.add(change)
             resetData()
         }
-
-
     }
 
     // leaving this here out of spite

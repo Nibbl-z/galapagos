@@ -56,10 +56,18 @@ class TrophyHistory : BaseOwoScreen<FlowLayout>() {
                 typeBreakdown = UIComponents.label(Component.empty())
                 categoryBreakdown = UIComponents.label(Component.empty())
 
-                dayBreakdown.child(typeBreakdown.horizontalSizing(Sizing.fill()))
-                dayBreakdown.child(UIComponents.box(Sizing.fill(), Sizing.fixed(1))
-                    .color(Color(0.0f, 0.0f, 0.0f, 0.2f)))
-                dayBreakdown.child(categoryBreakdown.horizontalSizing(Sizing.fill()))
+                if (Config.values::trophyTrackingShowTypeBreakdown.get()) {
+                    dayBreakdown.child(typeBreakdown.horizontalSizing(Sizing.fill()))
+                }
+
+                if (Config.values::trophyTrackingShowTypeBreakdown.get() && Config.values::trophyTrackingShowCategoryBreakdown.get()) {
+                    dayBreakdown.child(UIComponents.box(Sizing.fill(), Sizing.fixed(1))
+                        .color(Color(0.0f, 0.0f, 0.0f, 0.2f)))
+                }
+
+                if (Config.values::trophyTrackingShowCategoryBreakdown.get()) {
+                    dayBreakdown.child(categoryBreakdown.horizontalSizing(Sizing.fill()))
+                }
 
                 content.child(UIComponents.spacer().verticalSizing(Sizing.fixed(10)))
                 content.child(dayHeader)

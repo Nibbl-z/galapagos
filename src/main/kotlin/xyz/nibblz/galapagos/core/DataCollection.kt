@@ -1,10 +1,8 @@
 package xyz.nibblz.galapagos.core
 
-import kotlinx.serialization.json.Json
 import net.minecraft.client.Minecraft
 import net.minecraft.core.component.DataComponents
 import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
-import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.events.ContainerOpenEvent
 import xyz.nibblz.galapagos.util.Glyphs
 import xyz.nibblz.galapagos.util.findLore
@@ -37,7 +35,7 @@ object DataCollection : CoreFeature {
             badgeSprites[it.itemName.string] = it.get(DataComponents.ITEM_MODEL)?.path ?: "erm"
         }
 
-        Galapagos.logger.info(Json.encodeToString(badgeSprites))
+        //Galapagos.logger.info(Json.encodeToString(badgeSprites))
     }
 
     fun fetchFishSprites(packet: ClientboundContainerSetContentPacket) {
@@ -49,6 +47,6 @@ object DataCollection : CoreFeature {
             fishSprites[it.itemName.string] = it.get(DataComponents.ITEM_MODEL)?.path ?: "erm"
         }
 
-        Galapagos.logger.info(Json.encodeToString(fishSprites))
+        //Galapagos.logger.info(Json.encodeToString(fishSprites))
     }
 }

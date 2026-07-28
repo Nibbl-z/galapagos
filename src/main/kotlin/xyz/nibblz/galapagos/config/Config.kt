@@ -100,14 +100,6 @@ class Config {
     @SerialEntry
     var assemblerInfoShowNewRep: Boolean = true
 
-    // Weekly Vault Info
-    @SerialEntry
-    var weeklyVaultInfoEnabled: Boolean = true
-
-    // Trophy Tracking
-    @SerialEntry
-    var trophyTrackingEnabled: Boolean = true
-
     enum class AssemblerCoreInfoType(val label: String, val description: String) {
         DISABLED("Disabled", "Disables showing info of this core type."),
         ENABLED("Enabled", "Shows only how many of this core type will directly be earned from scavenging."),
@@ -128,6 +120,22 @@ class Config {
     var assemblerInfoMythicCores: AssemblerCoreInfoType = AssemblerCoreInfoType.CONVERSION
     @SerialEntry
     var assemblerInfoArcaneCores: AssemblerCoreInfoType = AssemblerCoreInfoType.CONVERSION
+
+    // Weekly Vault Info
+    @SerialEntry
+    var weeklyVaultInfoEnabled: Boolean = true
+    @SerialEntry
+    var weeklyVaultInfoShowTotalProgress: Boolean = true
+    @SerialEntry
+    var weeklyVaultInfoShowNeededXPPerDay: Boolean = true
+
+    // Trophy Tracking
+    @SerialEntry
+    var trophyTrackingEnabled: Boolean = true
+    @SerialEntry
+    var trophyTrackingShowTypeBreakdown: Boolean = true
+    @SerialEntry
+    var trophyTrackingShowCategoryBreakdown: Boolean = true
 
     // Misc
 
@@ -479,6 +487,58 @@ class Config {
                         controller(enumSwitch<AssemblerCoreInfoType> {
                             Component.literal(it.label)
                         })
+                    }
+                }
+
+                groups.register("weekly_vault_info") {
+                    name(Component.literal("Weekly Vault Info"))
+
+                    options.register("weekly_vault_info_show_total_progress") {
+                        name(Component.literal("Show Total Progress"))
+                        description(OptionDescription.of(
+                            Component.literal("Shows the total XP you've earned towards reaching max claims on your weekly vault.")
+                        ))
+                        controller(tickBox())
+                        binding(values::weeklyVaultInfoShowTotalProgress, true)
+                    }
+
+                    options.register("weekly_vault_info_show_needed_xp_per_day") {
+                        name(Component.literal("Show Needed XP Per Day"))
+                        description(OptionDescription.of(
+                            Component.literal("Shows an average amount of XP to earn each day in order to reach max claims on your weekly vault.")
+                        ))
+                        controller(tickBox())
+                        binding(values::weeklyVaultInfoShowNeededXPPerDay, true)
+                    }
+                }
+
+                groups.register("trophy_tracking") {
+                    name(Component.literal("Trophy Tracking"))
+
+                    options.register("trophy_tracking_show_type_breakdown") {
+                        name(Component.literal("Show Trophy Type Breakdown"))
+                        description(OptionDescription.of(
+                            Component.literal("For each day listed, shows a breakdown of how many of each type of trophy is obtained, including Skill, Style, and Angler.")
+                        ))
+                        controller(tickBox())
+                        binding(values::trophyTrackingShowTypeBreakdown, true)
+                    }
+
+                    options.register("trophy_tracking_show_category_breakdown") {
+                        name(Component.literal("Show Trophy Source Breakdown"))
+                        description(OptionDescription.of(
+                            Component.literal("For each day listed, shows a breakdown of how many of each trophy gain source is obtained, including:"),
+                            Component.literal("- Claiming badges"),
+                            Component.literal("- Claiming cosmetics"),
+                            Component.literal("- Royal reputation"),
+                            Component.literal("- Obtaining max chromas on a cosmetic"),
+                            Component.literal("- Collection bonuses"),
+                            Component.literal("- Discovering new fish"),
+                            Component.literal("- Claiming fishing research"),
+                            Component.literal("- Purchasing fishing upgrades"),
+                        ))
+                        controller(tickBox())
+                        binding(values::trophyTrackingShowCategoryBreakdown, true)
                     }
                 }
 

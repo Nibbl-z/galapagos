@@ -150,8 +150,6 @@ object QuestTracking : Feature {
 
         if (checkWeeklyVault && screen.title.string.contains("SUMMARY")) {
             checkWeeklyVault = false
-            // TODO: MAKE SURE THIS WORKS! IT IS COMPLETELY UNTESTED!
-            // and it SURE AS HELL BETTER WORK THE FIRST TIME because then i'll have to wait a week, aka 0.05 modrinth review periods
 
             val vault = WeeklyVault(
                 timestamp = Clock.System.now().epochSeconds,
@@ -163,7 +161,7 @@ object QuestTracking : Feature {
                 if (it.itemName.string == "Arcane Anomaly") {
                     vault.anomalies++
                 } else {
-                    val rarity = Rarity.entries.find { rarity -> it.itemName.string.contains(rarity.label) } ?: Rarity.COMMON
+                    val rarity = Rarity.entries.find { rarity -> it.itemName.string.contains(rarity.label) } ?: return@forEach
                     vault.rewards[rarity] = it.getItemCount()
                 }
             }
@@ -262,9 +260,9 @@ object QuestTracking : Feature {
     fun tooltipAdd(stack: ItemStack, components: MutableList<Component>) {
         if (!enabledProperty.get()) return
         val screen = Minecraft.getInstance().screen ?: return
-        if (!screen.title.string.contains("JOURNAL") && !screen.title.string.contains("MAILBOX")) return
+        if (!screen.title.string.contains("JOURNAL")) return
 
-        if (stack.itemName.string == "Island Rewards" && stack.get(DataComponents.ITEM_MODEL)?.path?.contains("blank") == false) {
+        if (stack.itemName.string == "Island Rewards" && stack.get(DataComponents.ITEM_MODEL)?.path?.contains("blank") == true) {
             var index = components.indexOfFirst { it.string.contains("minecraft:") } // if you have f3+h on :P
             if (index == -1) { index = components.size - 1 } // if you dont !
 
@@ -322,8 +320,6 @@ object QuestTracking : Feature {
             }
 
             val source = QuestingRewardSource.DAILY_METER
-
-            Galapagos.logger.info("$rarity $count $bonus")
 
             val reward = QuestingReward(
                 rarity = rarity,

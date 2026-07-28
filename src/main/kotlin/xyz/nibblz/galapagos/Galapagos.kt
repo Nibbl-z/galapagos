@@ -26,13 +26,13 @@ object Galapagos : ModInitializer {
 	val features: List<Feature> = listOf(
 		CoinTracking,
 		QuestTracking,
+		TrophyTracking,
 		CrateChances,
 		CosmeticMachineChances,
 		ExchangeUnitPrice,
 		CraftingInstructions,
 		BlueprintAssemblerInfo,
-		WeeklyVaultInfo,
-		TrophyTracking
+		WeeklyVaultInfo
 	)
 
 	val coreFeatures: List<CoreFeature> = listOf(
