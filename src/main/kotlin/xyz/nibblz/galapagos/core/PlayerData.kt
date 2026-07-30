@@ -285,7 +285,7 @@ object PlayerData : CoreFeature {
 
         if (item.isCosmeticToken) {
             val cosmetic = Galapagos.save.cosmetics[name.dropLast(6)]
-            if (cosmetic != null) {
+            if (cosmetic != null && cosmetic.donations != cosmetic.tag.maxDonations) {
                 RoyalReputationIncreaseEvent.EVENT.invoker().invoke(cosmetic.name, amount.coerceIn(0, cosmetic.tag.maxDonations - cosmetic.donations))
                 cosmetic.donations = (cosmetic.donations + amount).coerceIn(0, cosmetic.tag.maxDonations)
             }

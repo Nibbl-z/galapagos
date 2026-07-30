@@ -46,6 +46,8 @@ class TrophyHistory : BaseOwoScreen<FlowLayout>() {
         var categoryBreakdown: LabelComponent? = null
 
         sortedTrophyGains.forEach {
+            if (it.trophies == 0) return@forEach
+
             val date = Instant.fromEpochSeconds(it.timestamp).toLocalDateTime(TimeZone.currentSystemDefault())
 
             if (previousDay != date.day) {
