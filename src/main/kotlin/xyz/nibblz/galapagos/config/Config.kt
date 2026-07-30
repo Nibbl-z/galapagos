@@ -137,8 +137,11 @@ class Config {
     @SerialEntry
     var trophyTrackingShowCategoryBreakdown: Boolean = true
 
-    // Misc
+    // Average Income
+    @SerialEntry
+    var averageIncomeEnabled: Boolean = true
 
+    // Misc
     @SerialEntry
     var twentyFourHourTime: Boolean = false
 

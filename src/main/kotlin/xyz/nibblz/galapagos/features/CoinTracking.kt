@@ -23,7 +23,7 @@ import xyz.nibblz.galapagos.events.SystemChatEvent
 import xyz.nibblz.galapagos.mixin.accessor.HoveredSlotAccessor
 import xyz.nibblz.galapagos.screens.CoinHistory
 import xyz.nibblz.galapagos.util.Glyphs
-import xyz.nibblz.galapagos.core.PlayerData
+import xyz.nibblz.galapagos.data.StylePerk
 import xyz.nibblz.galapagos.util.findLore
 import xyz.nibblz.galapagos.util.playMcciSound
 import java.util.*
@@ -389,7 +389,7 @@ object CoinTracking : Feature {
             }
             CoinChangeCategory.COSMETIC -> "island_interface/wardrobe/hat/icon.png"
             CoinChangeCategory.STYLE_PERK -> {
-                val perk = PlayerData.StylePerk.valueOf(this.data)
+                val perk = StylePerk.valueOf(this.data)
                 perk.sprite
             }
             CoinChangeCategory.BID -> "island_interface/wardrobe/collector.png"
@@ -407,7 +407,7 @@ object CoinTracking : Feature {
             CoinChangeCategory.ITEM -> "${this.data}${if (this.dataCount > 1) " x${this.dataCount}" else ""}"
             CoinChangeCategory.COSMETIC -> this.data
             CoinChangeCategory.STYLE_PERK -> {
-                val perk = PlayerData.StylePerk.valueOf(this.data)
+                val perk = StylePerk.valueOf(this.data)
                 "Upgraded ${perk.label} to level ${this.dataCount}"
             }
             CoinChangeCategory.BID -> "Bid on ${this.data}"

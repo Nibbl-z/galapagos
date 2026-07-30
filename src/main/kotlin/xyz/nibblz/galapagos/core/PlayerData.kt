@@ -23,7 +23,9 @@ import xyz.nibblz.galapagos.data.Cosmetic
 import xyz.nibblz.galapagos.data.CosmeticTag
 import xyz.nibblz.galapagos.data.Item
 import xyz.nibblz.galapagos.data.ItemLocation
+import xyz.nibblz.galapagos.data.Rank
 import xyz.nibblz.galapagos.data.Rarity
+import xyz.nibblz.galapagos.data.StylePerk
 import xyz.nibblz.galapagos.events.ContainerOpenEvent
 import xyz.nibblz.galapagos.events.ContainerSetSlotEvent
 import xyz.nibblz.galapagos.events.InfinibagUpdateEvent
@@ -72,27 +74,6 @@ object PlayerData : CoreFeature {
         @SerialName("__typename") val typename: String? = null
     )
 
-    //// STYLE PERKS
-
-    @Serializable
-    enum class StylePerk(val label: String, val slotID: Int, val arcanes: List<String>, val sprite: String) {
-        LUCKY_METER("Lucky Meter", 11, listOf(), "island_interface/style_perks/lucky_claims.png"),
-        GLITCHED_CLAIMS("Glitched Claims", 12, listOf("Abomination Mask", "Wizard Hat (Ember Mage)"), "island_interface/style_perks/glitched_claims.png"),
-        EXPANDED_METER("Expanded Meter", 13, listOf("Wizard Cloak (Ember Mage)"), "island_interface/style_perks/expanded_meter.png"),
-        EXPANDED_VAULT("Expanded Vault", 14, listOf("Abomination Robe"), "island_interface/style_perks/expanded_vault.png"),
-        ARCANE_CLAIMS("Arcane Claims", 15, listOf(), "island_interface/style_perks/arcane_claims.png"),
-        LUCKY_QUESTS("Lucky Quests", 20, listOf(), "island_interface/style_perks/lucky_quests.png"),
-        BOOSTED_QUESTS("Boosted Quests", 21, listOf("Peacock Crown", "Tidal Lord Crown"), "island_interface/style_perks/boosted_quests.png"),
-        EXPANDED_DAILIES("Expanded Dailies", 22, listOf("Tidal Lord Cloak"), "island_interface/style_perks/expanded_dailies.png"),
-        EXPANDED_WEEKLIES("Expanded Weeklies", 23, listOf("Peacock Tail"), "island_interface/style_perks/expanded_weeklies.png"),
-        ARCANE_QUESTS("Arcane Quests", 24, listOf(), "island_interface/style_perks/arcane_quests.png"),
-        EFFICIENT_FUSION("Efficient Fusion", 29, listOf("Abomination Staff", "Wizard Staff (Ember Mage)"), "island_interface/style_perks/efficient_fusion.png"),
-        EFFICIENT_ASSEMBLY("Efficient Assembly", 30, listOf("Peacock Staff", "Tidal Lord Staff"), "island_interface/style_perks/efficient_assembler.png"),
-        EXPANDED_FORGE("Expanded Forge", 31, listOf(), "island_interface/style_perks/expanded_forge.png"),
-        EXPANDED_ASSEMBLER("Expanded Assembler", 32, listOf(), "island_interface/style_perks/expanded_assembler.png"),
-        ARCANE_ANOMALY("Arcane Anomaly", 33, listOf(), "island_items/infinibag/openable/arcane_anomaly.png") // I love this perk! this perk is cool.this is my favorite  perk. :3  ilove.arcane   anomaly! anomalyyy:3
-    }
-
     val client: HttpClient? = HttpClient.newHttpClient()
 
     fun fetchAPI(): Boolean {
@@ -131,6 +112,7 @@ object PlayerData : CoreFeature {
                     }
                   }
                 }
+                ranks
               }
             }
         """.trimIndent().replace("\n", "\\n")
@@ -262,6 +244,20 @@ object PlayerData : CoreFeature {
             }
         }
 
+        Galapagos.logger.info(jsonElement.toString())
+
+        val ranks: List<String> = Json.Default.decodeFromString(
+            jsonElement["data"]?.jsonObject["player"]?.jsonObject["ranks"]?.jsonArray.toString()
+        )
+
+        ranks.forEach {
+            val rank = Rank.valueOf(it)
+
+            if (Galapagos.save.rank == null || (Galapagos.save.rank?.ordinal ?: -1) < rank.ordinal) {
+                Galapagos.save.rank = rank
+            }
+        }
+
         return true
     }
 
@@ -333,6 +329,11 @@ object PlayerData : CoreFeature {
 
         packet.items.forEach {
             updateItemState(it)
+        }
+
+        if (screen.title.string.contains("ISLAND REWARDS")) {
+            val favorites = packet.items[43]
+            Galapagos.save.mccPlus = favorites.findLore("Click to Select Favorites")
         }
 
         if (screen.title.string.contains("INFINIBAG")) InfinibagUpdateEvent.EVENT.invoker().invoke()

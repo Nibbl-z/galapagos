@@ -27,6 +27,7 @@ object Galapagos : ModInitializer {
 		CoinTracking,
 		QuestTracking,
 		TrophyTracking,
+		AverageIncome,
 		CrateChances,
 		CosmeticMachineChances,
 		ExchangeUnitPrice,

@@ -22,11 +22,10 @@ import xyz.nibblz.galapagos.features.CraftingInstructions.getComponent
 import xyz.nibblz.galapagos.features.CraftingInstructions.gloopForRawMaterial
 import xyz.nibblz.galapagos.features.CraftingInstructions.tempInfinibag
 import xyz.nibblz.galapagos.util.Glyphs
-import xyz.nibblz.galapagos.core.PlayerData
 import xyz.nibblz.galapagos.util.formatTimeString
 import xyz.nibblz.galapagos.util.mcciTextureComponent
 
-class CraftingInstructionsDialog(x: Int, y: Int, val blueprint: CraftingInstructions.BlueprintInfo, stylePerk: PlayerData.StylePerk? = null) : Dialog(x, y), Themed by GalapagosTheme {
+class CraftingInstructionsDialog(x: Int, y: Int, val blueprint: CraftingInstructions.BlueprintInfo, stylePerk: StylePerk? = null) : Dialog(x, y), Themed by GalapagosTheme {
     val instructions: HashMap<Material, List<Instruction>> = hashMapOf()
     val materialStatus: HashMap<Material, Pair<Int, Int>> = hashMapOf()
     var requirements: List<Pair<String, Int>> = listOf()
@@ -138,7 +137,7 @@ class CraftingInstructionsDialog(x: Int, y: Int, val blueprint: CraftingInstruct
 
     override fun layout() = linear(LinearLayout.Orientation.VERTICAL) {
         val font = Minecraft.getInstance().font
-        val efficientFusion = 1.0 - ((Galapagos.save.stylePerks[PlayerData.StylePerk.EFFICIENT_FUSION] ?: 0) * 0.05)
+        val efficientFusion = 1.0 - ((Galapagos.save.stylePerks[StylePerk.EFFICIENT_FUSION] ?: 0) * 0.05)
 
         instructions.forEach { (material, instructions) ->
             +StringWidget(
@@ -162,7 +161,7 @@ class CraftingInstructionsDialog(x: Int, y: Int, val blueprint: CraftingInstruct
             +StringWidget(Component.literal("Total Craft Time: ${formatTimeString((time * efficientFusion).toInt())} ").append(
                 Glyphs.getGlyphComponent("_fonts/icon/time.png")), font)
         }
-        if (Galapagos.save.stylePerks[PlayerData.StylePerk.EFFICIENT_FUSION] == null) {
+        if (Galapagos.save.stylePerks[StylePerk.EFFICIENT_FUSION] == null) {
             +StringWidget(Component.literal("(Please open the Style Perks menu for accurate crafting time!)").withColor(ChatFormatting.RED.color!!), font)
         }
 

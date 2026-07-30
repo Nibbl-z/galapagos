@@ -15,7 +15,6 @@ import net.minecraft.world.item.TooltipFlag
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
-import xyz.nibblz.galapagos.core.PlayerData
 import xyz.nibblz.galapagos.data.*
 import xyz.nibblz.galapagos.dialogs.CraftingInstructionsDialog
 import xyz.nibblz.galapagos.events.*
@@ -63,7 +62,7 @@ object CraftingInstructions : Feature {
         return when(type) {
             InstructionType.CRAFT -> {
                 val craftTime = (craftingDuration[material] ?: 0) * count
-                val efficientFusion = 1.0 - (Galapagos.save.stylePerks[PlayerData.StylePerk.EFFICIENT_FUSION]!! * 0.05)
+                val efficientFusion = 1.0 - (Galapagos.save.stylePerks[StylePerk.EFFICIENT_FUSION]!! * 0.05)
 
                 var component = Component.literal("Craft ${count}x ")
                     .append(material.getStyledComponent())
@@ -144,7 +143,6 @@ object CraftingInstructions : Feature {
 
     fun hasValidInstructions(name: String, lore: List<Component>, screen: ContainerScreen): Boolean {
         if (screen.title.string.contains("STYLE PERKS")) {
-            //if (!PlayerData.StylePerk.entries.any { it.label == name }) return false
             if (findLoreFromList(lore, "Reach Style Level")) return false
         } else {
             if (!name.contains("Blueprint:") && !findLoreFromList(lore, "Trophies: ") && !findLoreFromList(lore, "Style Shard")) return false
@@ -187,7 +185,7 @@ object CraftingInstructions : Feature {
         }
 
         val perkName = Regex("(?<perk>.+) ").find(slot.item.itemName.string)?.groups["perk"]?.value
-        val stylePerk = PlayerData.StylePerk.entries.find { it.label == perkName }
+        val stylePerk = StylePerk.entries.find { it.label == perkName }
 
         val dialog = CraftingInstructionsDialog(10, 10, BlueprintInfo(
             slot.item.getItemRarity() ?: Rarity.COMMON,

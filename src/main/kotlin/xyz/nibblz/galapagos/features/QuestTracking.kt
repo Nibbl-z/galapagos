@@ -111,7 +111,7 @@ object QuestTracking : Feature {
                 QuestingRewardSource.DAILY_QUEST,
                 QuestingRewardSource.WEEKLY_QUEST,
                 QuestingRewardSource.QUEST_SCROLL,
-                QuestingRewardSource.DAILY_METER -> source.mult * bonus.mult * if (hasMccPlus) 2 else 1
+                QuestingRewardSource.DAILY_METER -> source.mult * bonus.mult * if (Galapagos.save.mccPlus) 2 else 1
             }
 
             return "[${rarity.label} Reward Crate]${if (count > 1) " x${count}" else ""}"
@@ -132,7 +132,6 @@ object QuestTracking : Feature {
     var checkDailyMeter = false
     var checkWeeklyVault = false
     var clickedQuest: QuestingReward? = null
-    var hasMccPlus = false
 
     var clickedQuestHistory = false
     var openQuestHistory = false
@@ -141,12 +140,6 @@ object QuestTracking : Feature {
 
     fun containerOpen(packet: ClientboundContainerSetContentPacket) {
         val screen = Minecraft.getInstance().screen ?: return
-        if (screen.title.string.contains("ISLAND REWARDS")) {
-            val favorites = packet.items[43]
-            if (favorites.findLore("Click to Select Favorites")) {
-                hasMccPlus = true
-            }
-        }
 
         if (checkWeeklyVault && screen.title.string.contains("SUMMARY")) {
             checkWeeklyVault = false
@@ -313,7 +306,7 @@ object QuestTracking : Feature {
             val count = match.groups[0]?.value?.toInt()
             val bonus = when(count) {
                 1 -> QuestingRewardBonus.NONE
-                2 -> if (hasMccPlus) QuestingRewardBonus.NONE else QuestingRewardBonus.GLITCHED
+                2 -> if (Galapagos.save.mccPlus) QuestingRewardBonus.NONE else QuestingRewardBonus.GLITCHED
                 4 -> QuestingRewardBonus.GLITCHED
                 10, 20 -> QuestingRewardBonus.ARCANE
                 else -> QuestingRewardBonus.NONE

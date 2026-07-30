@@ -6,6 +6,8 @@ import net.fabricmc.loader.api.FabricLoader
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.data.Cosmetic
 import xyz.nibblz.galapagos.data.Item
+import xyz.nibblz.galapagos.data.Rank
+import xyz.nibblz.galapagos.data.StylePerk
 import xyz.nibblz.galapagos.features.CoinTracking
 import xyz.nibblz.galapagos.features.QuestTracking
 import xyz.nibblz.galapagos.features.TrophyTracking
@@ -29,9 +31,12 @@ object Save : CoreFeature {
         var infinibag: HashMap<String, Item> = hashMapOf(),
         var infinivault: HashMap<String, Item> = hashMapOf(),
         var fusionForge: MutableList<Item> = mutableListOf(),
-        var stylePerks: HashMap<PlayerData.StylePerk, Int> = hashMapOf(),
+        var stylePerks: HashMap<StylePerk, Int> = hashMapOf(),
+        var finishedOOBE: Boolean = false,
+        var mccPlus: Boolean = false,
+        var rank: Rank? = null,
         var apiKey: String = "",
-        var finishedOOBE: Boolean = false
+
     )
 
     override fun init() {
@@ -45,7 +50,7 @@ object Save : CoreFeature {
         val loaded = json.decodeFromString<PlayerSave>(jsonText)
         Galapagos.save = loaded
 
-        PlayerData.StylePerk.entries.forEach {
+        StylePerk.entries.forEach {
             if (Galapagos.save.stylePerks[it] == null) Galapagos.save.stylePerks[it] = 0
         }
     }
