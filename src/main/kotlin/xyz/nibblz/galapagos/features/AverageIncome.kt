@@ -2,8 +2,13 @@ package xyz.nibblz.galapagos.features
 
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback
 import net.minecraft.ChatFormatting
+import net.minecraft.client.Minecraft
+import net.minecraft.client.gui.GuiGraphicsExtractor
+import net.minecraft.client.gui.screens.inventory.ContainerScreen
 import net.minecraft.core.component.DataComponents
 import net.minecraft.network.chat.Component
+import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
+import net.minecraft.util.ARGB
 import net.minecraft.world.item.ItemStack
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
@@ -12,9 +17,15 @@ import xyz.nibblz.galapagos.data.LUCKY_UPGRADE_CHANCES
 import xyz.nibblz.galapagos.data.Rarity
 import xyz.nibblz.galapagos.data.StylePerk
 import xyz.nibblz.galapagos.data.WEEKLY_VAULT_CHANCES
+import xyz.nibblz.galapagos.events.ContainerCloseEvent
+import xyz.nibblz.galapagos.events.ContainerOpenEvent
+import xyz.nibblz.galapagos.events.ContainerRenderEvent
+import xyz.nibblz.galapagos.events.SlotClickEvent
 import xyz.nibblz.galapagos.features.WeeklyVaultInfo.claims
 import xyz.nibblz.galapagos.features.WeeklyVaultInfo.maxClaims
+import xyz.nibblz.galapagos.mixin.accessor.HoveredSlotAccessor
 import xyz.nibblz.galapagos.util.Glyphs
+import xyz.nibblz.galapagos.util.findLore
 import kotlin.reflect.KMutableProperty0
 
 object AverageIncome : Feature {
@@ -31,6 +42,45 @@ object AverageIncome : Feature {
         Rarity.EPIC to 10000,
         Rarity.LEGENDARY to 30000,
         Rarity.MYTHIC to 60000
+    )
+
+    val DAILY_LOGIN_CHANCES: HashMap<IntRange, HashMap<Rarity, Double>> = hashMapOf(
+        0..0 to hashMapOf(
+            Rarity.COMMON to 1.0
+        ),
+        1..2 to hashMapOf(
+            Rarity.COMMON to 0.8,
+            Rarity.UNCOMMON to 0.2
+        ),
+        3..4 to hashMapOf(
+            Rarity.COMMON to 0.7,
+            Rarity.UNCOMMON to 0.25,
+            Rarity.RARE to 0.05
+        ),
+        5..6 to hashMapOf(
+            Rarity.COMMON to 0.6,
+            Rarity.UNCOMMON to 0.3,
+            Rarity.RARE to 0.1,
+        ),
+        7..9 to hashMapOf(
+            Rarity.COMMON to 0.45,
+            Rarity.UNCOMMON to 0.35,
+            Rarity.RARE to 0.15,
+            Rarity.EPIC to 0.05
+        ),
+        10..14 to hashMapOf(
+            Rarity.UNCOMMON to 0.65,
+            Rarity.RARE to 0.25,
+            Rarity.EPIC to 0.1
+        ),
+        // Playing mcci for 2,147,483,647 days breaks Galapagos average daily coins!
+        // (and probably many other things, such as nuclear fallout, death of The Sun, the heat death of the universe, etc etc)
+        15..Int.MAX_VALUE to hashMapOf(
+            Rarity.UNCOMMON to 0.5,
+            Rarity.RARE to 0.3,
+            Rarity.EPIC to 0.15,
+            Rarity.LEGENDARY to 0.05
+        )
     )
 
     var AVERAGE_COINS_PER_ANOMALY = 0.0
@@ -92,12 +142,38 @@ object AverageIncome : Feature {
         return boostedAverage
     }
 
+    fun averageCoinsFromScrolls(): Int {
+        val scrollCounts: HashMap<Rarity, Int> = hashMapOf()
+
+        Rarity.entries.forEach {
+            val scroll = Galapagos.save.infinibag["${it.label} Quest Scroll"]
+
+            if (scroll == null) scrollCounts[it] = 0 else scrollCounts[it] = scroll.count
+        }
+
+        return scrollCounts.entries.sumOf { (rarity, count) -> CRATE_AVERAGE_COINS[rarity]!! * count }
+    }
+
+    fun averageDailyChestIncome(days: Int): Double {
+        val chances = DAILY_LOGIN_CHANCES.entries.find { (range, _) -> days in range }?.value
+            ?: throw IllegalStateException("Day $days does not fall in the valid range days... Wtf???")
+
+        return averageIncome(chances, 1, 0.0, 0.0)
+    }
+
+    var loginStreak = 0
+    var openedScrollMenu = false
+
     override fun init() {
         ARCANE_ANOMALY_CHANCES.forEach { (rarity, chance) ->
             AVERAGE_COINS_PER_ANOMALY += CRATE_AVERAGE_COINS[rarity]!! * chance
         }
         AVERAGE_COINS_PER_ANOMALY *= 50
         ItemTooltipCallback.EVENT.register { stack, _, _, components -> tooltipAdd(stack, components) }
+        SlotClickEvent.EVENT.register { screen, _, _, _ -> slotClick(screen) }
+        ContainerRenderEvent.EVENT.register { screen, graphics, x, y, w, _ -> containerRender(screen, graphics, x, y, w) }
+        ContainerCloseEvent.EVENT.register { containerClose() }
+        ContainerOpenEvent.EVENT.register { packet -> containerOpen(packet) }
     }
 
     fun tooltipAdd(item: ItemStack, components: MutableList<Component>) {
@@ -106,6 +182,31 @@ object AverageIncome : Feature {
         if (item.itemName.string == "Daily Meter") handleDailyMeterIncomeTooltip(components)
         if (item.itemName.string == "Weekly Vault") handleWeeklyVaultIncomeTooltip(components)
         if (item.itemName.string == "Island Rewards" && item.get(DataComponents.ITEM_MODEL)?.path?.contains("blank") == true) handleOverallIncomeTooltip(components)
+        if (item.itemName.string == "Click to Add a Quest Scroll") handleQuestScrollTooltip(components)
+        if (item.itemName.string == "Daily Login Chest") handleDailyChestTooltip(components)
+    }
+
+    fun slotClick(screen: ContainerScreen) {
+        val slot = (screen as HoveredSlotAccessor).`galapagos$hoveredSlot`() ?: return
+
+        if (!screen.title.string.contains("ISLAND REWARDS")) return
+        if (slot.item.itemName.string != "Click to Add a Quest Scroll") return
+
+        openedScrollMenu = true
+    }
+
+    fun containerClose() {
+        openedScrollMenu = false
+    }
+
+    fun containerOpen(packet: ClientboundContainerSetContentPacket) {
+        val screen = Minecraft.getInstance().screen ?: return
+        if (!screen.title.string.contains("INFINIBAG")) openedScrollMenu = false
+
+        if (screen.title.string.contains("ISLAND REWARDS")) {
+            loginStreak = packet.items[10].findLore(Regex("Current Login Streak: (?<streak>\\d+) Days"))
+                ?.get("streak")?.value?.toIntOrNull() ?: 0
+        }
     }
 
     fun handleQuestIncomeTooltip(components: MutableList<Component>, isWeekly: Boolean) {
@@ -184,7 +285,7 @@ object AverageIncome : Feature {
         val weeklyClaims = (20 + (Galapagos.save.stylePerks[StylePerk.EXPANDED_VAULT] ?: 0) * 5)
 
         // todo: with the coins per day (maybe this can be a setting), add an option to also include coins from doing a quest scroll alongside?
-        val coinsPerDay = dailyQuests * averageDailyQuestIncome() + dailyClaims * averageDailyMeterIncome()
+        val coinsPerDay = dailyQuests * averageDailyQuestIncome() + dailyClaims * averageDailyMeterIncome() + averageDailyChestIncome(loginStreak)
         val coinsPerWeek = coinsPerDay * 7 + weeklyQuests * averageWeeklyQuestIncome() + weeklyClaims * averageWeeklyVaultIncome(weeklyClaims)
 
         // todo 2: in settings, add options to choose how of everything you think you'll do on average
@@ -199,5 +300,38 @@ object AverageIncome : Feature {
         components.add(index + 3, Component.literal("Average Coins/Week: ").withColor(ChatFormatting.YELLOW.color!!)
             .append(Component.literal("%,d".format(coinsPerWeek.toInt())).withColor(0xFFFFFF))
             .append(Glyphs.getGlyphComponent("_fonts/icon/coin_small.png")))
+    }
+
+    fun handleQuestScrollTooltip(components: MutableList<Component>) {
+        components.add(1, Component.empty())
+        components.add(2, Component.literal("Average Coins from All Scrolls: ").withColor(ChatFormatting.YELLOW.color!!)
+            .append(Component.literal("%,d".format(averageCoinsFromScrolls())).withColor(0xFFFFFF))
+            .append(Glyphs.getGlyphComponent("_fonts/icon/coin_small.png"))
+        )
+    }
+
+    fun handleDailyChestTooltip(components: MutableList<Component>) {
+        val index = components.indexOfFirst { it.string.contains("Current Login Streak:") }
+        if (index == -1) return
+
+        val income = averageDailyChestIncome(loginStreak).toInt()
+
+        components.add(index + 2, Component.literal("Average Coins: ").withColor(ChatFormatting.YELLOW.color!!)
+            .append(Component.literal("%,d".format(income)).withColor(0xFFFFFF))
+            .append(Glyphs.getGlyphComponent("_fonts/icon/coin_small.png"))
+        )
+    }
+
+    fun containerRender(screen: ContainerScreen, graphics: GuiGraphicsExtractor, x: Int, y: Int, w: Int) {
+        if (!openedScrollMenu) return
+        if (!screen.title.string.contains("INFINIBAG")) return
+
+        val coins = averageCoinsFromScrolls()
+
+        graphics.text(Minecraft.getInstance().font,
+            Component.literal("Average Coins from All Scrolls: " + "%,d".format(coins))
+                .append(Glyphs.getGlyphComponent("_fonts/icon/coin_small.png")),
+            x + w + 2, y + 130, ARGB.opaque(ChatFormatting.YELLOW.color!!), true
+        )
     }
 }
