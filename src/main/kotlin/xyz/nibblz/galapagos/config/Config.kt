@@ -7,6 +7,7 @@ import dev.isxander.yacl3.config.v2.api.serializer.GsonConfigSerializerBuilder
 import dev.isxander.yacl3.dsl.YetAnotherConfigLib
 import dev.isxander.yacl3.dsl.binding
 import dev.isxander.yacl3.dsl.enumSwitch
+import dev.isxander.yacl3.dsl.slider
 import dev.isxander.yacl3.dsl.tickBox
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.ChatFormatting
@@ -140,6 +141,16 @@ class Config {
     // Average Income
     @SerialEntry
     var averageIncomeEnabled: Boolean = true
+    @SerialEntry
+    var averageIncomeIncludeQuestScrolls: Boolean = true
+    @SerialEntry
+    var averageIncomeDailies: Int = 10
+    @SerialEntry
+    var averageIncomeWeeklies: Int = 10
+    @SerialEntry
+    var averageIncomeMeters: Int = 15
+    @SerialEntry
+    var averageIncomeVaultClaims: Int = 60
 
     // Misc
     @SerialEntry
@@ -542,6 +553,63 @@ class Config {
                         ))
                         controller(tickBox())
                         binding(values::trophyTrackingShowCategoryBreakdown, true)
+                    }
+                }
+
+                groups.register("average_income") {
+                    name(Component.literal("Average Income"))
+
+                    options.register("average_income_include_scrolls") {
+                        name(Component.literal("Include Quest Scrolls alongside Dailies"))
+                        description(OptionDescription.of(
+                            Component.literal("Adds another line under any average income including daily quests, making the assumption that you will complete whatever your current highest rarity of quest scroll is alongside the daily quest.")
+                        ))
+                        controller(tickBox())
+                        binding(values::averageIncomeIncludeQuestScrolls, true)
+                    }
+
+                    options.register("average_income_dailies") {
+                        name(Component.literal("Average Daily Quests/Day"))
+                        description(OptionDescription.of(
+                            Component.literal("Set here how many daily quests you think you will complete on average every day."),
+                            Component.empty(),
+                            Component.literal("This value will be clamped to whatever your actual max daily quest count is.")
+                        ))
+                        controller(slider(0..10))
+                        binding(values::averageIncomeDailies, 10)
+                    }
+
+                    options.register("average_income_weeklies") {
+                        name(Component.literal("Average Weekly Quests/Week"))
+                        description(OptionDescription.of(
+                            Component.literal("Set here how many weekly quests you think you will complete on average every week."),
+                            Component.empty(),
+                            Component.literal("This value will be clamped to whatever your actual max weekly quest count is.")
+                        ))
+                        controller(slider(0..10))
+                        binding(values::averageIncomeWeeklies, 10)
+                    }
+
+                    options.register("average_income_meters") {
+                        name(Component.literal("Average Daily Meter Claims/Day"))
+                        description(OptionDescription.of(
+                            Component.literal("Set here how many daily meter claims you think you will complete on average every day."),
+                            Component.empty(),
+                            Component.literal("This value will be clamped to whatever your actual max daily meter claims are.")
+                        ))
+                        controller(slider(0..15))
+                        binding(values::averageIncomeMeters, 15)
+                    }
+
+                    options.register("average_income_vault_claims") {
+                        name(Component.literal("Average Weekly Vault Claims/Week"))
+                        description(OptionDescription.of(
+                            Component.literal("Set here how many weekly vault claim you think you will complete on average every week."),
+                            Component.empty(),
+                            Component.literal("This value will be clamped to whatever your actual max weekly vault claims are.")
+                        ))
+                        controller(slider(0..60))
+                        binding(values::averageIncomeVaultClaims, 60)
                     }
                 }
 

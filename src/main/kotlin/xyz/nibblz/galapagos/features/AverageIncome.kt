@@ -26,6 +26,7 @@ import xyz.nibblz.galapagos.features.WeeklyVaultInfo.maxClaims
 import xyz.nibblz.galapagos.mixin.accessor.HoveredSlotAccessor
 import xyz.nibblz.galapagos.util.Glyphs
 import xyz.nibblz.galapagos.util.findLore
+import kotlin.math.min
 import kotlin.reflect.KMutableProperty0
 
 object AverageIncome : Feature {
@@ -90,7 +91,8 @@ object AverageIncome : Feature {
             LUCKY_UPGRADE_CHANCES[Galapagos.save.stylePerks[StylePerk.LUCKY_QUESTS]!!],
             1,
             Galapagos.save.stylePerks[StylePerk.BOOSTED_QUESTS]!! * 0.05,
-            Galapagos.save.stylePerks[StylePerk.ARCANE_QUESTS]!! * 0.005
+            Galapagos.save.stylePerks[StylePerk.ARCANE_QUESTS]!! * 0.005,
+            true
         )
     }
 
@@ -99,7 +101,8 @@ object AverageIncome : Feature {
             LUCKY_UPGRADE_CHANCES[Galapagos.save.stylePerks[StylePerk.LUCKY_QUESTS]!!],
             5,
             Galapagos.save.stylePerks[StylePerk.BOOSTED_QUESTS]!! * 0.05,
-            Galapagos.save.stylePerks[StylePerk.ARCANE_QUESTS]!! * 0.005
+            Galapagos.save.stylePerks[StylePerk.ARCANE_QUESTS]!! * 0.005,
+            true
         )
     }
 
@@ -108,7 +111,8 @@ object AverageIncome : Feature {
             LUCKY_UPGRADE_CHANCES[Galapagos.save.stylePerks[StylePerk.LUCKY_METER]!!],
             if (Galapagos.save.mccPlus) 2 else 1,
             Galapagos.save.stylePerks[StylePerk.GLITCHED_CLAIMS]!! * 0.05,
-            Galapagos.save.stylePerks[StylePerk.ARCANE_CLAIMS]!! * 0.005
+            Galapagos.save.stylePerks[StylePerk.ARCANE_CLAIMS]!! * 0.005,
+            true
         )
     }
 
@@ -120,11 +124,12 @@ object AverageIncome : Feature {
             chances,
             if (Galapagos.save.mccPlus) 2 else 1,
             Galapagos.save.stylePerks[StylePerk.GLITCHED_CLAIMS]!! * 0.05,
-            Galapagos.save.stylePerks[StylePerk.ARCANE_CLAIMS]!! * 0.005
+            Galapagos.save.stylePerks[StylePerk.ARCANE_CLAIMS]!! * 0.005,
+            true
         )
     }
 
-    fun averageIncome(chances: HashMap<Rarity, Double>, mult: Int, boostedChance: Double, arcaneChance: Double): Double {
+    fun averageIncome(chances: HashMap<Rarity, Double>, mult: Int, boostedChance: Double, arcaneChance: Double, includeAnomaly: Boolean = false): Double {
         var totalAverage = 0.0
 
         chances.forEach { (rarity, chance) ->
@@ -137,12 +142,12 @@ object AverageIncome : Feature {
 
         boostedAverage += (totalAverage * (boostedChance - (boostedChance * arcaneChance)))
         boostedAverage += (totalAverage * 9 * (boostedChance * arcaneChance))
-        boostedAverage += (AVERAGE_COINS_PER_ANOMALY * Galapagos.save.stylePerks[StylePerk.ARCANE_ANOMALY]!! * 0.00005)
+        if (includeAnomaly) boostedAverage += (AVERAGE_COINS_PER_ANOMALY * Galapagos.save.stylePerks[StylePerk.ARCANE_ANOMALY]!! * 0.00005)
 
         return boostedAverage
     }
 
-    fun averageCoinsFromScrolls(): Int {
+    fun averageCoinsFromAllScrolls(): Int {
         val scrollCounts: HashMap<Rarity, Int> = hashMapOf()
 
         Rarity.entries.forEach {
@@ -152,6 +157,30 @@ object AverageIncome : Feature {
         }
 
         return scrollCounts.entries.sumOf { (rarity, count) -> CRATE_AVERAGE_COINS[rarity]!! * count }
+    }
+
+    fun averageCoinsFromScrolls(scrolls: Int): Int {
+        val scrollCounts: HashMap<Rarity, Int> = hashMapOf()
+
+        Rarity.entries.forEach {
+            val scroll = Galapagos.save.infinibag["${it.label} Quest Scroll"]
+
+            if (scroll == null) scrollCounts[it] = 0 else scrollCounts[it] = scroll.count
+        }
+
+        var coins = 0
+
+        repeat(scrolls) {
+            Rarity.entries.reversed().forEach {
+                if (scrollCounts[it]!! > 0) {
+                    coins += CRATE_AVERAGE_COINS[it]!!
+                    scrollCounts[it] = scrollCounts[it]!! - 1
+                    return@repeat
+                }
+            }
+        }
+
+        return coins
     }
 
     fun averageDailyChestIncome(days: Int): Double {
@@ -183,6 +212,7 @@ object AverageIncome : Feature {
         if (item.itemName.string == "Weekly Vault") handleWeeklyVaultIncomeTooltip(components)
         if (item.itemName.string == "Island Rewards" && item.get(DataComponents.ITEM_MODEL)?.path?.contains("blank") == true) handleOverallIncomeTooltip(components)
         if (item.itemName.string == "Click to Add a Quest Scroll") handleQuestScrollTooltip(components)
+        else if (item.itemName.string.contains(" Quest Scroll")) handleStartedQuestScrollTooltip(item, components)
         if (item.itemName.string == "Daily Login Chest") handleDailyChestTooltip(components)
     }
 
@@ -212,21 +242,42 @@ object AverageIncome : Feature {
     fun handleQuestIncomeTooltip(components: MutableList<Component>, isWeekly: Boolean) {
         val averageIncome = if (isWeekly) averageWeeklyQuestIncome() else averageDailyQuestIncome()
 
-        val index = components.indexOfFirst { it.string.contains("Remaining ${if (isWeekly) "Weekly" else "Daily"} Quests:") }
+        var index = components.indexOfFirst { it.string.contains("Remaining ${if (isWeekly) "Weekly" else "Daily"} Quests:") }
         if (index == -1) return
 
-        components.add(index + 1,
-            Component.literal("Average Coins/${if (isWeekly) "Weekly" else "Daily"} Quest: ").withColor(ChatFormatting.YELLOW.color!!)
+        val originalIndex = index
+
+        index++
+
+        components.add(index,
+            Component.literal("Average Coins/${if (isWeekly) "Weekly" else "Daily"} Quest: ").withColor(0xfee761)
                 .append(Component.literal("%,d".format(averageIncome.toInt())).withColor(0xFFFFFF))
                 .append(Glyphs.getGlyphComponent("_fonts/icon/coin_small.png"))
         )
 
-        val remaining = Regex("Remaining ${if (isWeekly) "Weekly" else "Daily"} Quests: (?<quests>\\d+)").find(components[index].string)
+        if (!isWeekly && Config.values::averageIncomeIncludeQuestScrolls.get()) {
+            index++
+            components.add(index,
+                Component.literal("Average Coins/Daily Quest + Scroll: ").withColor(0xfee761)
+                    .append(Component.literal("%,d".format(averageIncome.toInt() + averageCoinsFromScrolls(1))).withColor(0xFFFFFF))
+                    .append(Glyphs.getGlyphComponent("_fonts/icon/coin_small.png"))
+            )
+        }
+
+        val remaining = Regex("Remaining ${if (isWeekly) "Weekly" else "Daily"} Quests: (?<quests>\\d+)").find(components[originalIndex].string)
             ?.groups?.get("quests")?.value?.toIntOrNull() ?: return
 
-        components[index] = Component.literal("Remaining ${if (isWeekly) "Weekly" else "Daily"} Quests: ").withColor(ChatFormatting.YELLOW.color!!)
-            .append(Component.literal("$remaining, ~" + "%,d".format(averageIncome.toInt() * remaining)).withColor(0xFFFFFF))
-            .append(Glyphs.getGlyphComponent("_fonts/icon/coin_small.png"))
+        index++
+        components.add(index, Component.literal("Average Coins Remaining: ").withColor(0xfee761)
+            .append(Component.literal("%,d".format(averageIncome.toInt() * remaining)).withColor(0xFFFFFF))
+            .append(Glyphs.getGlyphComponent("_fonts/icon/coin_small.png")))
+
+        if (!isWeekly && Config.values::averageIncomeIncludeQuestScrolls.get()) {
+            index++
+            components.add(index, Component.literal("Average Coins Remaining + Scrolls: ").withColor(0xfee761)
+                .append(Component.literal("%,d".format(averageIncome.toInt() * remaining + averageCoinsFromScrolls(remaining))).withColor(0xFFFFFF))
+                .append(Glyphs.getGlyphComponent("_fonts/icon/coin_small.png")))
+        }
     }
 
     fun handleDailyMeterIncomeTooltip(components: MutableList<Component>) {
@@ -236,7 +287,7 @@ object AverageIncome : Feature {
         if (index == -1) return
 
         components.add(index + 1,
-            Component.literal("Average Coins/Claim: ").withColor(ChatFormatting.YELLOW.color!!)
+            Component.literal("Average Coins/Claim: ").withColor(0xfee761)
                 .append(Component.literal("%,d".format(averageIncome.toInt())).withColor(0xFFFFFF))
                 .append(Glyphs.getGlyphComponent("_fonts/icon/coin_small.png"))
         )
@@ -263,7 +314,7 @@ object AverageIncome : Feature {
 
         val averageIncomePerClaim = averageWeeklyVaultIncome(claims)
         components.add(index + 1,
-            Component.literal("Average Coins: ").withColor(ChatFormatting.YELLOW.color!!)
+            Component.literal("Average Coins: ").withColor(0xfee761)
                 .append(Component.literal("%,d".format(averageIncomePerClaim.toInt() * claims)).withColor(0xFFFFFF))
                 .append(Glyphs.getGlyphComponent("_fonts/icon/coin_small.png"))
         )
@@ -272,40 +323,71 @@ object AverageIncome : Feature {
         val averageIncomePerMaxClaim = averageWeeklyVaultIncome(maxClaims)
 
         components.add(index + 2,
-            Component.literal("Average Coins (Maxed): ").withColor(ChatFormatting.YELLOW.color!!)
+            Component.literal("Average Coins (Maxed): ").withColor(0xfee761)
                 .append(Component.literal("%,d".format(averageIncomePerMaxClaim.toInt() * maxClaims)).withColor(0xFFFFFF))
                 .append(Glyphs.getGlyphComponent("_fonts/icon/coin_small.png"))
         )
     }
 
     fun handleOverallIncomeTooltip(components: MutableList<Component>) {
-        val dailyQuests = 2 + (Galapagos.save.rank?.bonusQuests ?: 0) + (Galapagos.save.stylePerks[StylePerk.EXPANDED_DAILIES] ?: 0)
-        val weeklyQuests = 2 + (Galapagos.save.rank?.bonusQuests ?: 0) + (Galapagos.save.stylePerks[StylePerk.EXPANDED_WEEKLIES] ?: 0)
-        val dailyClaims = 7 + (Galapagos.save.stylePerks[StylePerk.EXPANDED_METER] ?: 0)
-        val weeklyClaims = (20 + (Galapagos.save.stylePerks[StylePerk.EXPANDED_VAULT] ?: 0) * 5)
+        val dailyQuests = min(2 + (Galapagos.save.rank?.bonusQuests ?: 0) + (Galapagos.save.stylePerks[StylePerk.EXPANDED_DAILIES] ?: 0), Config.values::averageIncomeDailies.get())
+        val weeklyQuests = min(2 + (Galapagos.save.rank?.bonusQuests ?: 0) + (Galapagos.save.stylePerks[StylePerk.EXPANDED_WEEKLIES] ?: 0), Config.values::averageIncomeWeeklies.get())
+        val dailyClaims = min(7 + (Galapagos.save.stylePerks[StylePerk.EXPANDED_METER] ?: 0), Config.values::averageIncomeMeters.get())
+        val weeklyClaims = min((20 + (Galapagos.save.stylePerks[StylePerk.EXPANDED_VAULT] ?: 0) * 5), Config.values::averageIncomeVaultClaims.get())
 
-        // todo: with the coins per day (maybe this can be a setting), add an option to also include coins from doing a quest scroll alongside?
         val coinsPerDay = dailyQuests * averageDailyQuestIncome() + dailyClaims * averageDailyMeterIncome() + averageDailyChestIncome(loginStreak)
         val coinsPerWeek = coinsPerDay * 7 + weeklyQuests * averageWeeklyQuestIncome() + weeklyClaims * averageWeeklyVaultIncome(weeklyClaims)
 
-        // todo 2: in settings, add options to choose how of everything you think you'll do on average
+        val coinsPerDayWithScrolls = coinsPerDay + averageCoinsFromScrolls(dailyQuests)
+        val coinsPerWeekWithScrolls = coinsPerWeek + averageCoinsFromScrolls(dailyQuests * 7)
 
-        val index = components.indexOfFirst { it.string.contains("earn Reward Crates") }
+        var index = components.indexOfFirst { it.string.contains("earn Reward Crates") }
         if (index == -1) return
 
-        components.add(index + 1, Component.empty())
-        components.add(index + 2, Component.literal("Average Coins/Day: ").withColor(ChatFormatting.YELLOW.color!!)
+        index++
+        components.add(index, Component.empty())
+
+        index++
+        components.add(index, Component.literal("Average Coins/Day: ").withColor(0xfee761)
             .append(Component.literal("%,d".format(coinsPerDay.toInt())).withColor(0xFFFFFF))
             .append(Glyphs.getGlyphComponent("_fonts/icon/coin_small.png")))
-        components.add(index + 3, Component.literal("Average Coins/Week: ").withColor(ChatFormatting.YELLOW.color!!)
+
+        if (Config.values::averageIncomeIncludeQuestScrolls.get()) {
+            index++
+            components.add(index, Component.literal("Average Coins/Day + Scrolls: ").withColor(0xfee761)
+                .append(Component.literal("%,d".format(coinsPerDayWithScrolls.toInt())).withColor(0xFFFFFF))
+                .append(Glyphs.getGlyphComponent("_fonts/icon/coin_small.png")))
+        }
+
+        index++
+        components.add(index, Component.literal("Average Coins/Week: ").withColor(0xfee761)
             .append(Component.literal("%,d".format(coinsPerWeek.toInt())).withColor(0xFFFFFF))
             .append(Glyphs.getGlyphComponent("_fonts/icon/coin_small.png")))
+
+        if (Config.values::averageIncomeIncludeQuestScrolls.get()) {
+            index++
+            components.add(index, Component.literal("Average Coins/Week + Scrolls: ").withColor(0xfee761)
+                .append(Component.literal("%,d".format(coinsPerWeekWithScrolls.toInt())).withColor(0xFFFFFF))
+                .append(Glyphs.getGlyphComponent("_fonts/icon/coin_small.png")))
+        }
     }
 
     fun handleQuestScrollTooltip(components: MutableList<Component>) {
         components.add(1, Component.empty())
-        components.add(2, Component.literal("Average Coins from All Scrolls: ").withColor(ChatFormatting.YELLOW.color!!)
-            .append(Component.literal("%,d".format(averageCoinsFromScrolls())).withColor(0xFFFFFF))
+        components.add(2, Component.literal("Average Coins from All Scrolls: ").withColor(0xfee761)
+            .append(Component.literal("%,d".format(averageCoinsFromAllScrolls())).withColor(0xFFFFFF))
+            .append(Glyphs.getGlyphComponent("_fonts/icon/coin_small.png"))
+        )
+    }
+
+    fun handleStartedQuestScrollTooltip(item: ItemStack, components: MutableList<Component>) {
+        val index = components.indexOfFirst { it.string == "Rewards:" }
+        if (index == -1) return
+
+        val rarity = Rarity.entries.find { item.itemName.string.contains(it.label) } ?: return
+
+        components.add(index + 2, Component.literal("Average Coins: ").withColor(0xfee761)
+            .append(Component.literal("%,d".format(CRATE_AVERAGE_COINS[rarity]!!)).withColor(0xFFFFFF))
             .append(Glyphs.getGlyphComponent("_fonts/icon/coin_small.png"))
         )
     }
@@ -316,7 +398,7 @@ object AverageIncome : Feature {
 
         val income = averageDailyChestIncome(loginStreak).toInt()
 
-        components.add(index + 2, Component.literal("Average Coins: ").withColor(ChatFormatting.YELLOW.color!!)
+        components.add(index + 2, Component.literal("Average Coins: ").withColor(0xfee761)
             .append(Component.literal("%,d".format(income)).withColor(0xFFFFFF))
             .append(Glyphs.getGlyphComponent("_fonts/icon/coin_small.png"))
         )
@@ -326,12 +408,12 @@ object AverageIncome : Feature {
         if (!openedScrollMenu) return
         if (!screen.title.string.contains("INFINIBAG")) return
 
-        val coins = averageCoinsFromScrolls()
+        val coins = averageCoinsFromAllScrolls()
 
         graphics.text(Minecraft.getInstance().font,
             Component.literal("Average Coins from All Scrolls: " + "%,d".format(coins))
                 .append(Glyphs.getGlyphComponent("_fonts/icon/coin_small.png")),
-            x + w + 2, y + 130, ARGB.opaque(ChatFormatting.YELLOW.color!!), true
+            x + w + 2, y + 130, ARGB.opaque(0xfee761), true
         )
     }
 }
