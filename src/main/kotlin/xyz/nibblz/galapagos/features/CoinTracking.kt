@@ -229,6 +229,29 @@ object CoinTracking : Feature {
             return
         }
 
+        if (slot.item.findLore("Left-Click to Upgrade Perk") && screen.title.string.contains("STYLE PERKS") && button == 0) {
+            val coins = slot.item.findLore(Regex("[^]] [\\d,]+/(?<price>[\\d,]+)"))
+                ?.get("price")?.value?.replace(",", "")?.toIntOrNull() ?: return
+
+            val perkName = Regex("(?<perk>.+) ").find(slot.item.itemName.string)?.groups["perk"]?.value
+            val stylePerk = StylePerk.entries.find { it.label == perkName } ?: return
+
+            val change = CoinChange(
+                amount = -coins,
+                timestamp = Clock.System.now().epochSeconds,
+                category = CoinChangeCategory.STYLE_PERK,
+                data = stylePerk.name,
+                dataCount = (Galapagos.save.stylePerks[stylePerk] ?: 0) + 1
+            )
+
+            // todo: this probably SHOULD be in PlayerData but i dont wanna copy this code over that just seems weird
+            Galapagos.save.stylePerks[stylePerk] = Galapagos.save.stylePerks[stylePerk]!! + 1
+
+            Galapagos.save.coinChanges.add(change)
+
+            return
+        }
+
         if (price == 0 && data.isEmpty()) {
             if (slot.item.itemName.string.contains("Reward Crate")) {
                 category = CoinChangeCategory.REWARD_CRATE
