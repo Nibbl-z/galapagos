@@ -30,6 +30,7 @@ object Galapagos : ModInitializer {
 		AverageIncome,
 		CrateChances,
 		CosmeticMachineChances,
+		RewardChances,
 		ExchangeUnitPrice,
 		CraftingInstructions,
 		BlueprintAssemblerInfo,

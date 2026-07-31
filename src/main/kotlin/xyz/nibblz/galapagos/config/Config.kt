@@ -152,6 +152,10 @@ class Config {
     @SerialEntry
     var averageIncomeVaultClaims: Int = 60
 
+    // Reward Chances
+    @SerialEntry
+    var rewardChancesEnabled: Boolean = true
+
     // Misc
     @SerialEntry
     var twentyFourHourTime: Boolean = false
