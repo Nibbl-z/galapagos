@@ -244,9 +244,6 @@ object CoinTracking : Feature {
                 dataCount = (Galapagos.save.stylePerks[stylePerk] ?: 0) + 1
             )
 
-            // todo: this probably SHOULD be in PlayerData but i dont wanna copy this code over that just seems weird
-            Galapagos.save.stylePerks[stylePerk] = Galapagos.save.stylePerks[stylePerk]!! + 1
-
             Galapagos.save.coinChanges.add(change)
 
             return

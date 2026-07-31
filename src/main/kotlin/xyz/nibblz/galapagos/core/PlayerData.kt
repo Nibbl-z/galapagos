@@ -457,6 +457,10 @@ object PlayerData : CoreFeature {
             handleScavengeMenu(item, input)
         }
 
+        if (screen.title.string.contains("STYLE PERKS")) {
+            handleStylePerkPurchase(item)
+        }
+
         InfinibagUpdateEvent.EVENT.invoker().invoke()
     }
 
@@ -643,5 +647,21 @@ object PlayerData : CoreFeature {
         if (index == -1) return
 
         itemsInScavenging.removeAt(index)
+    }
+
+    fun handleStylePerkPurchase(item: ItemStack) {
+        if (!item.findLore("Left-Click to Upgrade Perk")) return
+
+        val perkName = Regex("(?<perk>.+) ").find(item.itemName.string)?.groups["perk"]?.value
+        val stylePerk = StylePerk.entries.find { it.label == perkName } ?: return
+        val materials = CraftingInstructions.fetchCraftingMaterials(item)
+
+        materials.forEach { (material, count) ->
+            decrementItem(material, count)
+        }
+
+        Galapagos.save.stylePerks[stylePerk] = Galapagos.save.stylePerks[stylePerk]!! + 1
+
+        Galapagos.logger.info("$materials")
     }
 }
