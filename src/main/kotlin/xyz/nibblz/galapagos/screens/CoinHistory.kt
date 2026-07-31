@@ -42,8 +42,10 @@ class CoinHistory : BaseOwoScreen<FlowLayout>() {
             if (CoinTracking.filter[it.category] == false) return@forEach
 
             val date = Instant.fromEpochSeconds(it.timestamp).toLocalDateTime(TimeZone.currentSystemDefault())
+            val newDayDate = if (Config.values::startDayAtQuestRefresh.get())
+                Instant.fromEpochSeconds(it.timestamp + (60 * 60 * 10)).toLocalDateTime(TimeZone.UTC) else date
 
-            if (previousDay != date.day) {
+            if (previousDay != newDayDate.day) {
                 dayGain = 0
                 dayLoss = 0
                 dayHeader = UIComponents.label(Component.empty())
@@ -74,7 +76,7 @@ class CoinHistory : BaseOwoScreen<FlowLayout>() {
                 )
             }
 
-            previousDay = date.day
+            previousDay = newDayDate.day
 
             val changeContainer = UIContainers.horizontalFlow(Sizing.fill(100), Sizing.content())
             changeContainer.gap(5)

@@ -49,8 +49,10 @@ class TrophyHistory : BaseOwoScreen<FlowLayout>() {
             if (it.trophies == 0) return@forEach
 
             val date = Instant.fromEpochSeconds(it.timestamp).toLocalDateTime(TimeZone.currentSystemDefault())
+            val newDayDate = if (Config.values::startDayAtQuestRefresh.get())
+                Instant.fromEpochSeconds(it.timestamp + (60 * 60 * 10)).toLocalDateTime(TimeZone.UTC) else date
 
-            if (previousDay != date.day) {
+            if (previousDay != newDayDate.day) {
                 dayPerCategory = TrophyTracking.TrophySource.entries.associateWithTo(EnumMap(TrophyTracking.TrophySource::class.java)) { 0 }
 
                 dayHeader = UIComponents.label(Component.empty())
@@ -76,7 +78,7 @@ class TrophyHistory : BaseOwoScreen<FlowLayout>() {
                 content.child(dayBreakdown)
             }
 
-            previousDay = date.day
+            previousDay = newDayDate.day
 
             dayPerCategory[it.source] = dayPerCategory[it.source]!! + it.trophies
 

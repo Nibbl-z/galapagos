@@ -159,6 +159,8 @@ class Config {
     // Misc
     @SerialEntry
     var twentyFourHourTime: Boolean = false
+    @SerialEntry
+    var startDayAtQuestRefresh: Boolean = false
 
     companion object {
         val handler: ConfigClassHandler<Config> = ConfigClassHandler.createBuilder(Config::class.java)
@@ -627,6 +629,15 @@ class Config {
                         ))
                         controller(tickBox())
                         binding(values::twentyFourHourTime, false)
+                    }
+
+                    options.register("start_day_at_quest_refresh") {
+                        name(Component.literal("Start Day at Quest Refresh"))
+                        description(OptionDescription.of(
+                            Component.literal("In any history menu where items are categorized by day, enabling this setting will make the day start at 10 a.m UTC, which is when MCC Island refreshes quests.")
+                        ))
+                        controller(tickBox())
+                        binding(values::startDayAtQuestRefresh, false)
                     }
                 }
             }

@@ -29,13 +29,15 @@ class QuestHistory : BaseOwoScreen<FlowLayout>() {
 
         sortedQuests.forEach {
             val date = Instant.fromEpochSeconds(it.timestamp).toLocalDateTime(TimeZone.currentSystemDefault())
+            val newDayDate = if (Config.values::startDayAtQuestRefresh.get())
+                Instant.fromEpochSeconds(it.timestamp + (60 * 60 * 10)).toLocalDateTime(TimeZone.UTC) else date
 
-            if (previousDay != date.day) {
+            if (previousDay != newDayDate.day) {
                 content.child(UIComponents.spacer().verticalSizing(Sizing.fixed(10)))
                 content.child(UIComponents.label(Component.literal("${date.month.name.lowercase().replaceFirstChar { char -> char.uppercase() }} ${date.day}, ${date.year}").withColor(ChatFormatting.GRAY.color!!)))
             }
 
-            previousDay = date.day
+            previousDay = newDayDate.day
 
             val changeContainer = UIContainers.horizontalFlow(Sizing.fill(100), Sizing.content())
             changeContainer.gap(5)
