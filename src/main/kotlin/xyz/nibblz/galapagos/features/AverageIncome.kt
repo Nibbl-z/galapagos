@@ -32,9 +32,19 @@ import kotlin.reflect.KMutableProperty0
 object AverageIncome : Feature {
     override val id: String = "average_income"
     override val name: String = "Average Income"
-    override val description: List<Component> = listOf()
+    override val description: List<Component> = listOf(
+        Component.literal("Shows the average amount of coins you will gain from all sources seen in the Island Rewards menu, including:"),
+        Component.literal("- Daily Quests"),
+        Component.literal("- Weekly Quests"),
+        Component.literal("- Daily Meter"),
+        Component.literal("- Weekly Vault"),
+        Component.literal("- Quest Scrolls"),
+        Component.literal("- Daily Login Chest"),
+        Component.empty(),
+        Component.literal("You can also view the total amount of coins you'll earn every day and every week in the info icon at the top-right of the journal.")
+    )
     override val enabledProperty: KMutableProperty0<Boolean> = Config.values::averageIncomeEnabled
-    override val image: Config.ConfigImage = Config.ConfigImage("assembler_info.png", 842, 364)
+    override val image: Config.ConfigImage = Config.ConfigImage("average_income.png", 850, 474)
 
     val CRATE_AVERAGE_COINS: HashMap<Rarity, Int> = hashMapOf(
         Rarity.COMMON to 1000,
@@ -206,6 +216,7 @@ object AverageIncome : Feature {
     }
 
     fun tooltipAdd(item: ItemStack, components: MutableList<Component>) {
+        if (!enabledProperty.get()) return
         if (item.itemName.string == "Remaining Daily Quests") handleQuestIncomeTooltip(components, false)
         if (item.itemName.string == "Remaining Weekly Quests") handleQuestIncomeTooltip(components, true)
         if (item.itemName.string == "Daily Meter") handleDailyMeterIncomeTooltip(components)
@@ -405,6 +416,7 @@ object AverageIncome : Feature {
     }
 
     fun containerRender(screen: ContainerScreen, graphics: GuiGraphicsExtractor, x: Int, y: Int, w: Int) {
+        if (!enabledProperty.get()) return
         if (!openedScrollMenu) return
         if (!screen.title.string.contains("INFINIBAG")) return
 

@@ -661,7 +661,5 @@ object PlayerData : CoreFeature {
         }
 
         Galapagos.save.stylePerks[stylePerk] = Galapagos.save.stylePerks[stylePerk]!! + 1
-
-        Galapagos.logger.info("$materials")
     }
 }
