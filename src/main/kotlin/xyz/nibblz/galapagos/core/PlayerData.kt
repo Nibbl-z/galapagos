@@ -266,6 +266,7 @@ object PlayerData : CoreFeature {
     val itemsInScavenging: MutableList<Item> = mutableListOf()
     val itemsInCraftedBlueprint: MutableList<Item> = mutableListOf()
     var cancellingForging: Int? = null
+    var cancellingAssembly: Int? = null
     var craftedBlueprint: String? = null
 
     override fun init() {
@@ -374,6 +375,28 @@ object PlayerData : CoreFeature {
             }
         }
 
+        if (screen.title.string.contains("BLUEPRINT ASSEMBLER")) {
+            val slots = listOf(19, 20, 21, 22, 23, 24, 25)
+
+            Galapagos.save.blueprintAssembler.clear()
+
+            slots.forEach {
+                val item = packet.items[it]
+                if (item.isEmpty) return@forEach
+                if (item.itemName.string == "Select a Blueprint") return@forEach
+                if (item.itemName.string == "Locked Assember Slot") return@forEach // noxcrew... come on...
+                if (item.itemName.string == "Locked Assembler Slot") return@forEach // Be So for real.
+
+                Galapagos.save.blueprintAssembler.add(
+                    Item(
+                        name = item.itemName.string,
+                        count = item.count,
+                        isCosmeticToken = false
+                    )
+                )
+            }
+        }
+
         if (screen.title.string.contains("STYLE PERKS")) {
             StylePerk.entries.forEach {
                 val item = packet.items[it.slotID]
@@ -434,6 +457,7 @@ object PlayerData : CoreFeature {
 
         if (screen.title.string.contains("BLUEPRINT ASSEMBLER") ) {
             handleMaterialGloopTimeskip(item, input)
+            handleCraftingClaim(item, input, false)
         }
 
         if (screen.title.string.contains("PURCHASE THIS ITEM?")) {
@@ -443,11 +467,11 @@ object PlayerData : CoreFeature {
         if (screen.title.string.contains("FUSION FORGE")) {
             handleMaterialGloopTimeskip(item, input)
             handleFusionForgeCraft(item, input)
-            handleFusionForgeClaim(item, input)
+            handleCraftingClaim(item, input, true)
         }
 
-        if (screen.title.string.contains("CANCEL FORGING?")) {
-            handleFusionForgeCancel(slot)
+        if (screen.title.string.contains("CANCEL FORGING?") || screen.title.string.contains("CANCEL ASSSEMBLY?")) {
+            handleCraftCancel(slot)
         }
 
         // also handles rep gain from scavenging
@@ -587,33 +611,43 @@ object PlayerData : CoreFeature {
         }
     }
 
-    fun handleFusionForgeClaim(item: ItemStack, input: ContainerInput) {
+    fun handleCraftingClaim(item: ItemStack, input: ContainerInput, isForge: Boolean) {
         if (item.findLore("Click to Claim Item")) {
-            val index = Galapagos.save.fusionForge.indexOfFirst {
+            val index = (if (isForge) Galapagos.save.fusionForge else Galapagos.save.blueprintAssembler).indexOfFirst {
                 it.name == item.itemName.string && it.count == item.count
             }
 
             if (index == -1) return
 
-            Galapagos.save.fusionForge.removeAt(index)
+            (if (isForge) Galapagos.save.fusionForge else Galapagos.save.blueprintAssembler).removeAt(index)
         }
 
-        if (item.findLore("Shift-Click to Cancel Forging") && input == ContainerInput.QUICK_MOVE) {
-            val index = Galapagos.save.fusionForge.indexOfFirst {
+        if (item.findLore("Shift-Click to Cancel ${if (isForge) "Forging" else "Assembly"}") && input == ContainerInput.QUICK_MOVE) {
+            val index = (if (isForge) Galapagos.save.fusionForge else Galapagos.save.blueprintAssembler).indexOfFirst {
                 it.name == item.itemName.string && it.count == item.count
             }
 
             if (index == -1) return
 
-            cancellingForging = index
+            if (isForge) cancellingForging = index
+            else cancellingAssembly = index
         }
     }
 
-    fun handleFusionForgeCancel(slot: Slot) {
+    fun handleCraftCancel(slot: Slot) {
         if (slot.index !in 46..48) return
-        if (cancellingForging == null) return
 
-        Galapagos.save.fusionForge.removeAt(cancellingForging!!)
+        if (cancellingForging != null) {
+            Galapagos.save.fusionForge.removeAt(cancellingForging!!)
+            cancellingForging = null
+            return
+        }
+
+        if (cancellingAssembly != null) {
+            Galapagos.save.blueprintAssembler.removeAt(cancellingAssembly!!)
+            cancellingAssembly = null
+            return
+        }
     }
 
     fun handleScavengeConfirm(slot: Slot) {

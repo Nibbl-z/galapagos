@@ -67,9 +67,13 @@ object CrateChances: Feature {
                 val savedCosmetic = Galapagos.save.cosmetics[it.name] ?: return@crateForEach
                 if (!isExclusive && savedCosmetic.tag == CosmeticTag.EXCLUSIVE) isExclusive = true
 
+                val blueprintOwned =
+                    (Galapagos.save.infinibag["Blueprint: ${it.name} Token"] != null && (Galapagos.save.infinibag["Blueprint: ${it.name} Token"]?.count ?: 0) > 0)
+                    || (Galapagos.save.infinivault["Blueprint: ${it.name} Token"] != null && (Galapagos.save.infinivault["Blueprint: ${it.name} Token"]?.count ?: 0) > 0)
+
                 val lootPreviewCosmetic = LootPreviewCosmetic(
                     chance = it.chance,
-                    isOwned = savedCosmetic.isOwned,
+                    isOwned = savedCosmetic.isOwned || blueprintOwned,
                     trophies = savedCosmetic.rarity.trophies,
                     rep = savedCosmetic.getRep(),
                     perDonation = savedCosmetic.repPerDonation(),

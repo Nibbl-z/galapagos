@@ -120,13 +120,18 @@ object CosmeticMachineChances : Feature {
         Galapagos.save.cosmetics.forEach { (_, it) ->
             if (it.collection !in COLLECTIONS_IN_MACHINE) return@forEach
 
+            val blueprintOwned =
+                (Galapagos.save.infinibag["Blueprint: ${it.name} Token"] != null && (Galapagos.save.infinibag["Blueprint: ${it.name} Token"]?.count ?: 0) > 0)
+                || (Galapagos.save.infinivault["Blueprint: ${it.name} Token"] != null && (Galapagos.save.infinivault["Blueprint: ${it.name} Token"]?.count ?: 0) > 0)
+                || Galapagos.save.blueprintAssembler.any { blueprint -> blueprint.name == "${it.name} Token" }
+
             if (it.rarity != Rarity.MYTHIC) {
                 val basicChance = getChance(false, it.rarity, it.tag)
 
                 if (basicChance != null) {
                     basicCosmetics[it.name] = LootPreviewCosmetic(
                         chance = basicChance / cosmeticCounts[(Pair(it.rarity, it.tag))]!!,
-                        isOwned = it.isOwned,
+                        isOwned = it.isOwned || blueprintOwned,
                         trophies = it.rarity.trophies,
                         rep = it.getRep(),
                         perDonation = it.repPerDonation(),
@@ -142,7 +147,7 @@ object CosmeticMachineChances : Feature {
                 if (ultimateChance != null) {
                     ultimateCosmetics[it.name] = LootPreviewCosmetic(
                         chance = ultimateChance / cosmeticCounts[(Pair(it.rarity, it.tag))]!!,
-                        isOwned = it.isOwned,
+                        isOwned = it.isOwned || blueprintOwned,
                         trophies = it.rarity.trophies,
                         rep = it.getRep(),
                         perDonation = it.repPerDonation(),

@@ -90,6 +90,14 @@ object GalapagosCommand : CoreFeature {
                     }
                 }
 
+                literal("blueprintassembler") {
+                    executes {
+                        Minecraft.getInstance().gui.chat.addClientSystemMessage(
+                            Component.literal(Galapagos.save.blueprintAssembler.toString())
+                        )
+                    }
+                }
+
                 literal("coinhistory") {
                     executes {
                         Minecraft.getInstance().execute {

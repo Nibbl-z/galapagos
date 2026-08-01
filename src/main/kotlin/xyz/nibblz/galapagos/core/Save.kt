@@ -31,12 +31,12 @@ object Save : CoreFeature {
         var infinibag: HashMap<String, Item> = hashMapOf(),
         var infinivault: HashMap<String, Item> = hashMapOf(),
         var fusionForge: MutableList<Item> = mutableListOf(),
+        var blueprintAssembler: MutableList<Item> = mutableListOf(),
         var stylePerks: HashMap<StylePerk, Int> = hashMapOf(),
         var finishedOOBE: Boolean = false,
         var mccPlus: Boolean = false,
         var rank: Rank? = null,
         var apiKey: String = "",
-
     )
 
     override fun init() {
