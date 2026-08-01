@@ -42,6 +42,10 @@ object WeeklyVaultInfo : Feature {
     var progress = 0
     var daysLeft = 7
 
+    val storedRewardsRegex = Regex("Stored Rewards: (?<claims>\\d+)/(?<max>\\d+)")
+    val progressRegex = Regex("Progress: (?<xp>[\\d,]+)")
+    val claimableInRegex = Regex("Claimable in: (?<days>\\d)d")
+
     fun claimXP(claim: Int): Int {
         // note for the future:
         // this'll probably get patched eventually but apparently last 5 vault levels always act as claims 56-60
@@ -94,14 +98,14 @@ object WeeklyVaultInfo : Feature {
         val vault = packet.items[16]
         if (vault.itemName.string != "Weekly Vault") return
 
-        val storedRewardsMatch = vault.findLore(Regex("Stored Rewards: (?<claims>\\d+)/(?<max>\\d+)")) ?: return
+        val storedRewardsMatch = vault.findLore(storedRewardsRegex) ?: return
         claims = storedRewardsMatch["claims"]?.value?.toIntOrNull() ?: return
         maxClaims = storedRewardsMatch["max"]?.value?.toIntOrNull() ?: return
 
-        val progressMatch = vault.findLore(Regex("Progress: (?<xp>[\\d,]+)")) ?: return
+        val progressMatch = vault.findLore(progressRegex) ?: return
         progress = progressMatch["xp"]?.value?.replace(",", "")?.toIntOrNull() ?: return
 
-        val daysMatch = vault.findLore(Regex("Claimable in: (?<days>\\d)d"))
+        val daysMatch = vault.findLore(claimableInRegex)
         daysLeft = daysMatch?.get("days")?.value?.toIntOrNull() ?: 1
     }
 

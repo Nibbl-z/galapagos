@@ -203,6 +203,11 @@ object AverageIncome : Feature {
     var loginStreak = 0
     var openedScrollMenu = false
 
+    val loginStreakRegex = Regex("Current Login Streak: (?<streak>\\d+) Days")
+    val remainingQuestRegex = Regex("Remaining Daily|Weekly Quests: (?<quests>\\d+)")
+    val dailyClaimsRegex = Regex("Daily Claims: (?<completed>\\d+)/(?<total>\\d+)")
+    val storedRewardsRegex = Regex("Stored Rewards: (?<claims>\\d+)/(?<max>\\d+)")
+
     override fun init() {
         ARCANE_ANOMALY_CHANCES.forEach { (rarity, chance) ->
             AVERAGE_COINS_PER_ANOMALY += CRATE_AVERAGE_COINS[rarity]!! * chance
@@ -243,8 +248,7 @@ object AverageIncome : Feature {
         if (!screen.title.string.contains("INFINIBAG")) openedScrollMenu = false
 
         if (screen.title.string.contains("ISLAND REWARDS")) {
-            loginStreak = packet.items[10].findLore(Regex("Current Login Streak: (?<streak>\\d+) Days"))
-                ?.get("streak")?.value?.toIntOrNull() ?: 0
+            loginStreak = packet.items[10].findLore(loginStreakRegex)?.get("streak")?.value?.toIntOrNull() ?: 0
         }
     }
 
@@ -273,8 +277,7 @@ object AverageIncome : Feature {
             )
         }
 
-        val remaining = Regex("Remaining ${if (isWeekly) "Weekly" else "Daily"} Quests: (?<quests>\\d+)").find(components[originalIndex].string)
-            ?.groups?.get("quests")?.value?.toIntOrNull() ?: return
+        val remaining = remainingQuestRegex.find(components[originalIndex].string)?.groups?.get("quests")?.value?.toIntOrNull() ?: return
 
         index++
         components.add(index, Component.literal("Average Coins Remaining: ").withColor(0xfee761)
@@ -301,7 +304,7 @@ object AverageIncome : Feature {
                 .append(Glyphs.getGlyphComponent("_fonts/icon/coin_small.png"))
         )
 
-        val claimsMatch = Regex("Daily Claims: (?<completed>\\d+)/(?<total>\\d+)").find(components[index].string)?.groups ?: return
+        val claimsMatch = dailyClaimsRegex.find(components[index].string)?.groups ?: return
         val completedClaims = claimsMatch["completed"]?.value?.toIntOrNull() ?: return
         val totalClaims = claimsMatch["total"]?.value?.toIntOrNull() ?: return
 
@@ -317,7 +320,7 @@ object AverageIncome : Feature {
         val index = components.indexOfFirst { it.string.contains("Stored Rewards:") }
         if (index == -1) return
 
-        val storedRewardsMatch = Regex("Stored Rewards: (?<claims>\\d+)/(?<max>\\d+)").find(components[index].string)?.groups ?: return
+        val storedRewardsMatch = storedRewardsRegex.find(components[index].string)?.groups ?: return
         claims = storedRewardsMatch["claims"]?.value?.toIntOrNull() ?: return
         maxClaims = storedRewardsMatch["max"]?.value?.toIntOrNull() ?: return
 

@@ -40,6 +40,8 @@ object ExchangeUnitPrice : Feature {
     val soulEquivalent: MutableMap<ItemStack, Int> = mutableMapOf()
     val wispEquivalent: MutableMap<ItemStack, Int> = mutableMapOf()
 
+    val listedPriceRegex = Regex("Listed Price: .(?<price>[\\d,]+)")
+
     fun containerOpen(packet: ClientboundContainerSetContentPacket) {
         val screen = Minecraft.getInstance().screen ?: return
         if (!screen.title.string.contains("ISLAND EXCHANGE", false)) return
@@ -53,8 +55,7 @@ object ExchangeUnitPrice : Feature {
     }
 
     fun getData(item: ItemStack) {
-        val regex = Regex("Listed Price: .(?<price>[\\d,]+)")
-        val priceString = item.findLore(regex)?.get("price")?.value ?: return
+        val priceString = item.findLore(listedPriceRegex)?.get("price")?.value ?: return
         val cleanedString = priceString.replace(",", "")
         val price = cleanedString.toInt()
 
