@@ -6,9 +6,7 @@
     "AbstractContainerScreenMixin",
     "BitmapProviderMixin",
     "ClientPacketMixin",
-    "PlayerMixin",
-    "accessor.AnvilMenuAccessor",
-    "accessor.HoveredSlotAccessor"
+    "PlayerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

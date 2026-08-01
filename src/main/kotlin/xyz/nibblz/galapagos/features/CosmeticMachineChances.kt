@@ -7,6 +7,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.screens.inventory.ContainerScreen
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.Style
+import net.minecraft.world.inventory.Slot
 import net.minecraft.world.item.ItemStack
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
@@ -15,7 +16,6 @@ import xyz.nibblz.galapagos.events.ContainerCloseEvent
 import xyz.nibblz.galapagos.events.ContainerOpenEvent
 import xyz.nibblz.galapagos.events.ContainerRenderEvent
 import xyz.nibblz.galapagos.events.SlotClickEvent
-import xyz.nibblz.galapagos.mixin.accessor.HoveredSlotAccessor
 import xyz.nibblz.galapagos.util.Glyphs
 import kotlin.math.round
 import kotlin.reflect.KMutableProperty0
@@ -81,7 +81,7 @@ object CosmeticMachineChances : Feature {
     override fun init() {
         ContainerOpenEvent.EVENT.register { containerOpen() }
         ContainerCloseEvent.EVENT.register { containerClose() }
-        SlotClickEvent.EVENT.register { screen, _, _, _ -> slotClick(screen) }
+        SlotClickEvent.EVENT.register { slot, _, _, _, _ -> slotClick(slot) }
         ItemTooltipCallback.EVENT.register { stack, _, _, components -> tooltipAdd(stack, components) }
         ContainerRenderEvent.EVENT.register { screen, graphics, x, y, w, _ -> containerRender(screen, graphics, x, y, w) }
     }
@@ -95,9 +95,7 @@ object CosmeticMachineChances : Feature {
     var basicData = BlueprintLootPreview()
     var ultimateData = BlueprintLootPreview()
 
-    fun slotClick(screen: ContainerScreen) {
-        val slot = (screen as HoveredSlotAccessor).`galapagos$hoveredSlot`() ?: return
-
+    fun slotClick(slot: Slot) {
         if (slot.item.itemName.string.contains("Basic Pull")) isUltimate = false
         if (slot.item.itemName.string.contains("Ultimate Pull")) isUltimate = true
     }

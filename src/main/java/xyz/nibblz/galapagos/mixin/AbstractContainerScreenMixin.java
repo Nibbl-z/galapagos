@@ -46,7 +46,7 @@ public class AbstractContainerScreenMixin {
         if (!UtilKt.onIsland()) return;
 
         if (screen != null) {
-            SlotClickEvent.INSTANCE.getEVENT().invoker().invoke(screen, containerInput, ci, buttonNum);
+            SlotClickEvent.INSTANCE.getEVENT().invoker().invoke(slot, screen, containerInput, ci, buttonNum);
         }
 
         if (anvilScreen != null) {

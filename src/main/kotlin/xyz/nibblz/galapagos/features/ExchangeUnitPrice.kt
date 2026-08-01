@@ -8,6 +8,7 @@ import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.Style
 import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
+import net.minecraft.world.inventory.Slot
 import net.minecraft.world.item.ItemStack
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
@@ -15,7 +16,6 @@ import xyz.nibblz.galapagos.data.Rarity
 import xyz.nibblz.galapagos.events.ContainerOpenEvent
 import xyz.nibblz.galapagos.events.ContainerSetSlotEvent
 import xyz.nibblz.galapagos.events.SlotClickEvent
-import xyz.nibblz.galapagos.mixin.accessor.HoveredSlotAccessor
 import xyz.nibblz.galapagos.util.Glyphs
 import xyz.nibblz.galapagos.util.findLore
 import kotlin.reflect.KMutableProperty0
@@ -33,7 +33,7 @@ object ExchangeUnitPrice : Feature {
         ItemTooltipCallback.EVENT.register { stack, _, _, components -> tooltipAdd(stack, components) }
         ContainerOpenEvent.EVENT.register { packet -> containerOpen(packet) }
         ContainerSetSlotEvent.EVENT.register { packet -> containerSetSlot(packet) }
-        SlotClickEvent.EVENT.register { screen, _, _, _ -> slotClick(screen) }
+        SlotClickEvent.EVENT.register { slot, screen, _, _, _ -> slotClick(slot, screen) }
     }
 
     val perUnitPrices: MutableMap<ItemStack, Int> = mutableMapOf()
@@ -130,9 +130,8 @@ object ExchangeUnitPrice : Feature {
         wispEquivalent.clear()
     }
 
-    fun slotClick(screen: ContainerScreen) {
+    fun slotClick(slot: Slot, screen: ContainerScreen) {
         if (!screen.title.string.contains("ISLAND EXCHANGE", false)) return
-        val slot = (screen as HoveredSlotAccessor).`galapagos$hoveredSlot`() ?: return
 
         if (slot.item.itemName.string.contains("Back")) clear()
         if (slot.item.itemName.string.contains("Main Filter")) clear()

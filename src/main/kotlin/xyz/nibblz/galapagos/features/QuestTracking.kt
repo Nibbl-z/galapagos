@@ -11,6 +11,7 @@ import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket
 import net.minecraft.network.protocol.game.ServerboundContainerClosePacket
+import net.minecraft.world.inventory.Slot
 import net.minecraft.world.item.ItemStack
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
@@ -19,7 +20,6 @@ import xyz.nibblz.galapagos.events.ContainerCloseEvent
 import xyz.nibblz.galapagos.events.ContainerOpenEvent
 import xyz.nibblz.galapagos.events.SlotClickEvent
 import xyz.nibblz.galapagos.events.SystemChatEvent
-import xyz.nibblz.galapagos.mixin.accessor.HoveredSlotAccessor
 import xyz.nibblz.galapagos.screens.QuestHistory
 import xyz.nibblz.galapagos.screens.VaultHistory
 import xyz.nibblz.galapagos.util.Glyphs
@@ -45,7 +45,7 @@ object QuestTracking : Feature {
     override fun init() {
         ContainerOpenEvent.EVENT.register { packet -> containerOpen(packet) }
         ContainerCloseEvent.EVENT.register { containerClose() }
-        SlotClickEvent.EVENT.register { screen, _, _, button -> slotClick(screen, button) }
+        SlotClickEvent.EVENT.register { slot, screen, _, _, button -> slotClick(slot, screen, button) }
         SystemChatEvent.EVENT.register { packet -> systemChat(packet) }
         ItemTooltipCallback.EVENT.register { stack, _, _, components -> tooltipAdd(stack, components) }
         ClientTickEvents.END_CLIENT_TICK.register {
@@ -198,9 +198,7 @@ object QuestTracking : Feature {
         return QuestingRewardSource.DAILY_QUEST // fallback, i guess
     }
 
-    fun slotClick(screen: ContainerScreen, button: Int) {
-        val slot = (screen as HoveredSlotAccessor).`galapagos$hoveredSlot`() ?: return
-
+    fun slotClick(slot: Slot, screen: ContainerScreen, button: Int) {
         if (screen.title.string.contains("JOURNAL") || screen.title.string.contains("MAILBOX")) {
             if (slot.item.itemName.string.contains("Island Rewards") && button == 0 && slot.index == 8) {
                 if (!enabledProperty.get()) return

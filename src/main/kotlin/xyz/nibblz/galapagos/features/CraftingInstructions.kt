@@ -10,6 +10,7 @@ import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
 import net.minecraft.world.inventory.ContainerInput
+import net.minecraft.world.inventory.Slot
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.TooltipFlag
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo
@@ -18,7 +19,6 @@ import xyz.nibblz.galapagos.config.Config
 import xyz.nibblz.galapagos.data.*
 import xyz.nibblz.galapagos.dialogs.CraftingInstructionsDialog
 import xyz.nibblz.galapagos.events.*
-import xyz.nibblz.galapagos.mixin.accessor.HoveredSlotAccessor
 import xyz.nibblz.galapagos.util.*
 import kotlin.math.ceil
 import kotlin.reflect.KMutableProperty0
@@ -100,7 +100,7 @@ object CraftingInstructions : Feature {
     }
 
     override fun init() {
-        SlotClickEvent.EVENT.register { screen, input, ci, button -> slotClick(screen, input, ci, button) }
+        SlotClickEvent.EVENT.register { slot, screen, input, ci, button -> slotClick(slot, screen, input, ci, button) }
         ItemTooltipCallback.EVENT.register { stack, _, _, components -> tooltipAdd(stack, components) }
         InfinibagUpdateEvent.EVENT.register { infinibagUpdate() }
         ContainerSetSlotEvent.EVENT.register { packet -> setSlot(packet) }
@@ -160,9 +160,8 @@ object CraftingInstructions : Feature {
         return true
     }
 
-    fun slotClick(screen: ContainerScreen, type: ContainerInput, ci: CallbackInfo, button: Int) {
+    fun slotClick(slot: Slot, screen: ContainerScreen, type: ContainerInput, ci: CallbackInfo, button: Int) {
         if (!enabledProperty.get()) return
-        val slot = (screen as HoveredSlotAccessor).`galapagos$hoveredSlot`() ?: return
         if (type != ContainerInput.QUICK_MOVE) return
         if (button != 1) return
         if (!hasValidInstructions(slot.item)) return

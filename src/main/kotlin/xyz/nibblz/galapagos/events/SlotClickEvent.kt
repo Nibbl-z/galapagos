@@ -4,6 +4,7 @@ import net.fabricmc.fabric.api.event.Event
 import net.fabricmc.fabric.api.event.EventFactory
 import net.minecraft.client.gui.screens.inventory.ContainerScreen
 import net.minecraft.world.inventory.ContainerInput
+import net.minecraft.world.inventory.Slot
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo
 
 object SlotClickEvent {
@@ -11,11 +12,11 @@ object SlotClickEvent {
         SlotClickCallback::class.java
     ) { listeners ->
         SlotClickCallback {
-            screen, containerInput, ci, button -> listeners.forEach { it.invoke(screen, containerInput, ci, button) }
+            slot, screen, containerInput, ci, button -> listeners.forEach { it.invoke(slot, screen, containerInput, ci, button) }
         }
     }
 
     fun interface SlotClickCallback {
-        fun invoke(screen: ContainerScreen, containerInput: ContainerInput, ci: CallbackInfo, button: Int)
+        fun invoke(slot: Slot, screen: ContainerScreen, containerInput: ContainerInput, ci: CallbackInfo, button: Int)
     }
 }

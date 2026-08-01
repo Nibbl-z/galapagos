@@ -6,6 +6,7 @@ import net.minecraft.client.gui.screens.inventory.ContainerScreen
 import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
 import net.minecraft.util.ARGB
+import net.minecraft.world.inventory.Slot
 import net.minecraft.world.item.ItemStack
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
@@ -14,7 +15,6 @@ import xyz.nibblz.galapagos.events.ContainerCloseEvent
 import xyz.nibblz.galapagos.events.ContainerOpenEvent
 import xyz.nibblz.galapagos.events.ContainerRenderEvent
 import xyz.nibblz.galapagos.events.SlotClickEvent
-import xyz.nibblz.galapagos.mixin.accessor.HoveredSlotAccessor
 import xyz.nibblz.galapagos.util.Glyphs
 import java.util.*
 import kotlin.math.round
@@ -45,7 +45,7 @@ object BlueprintAssemblerInfo : Feature {
     override fun init() {
         ContainerOpenEvent.EVENT.register { packet -> containerOpen(packet) }
         ContainerRenderEvent.EVENT.register { screen, graphics, x, y, w, _ -> containerRender(screen, graphics, x, y, w) }
-        SlotClickEvent.EVENT.register { screen, _, _, _ -> slotClick(screen) }
+        SlotClickEvent.EVENT.register { slot, screen, _, _, _ -> slotClick(slot, screen) }
         ContainerCloseEvent.EVENT.register { containerClose() }
     }
 
@@ -82,9 +82,7 @@ object BlueprintAssemblerInfo : Feature {
         displayData = false
     }
 
-    fun slotClick(screen: ContainerScreen) {
-        val slot = (screen as HoveredSlotAccessor).`galapagos$hoveredSlot`() ?: return
-
+    fun slotClick(slot: Slot, screen: ContainerScreen) {
         if (screen.title.string.contains("BLUEPRINT ASSEMBLER") && slot.item.itemName.string == "Select a Blueprint") {
             displayData = true
         }

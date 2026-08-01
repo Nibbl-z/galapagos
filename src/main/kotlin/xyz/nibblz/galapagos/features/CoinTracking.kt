@@ -12,6 +12,7 @@ import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket
 import net.minecraft.network.protocol.game.ServerboundContainerClosePacket
 import net.minecraft.world.inventory.ContainerInput
+import net.minecraft.world.inventory.Slot
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 import xyz.nibblz.galapagos.Galapagos
@@ -20,7 +21,6 @@ import xyz.nibblz.galapagos.events.ContainerCloseEvent
 import xyz.nibblz.galapagos.events.ContainerOpenEvent
 import xyz.nibblz.galapagos.events.SlotClickEvent
 import xyz.nibblz.galapagos.events.SystemChatEvent
-import xyz.nibblz.galapagos.mixin.accessor.HoveredSlotAccessor
 import xyz.nibblz.galapagos.screens.CoinHistory
 import xyz.nibblz.galapagos.util.Glyphs
 import xyz.nibblz.galapagos.data.StylePerk
@@ -54,7 +54,7 @@ object CoinTracking : Feature {
 
     override fun init() {
         ContainerCloseEvent.EVENT.register { containerClose() }
-        SlotClickEvent.EVENT.register { screen, input, _, button -> slotClick(screen, input, button) }
+        SlotClickEvent.EVENT.register { slot, screen, input, _, button -> slotClick(slot, screen, input, button) }
         //AnvilSlotClickEvent.EVENT.register { screen, input, _, button -> anvilSlotClick(screen, input, button) }
         SystemChatEvent.EVENT.register { packet -> systemChat(packet) }
         ContainerOpenEvent.EVENT.register { packet -> containerOpen(packet) }
@@ -193,9 +193,7 @@ object CoinTracking : Feature {
         return cleanedCountString.toInt()
     }
 
-    fun slotClick(screen: ContainerScreen, type: ContainerInput, button: Int) {
-        val slot = (screen as HoveredSlotAccessor).`galapagos$hoveredSlot`() ?: return
-
+    fun slotClick(slot: Slot, screen: ContainerScreen, type: ContainerInput, button: Int) {
         if (slot.item.itemName.string == "Coins" && screen.title.string.contains("INFINIBAG") && button == 0) {
             if (!enabledProperty.get()) return
             clickedCoinHistory = true

@@ -9,6 +9,7 @@ import net.minecraft.core.component.DataComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
 import net.minecraft.util.ARGB
+import net.minecraft.world.inventory.Slot
 import net.minecraft.world.item.ItemStack
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
@@ -23,7 +24,6 @@ import xyz.nibblz.galapagos.events.ContainerRenderEvent
 import xyz.nibblz.galapagos.events.SlotClickEvent
 import xyz.nibblz.galapagos.features.WeeklyVaultInfo.claims
 import xyz.nibblz.galapagos.features.WeeklyVaultInfo.maxClaims
-import xyz.nibblz.galapagos.mixin.accessor.HoveredSlotAccessor
 import xyz.nibblz.galapagos.util.Glyphs
 import xyz.nibblz.galapagos.util.findLore
 import kotlin.math.min
@@ -209,7 +209,7 @@ object AverageIncome : Feature {
         }
         AVERAGE_COINS_PER_ANOMALY *= 50
         ItemTooltipCallback.EVENT.register { stack, _, _, components -> tooltipAdd(stack, components) }
-        SlotClickEvent.EVENT.register { screen, _, _, _ -> slotClick(screen) }
+        SlotClickEvent.EVENT.register { slot, screen, _, _, _ -> slotClick(slot, screen) }
         ContainerRenderEvent.EVENT.register { screen, graphics, x, y, w, _ -> containerRender(screen, graphics, x, y, w) }
         ContainerCloseEvent.EVENT.register { containerClose() }
         ContainerOpenEvent.EVENT.register { packet -> containerOpen(packet) }
@@ -227,9 +227,7 @@ object AverageIncome : Feature {
         if (item.itemName.string == "Daily Login Chest") handleDailyChestTooltip(components)
     }
 
-    fun slotClick(screen: ContainerScreen) {
-        val slot = (screen as HoveredSlotAccessor).`galapagos$hoveredSlot`() ?: return
-
+    fun slotClick(slot: Slot, screen: ContainerScreen) {
         if (!screen.title.string.contains("ISLAND REWARDS")) return
         if (slot.item.itemName.string != "Click to Add a Quest Scroll") return
 

@@ -14,7 +14,6 @@ import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
 import xyz.nibblz.galapagos.data.*
 import xyz.nibblz.galapagos.events.*
-import xyz.nibblz.galapagos.mixin.accessor.HoveredSlotAccessor
 import xyz.nibblz.galapagos.util.Glyphs
 import kotlin.reflect.KMutableProperty0
 
@@ -47,7 +46,7 @@ object CrateChances: Feature {
         ContainerRenderEvent.EVENT.register { screen, graphics, x, y, w, _ -> containerRender(screen, graphics, x, y, w) }
         ContainerCloseEvent.EVENT.register { containerClose() }
         ContainerOpenEvent.EVENT.register { containerOpen() }
-        SlotClickEvent.EVENT.register { screen, _, _, _ -> slotClick(screen) }
+        SlotClickEvent.EVENT.register { slot, screen, _, _, _ -> slotClick(slot, screen) }
         ItemTooltipCallback.EVENT.register { stack, _, _, components -> tooltipAdd(stack, components) }
         SlotRenderEvent.EVENT.register { extractor, slot -> slotRender(extractor, slot) }
     }
@@ -112,9 +111,8 @@ object CrateChances: Feature {
         currentCrate = null
     }
 
-    fun slotClick(screen: ContainerScreen) {
+    fun slotClick(slot: Slot, screen: ContainerScreen) {
         if (!screen.title.string.contains("CRATE EMPORIUM", false)) return
-        val slot = (screen as HoveredSlotAccessor).`galapagos$hoveredSlot`() ?: return
 
         currentCrate = slot.item.itemName.string
     }

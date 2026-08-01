@@ -9,6 +9,7 @@ import net.minecraft.client.gui.screens.inventory.ContainerScreen
 import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket
 import net.minecraft.network.protocol.game.ServerboundContainerClosePacket
+import net.minecraft.world.inventory.Slot
 import net.minecraft.world.item.ItemStack
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
@@ -21,7 +22,6 @@ import xyz.nibblz.galapagos.events.ContainerCloseEvent
 import xyz.nibblz.galapagos.events.RoyalReputationIncreaseEvent
 import xyz.nibblz.galapagos.events.SlotClickEvent
 import xyz.nibblz.galapagos.events.SystemChatEvent
-import xyz.nibblz.galapagos.mixin.accessor.HoveredSlotAccessor
 import xyz.nibblz.galapagos.screens.TrophyHistory
 import xyz.nibblz.galapagos.util.Glyphs
 import xyz.nibblz.galapagos.util.findLore
@@ -43,7 +43,7 @@ object TrophyTracking : Feature {
     override val image: Config.ConfigImage = Config.ConfigImage("trophy_tracking.png", 1044, 561)
 
     override fun init() {
-        SlotClickEvent.EVENT.register { screen, _, _, _ -> slotClick(screen) }
+        SlotClickEvent.EVENT.register { slot, screen, _, _, _ -> slotClick(slot, screen) }
         SystemChatEvent.EVENT.register { packet -> systemChat(packet) }
         RoyalReputationIncreaseEvent.EVENT.register { cosmetic, count -> royalReputationIncrease(cosmetic, count) }
         ItemTooltipCallback.EVENT.register { stack, _, _, components -> tooltipAdd(stack, components) }
@@ -119,9 +119,7 @@ object TrophyTracking : Feature {
     var clickedTrophyHistory = false
     var openTrophyHistory = false
 
-    fun slotClick(screen: ContainerScreen) {
-        val slot = (screen as HoveredSlotAccessor).`galapagos$hoveredSlot`() ?: return
-
+    fun slotClick(slot: Slot, screen: ContainerScreen) {
         if (slot.item.itemName.string == "Crown Level" && screen.title.string.contains("MY PROFILE")) {
             if (!enabledProperty.get()) return
             clickedTrophyHistory = true

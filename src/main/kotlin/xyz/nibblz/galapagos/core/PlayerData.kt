@@ -34,7 +34,6 @@ import xyz.nibblz.galapagos.events.RoyalReputationIncreaseEvent
 import xyz.nibblz.galapagos.events.SlotClickEvent
 import xyz.nibblz.galapagos.events.SystemChatEvent
 import xyz.nibblz.galapagos.features.CraftingInstructions
-import xyz.nibblz.galapagos.mixin.accessor.HoveredSlotAccessor
 import xyz.nibblz.galapagos.util.findLore
 import xyz.nibblz.galapagos.util.sendGalapagosChatMessage
 import xyz.nibblz.galapagos.util.toDataItem
@@ -272,7 +271,7 @@ object PlayerData : CoreFeature {
     override fun init() {
         ContainerOpenEvent.EVENT.register { packet -> containerOpen(packet) }
         ContainerSetSlotEvent.EVENT.register { packet -> containerSetSlot(packet) }
-        SlotClickEvent.EVENT.register { screen, input, _, _ -> slotClick(screen, input) }
+        SlotClickEvent.EVENT.register { slot, screen, input, _, _ -> slotClick(slot, screen, input) }
         SystemChatEvent.EVENT.register { packet -> systemChat(packet) }
         JoinMCCIEvent.EVENT.register {
             if (!Galapagos.save.finishedOOBE) return@register
@@ -438,8 +437,7 @@ object PlayerData : CoreFeature {
         }
     }
 
-    fun slotClick(screen: ContainerScreen, input: ContainerInput) {
-        val slot = (screen as HoveredSlotAccessor).`galapagos$hoveredSlot`() ?: return
+    fun slotClick(slot: Slot, screen: ContainerScreen, input: ContainerInput) {
         val item = slot.item
 
         if (screen.title.string.contains("INFINIBAG")) {
