@@ -27,6 +27,7 @@ import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
 import xyz.nibblz.galapagos.features.TrophyTracking
 import xyz.nibblz.galapagos.util.Glyphs
+import xyz.nibblz.galapagos.util.mcciTextureComponent
 import java.util.EnumMap
 import kotlin.time.Instant
 
@@ -128,11 +129,10 @@ class TrophyHistory : BaseOwoScreen<FlowLayout>() {
                     if (trophies == 0) return@category
                     categoryBreakdownComponent = categoryBreakdownComponent.append(
                         Component.literal("+$trophies ").withColor(category.type.color)
-                            .append(if (category == TrophyTracking.TrophySource.CLAIM_RESEARCH) {
-                                // this sucks
-                                Component.literal("\uE007").withColor(0xffffff).withStyle(Style.EMPTY.withFont(Galapagos.font))
-                            } else {
+                            .append(if (category.sprite.contains("_fonts")) {
                                 Glyphs.getGlyphComponent(category.sprite + ".png")
+                            } else {
+                                mcciTextureComponent(category.sprite).withColor(0xffffff)
                             })
                             .append(Component.literal(" "))
                     )

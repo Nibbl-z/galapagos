@@ -100,7 +100,7 @@ object CraftingInstructions : Feature {
     }
 
     override fun init() {
-        SlotClickEvent.EVENT.register { slot, screen, input, ci, button -> slotClick(slot, screen, input, ci, button) }
+        SlotClickEvent.EVENT.register { slot, _, input, ci, button -> slotClick(slot, input, ci, button) }
         ItemTooltipCallback.EVENT.register { stack, _, _, components -> tooltipAdd(stack, components) }
         InfinibagUpdateEvent.EVENT.register { infinibagUpdate() }
         ContainerSetSlotEvent.EVENT.register { packet -> setSlot(packet) }
@@ -160,7 +160,7 @@ object CraftingInstructions : Feature {
         return true
     }
 
-    fun slotClick(slot: Slot, screen: ContainerScreen, type: ContainerInput, ci: CallbackInfo, button: Int) {
+    fun slotClick(slot: Slot, type: ContainerInput, ci: CallbackInfo, button: Int) {
         if (!enabledProperty.get()) return
         if (type != ContainerInput.QUICK_MOVE) return
         if (button != 1) return

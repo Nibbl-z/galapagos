@@ -70,7 +70,7 @@ object TrophyTracking : Feature {
         COLLECTION_BONUS(TrophyType.STYLE, "_fonts/icon/arcane_gate"),
 
         CLAIM_FISH(TrophyType.ANGLER, "_fonts/icon/fish_fish"),
-        CLAIM_RESEARCH(TrophyType.ANGLER, "island_interface/badges/general/loyalist_pink_parrots"), // uuuaaughhh
+        CLAIM_RESEARCH(TrophyType.ANGLER, "island_interface/fishing/glimmering_research"),
         UPGRADE_PURCHASE(TrophyType.ANGLER, "_fonts/icon/fishing_perk/xp_magnet")
     }
 

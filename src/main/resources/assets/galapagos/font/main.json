@@ -71,15 +71,6 @@
       "chars": [
         "\uE006"
       ]
-    },
-    {
-      "type": "bitmap",
-      "file": "galapagos:font/research.png",
-      "ascent": 7,
-      "height": 8,
-      "chars": [
-        "\uE007"
-      ]
     }
   ]
 }
