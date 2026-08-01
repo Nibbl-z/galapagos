@@ -15,6 +15,7 @@ import xyz.nibblz.galapagos.features.*
 import xyz.nibblz.galapagos.core.OOBE
 import xyz.nibblz.galapagos.core.PlayerData
 import xyz.nibblz.galapagos.core.Save
+import java.text.DecimalFormat
 
 object Galapagos : ModInitializer {
 	const val MOD_ID: String = "galapagos"
@@ -22,6 +23,7 @@ object Galapagos : ModInitializer {
 	val logger: Logger = LoggerFactory.getLogger(MOD_ID)
 	var save: Save.PlayerSave = Save.PlayerSave()
 	val font = FontDescription.Resource(Identifier.fromNamespaceAndPath(MOD_ID, "main"))
+	var decimalFormat = DecimalFormat("#.###")
 
 	val features: List<Feature> = listOf(
 		CoinTracking,
@@ -52,6 +54,7 @@ object Galapagos : ModInitializer {
 
 	override fun onInitialize() {
 		Config.handler.load()
+		decimalFormat = DecimalFormat("#${if (Config.values::decimalPoints.get() > 0) "." else ""}${"#".repeat(Config.values::decimalPoints.get())}")
 		registerFeatures()
 		ConstantIslandData.load()
 

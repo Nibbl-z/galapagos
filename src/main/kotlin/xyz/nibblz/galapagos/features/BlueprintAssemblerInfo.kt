@@ -171,7 +171,7 @@ object BlueprintAssemblerInfo : Feature {
             if (cosmeticCoreSettings[it]!!.get() == Config.AssemblerCoreInfoType.DISABLED) return@forEach
 
             graphics.text(Minecraft.getInstance().font,
-                Component.literal("${it.label}s: ${round((directCores[it] ?: 0.0) * 1000) / 1000.0}${if (cosmeticCoreSettings[it]!!.get() == Config.AssemblerCoreInfoType.CONVERSION) " (${round((convertedCores[it] ?: 0.0) * 1000) / 1000.0} converted) " else " "}")
+                Component.literal("${it.label}s: ${Galapagos.decimalFormat.format(directCores[it] ?: 0.0)}${if (cosmeticCoreSettings[it]!!.get() == Config.AssemblerCoreInfoType.CONVERSION) " (${Galapagos.decimalFormat.format(convertedCores[it] ?: 0.0)} converted) " else " "}")
                 .append(it.getComponent()), x + w + 2, y + yOffset, ARGB.opaque(it.color), true)
 
             yOffset += 15

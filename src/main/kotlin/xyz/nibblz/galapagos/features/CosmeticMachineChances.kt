@@ -184,8 +184,8 @@ object CosmeticMachineChances : Feature {
         val exclusiveChance = if (isUltimate) ULTIMATE_EXCLUSIVE_CHANCE else BASIC_EXCLUSIVE_CHANCE
         val arcaneChance = if (isUltimate && rarity == Rarity.MYTHIC) ULTIMATE_ARCANE_CHANCE else 0.0
 
-        val fixedChance = round((chance * (1.0 - exclusiveChance - arcaneChance) * 100.0) * 1000) / 1000.0
-        val fixedExclusiveChance = round(chance * exclusiveChance * 100.0 * 1000) / 1000.0
+        val fixedChance = Galapagos.decimalFormat.format(chance * (1.0 - exclusiveChance - arcaneChance) * 100.0)
+        val fixedExclusiveChance = Galapagos.decimalFormat.format(chance * exclusiveChance * 100.0)
 
         return Component.literal(" • ").withColor(ChatFormatting.DARK_GRAY.color!!)
                 .append(Component.literal("$fixedChance%").withColor(ChatFormatting.GRAY.color!!))

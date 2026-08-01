@@ -17,6 +17,7 @@ import net.minecraft.network.chat.MutableComponent
 import net.minecraft.network.chat.Style
 import net.minecraft.resources.Identifier
 import xyz.nibblz.galapagos.Galapagos
+import java.text.DecimalFormat
 
 class Config {
     data class ConfigImage(
@@ -161,6 +162,8 @@ class Config {
     var twentyFourHourTime: Boolean = false
     @SerialEntry
     var startDayAtQuestRefresh: Boolean = false
+    @SerialEntry
+    var decimalPoints: Int = 3
 
     companion object {
         val handler: ConfigClassHandler<Config> = ConfigClassHandler.createBuilder(Config::class.java)
@@ -638,6 +641,18 @@ class Config {
                         ))
                         controller(tickBox())
                         binding(values::startDayAtQuestRefresh, false)
+                    }
+
+                    options.register("decimal_points") {
+                        name(Component.literal("Decimal Points"))
+                        description(OptionDescription.of(
+                            Component.literal("Changes the amount of decimal points shown for any information that Galapagos shows including decimals, such as chances or average amounts.")
+                        ))
+                        controller(slider(0..10))
+                        addListener { option, _ ->
+                            Galapagos.decimalFormat = DecimalFormat("#${if (option.pendingValue() > 0) "." else ""}${"#".repeat(option.pendingValue())}")
+                        }
+                        binding(values::decimalPoints, 3)
                     }
                 }
             }

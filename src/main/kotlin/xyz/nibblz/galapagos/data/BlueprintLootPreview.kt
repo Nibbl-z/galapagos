@@ -75,13 +75,13 @@ fun BlueprintLootPreview.update(lootPreviewCosmetics: List<LootPreviewCosmetic>)
 
 fun BlueprintLootPreview.render(graphics: GuiGraphicsExtractor, x: Int, y: Int, w: Int, showCosmeticChance: Boolean, showRepChance: Boolean) {
     if (showCosmeticChance) {
-        graphics.text(Minecraft.getInstance().font, Component.literal("New Cosmetic: ${"%.2f".format(this.newCosmeticChance)}%"), x + w + 2, y + 30, ARGB.opaque(0x66fc56), true)
+        graphics.text(Minecraft.getInstance().font, Component.literal("New Cosmetic: ${Galapagos.decimalFormat.format(this.newCosmeticChance)}%"), x + w + 2, y + 30, ARGB.opaque(0x66fc56), true)
         graphics.text(Minecraft.getInstance().font, Component.literal("${this.currentTrophies}/${this.totalTrophies} ").append(
             Glyphs.getGlyphComponent("_fonts/icon/trophy/purple.png")), x + w + 2, y + 45, ARGB.opaque(0x66fc56), true)
     }
 
     if (showRepChance) {
-        graphics.text(Minecraft.getInstance().font, Component.literal("New Rep: ${"%.2f".format(this.newRepChance)}%"), x + w + 2, y + 60, ARGB.opaque(0x9143f0), true)
+        graphics.text(Minecraft.getInstance().font, Component.literal("New Rep: ${Galapagos.decimalFormat.format(this.newRepChance)}%"), x + w + 2, y + 60, ARGB.opaque(0x9143f0), true)
         graphics.text(Minecraft.getInstance().font, Component.literal("${this.currentRep}/${this.totalRep} ").append(
             Glyphs.getGlyphComponent("_fonts/icon/royal_reputation.png")), x + w + 2, y + 75, ARGB.opaque(0x9143f0), true)
     }
@@ -89,7 +89,7 @@ fun BlueprintLootPreview.render(graphics: GuiGraphicsExtractor, x: Int, y: Int, 
 
 fun BlueprintLootPreview.newCosmeticTooltip(): Component {
     return Component.literal("New Cosmetic: ").withColor(ChatFormatting.GRAY.color!!)
-        .append(Component.literal("${"%.2f".format(this.newCosmeticChance)}%").withColor(ChatFormatting.GREEN.color!!))
+        .append(Component.literal("${Galapagos.decimalFormat.format(this.newCosmeticChance)}%").withColor(ChatFormatting.GREEN.color!!))
         .append(Component.literal(" [").withColor(ChatFormatting.GRAY.color!!))
         .append(Component.literal("${this.currentTrophies}/${this.totalTrophies} ").withColor(ChatFormatting.GREEN.color!!))
         .append(Glyphs.getGlyphComponent("_fonts/icon/trophy/purple.png"))
@@ -98,7 +98,7 @@ fun BlueprintLootPreview.newCosmeticTooltip(): Component {
 
 fun BlueprintLootPreview.newRepTooltip(): Component {
     return Component.literal("New Royal Rep: ").withColor(ChatFormatting.GRAY.color!!)
-        .append(Component.literal("${"%.2f".format(this.newRepChance)}%").withColor(0x9143f0))
+        .append(Component.literal("${Galapagos.decimalFormat.format(this.newRepChance)}%").withColor(0x9143f0))
         .append(Component.literal(" [").withColor(ChatFormatting.GRAY.color!!))
         .append(Component.literal("${this.currentRep}/${this.totalRep} ").withColor(0x9143f0))
         .append(Glyphs.getGlyphComponent("_fonts/icon/royal_reputation.png"))
@@ -107,19 +107,19 @@ fun BlueprintLootPreview.newRepTooltip(): Component {
 
 fun BlueprintLootPreview.trophiesPerRollTooltip(): Component {
     return Component.literal("Average Trophies/Roll: ").withColor(ChatFormatting.GRAY.color!!)
-        .append(Component.literal("%.3f ".format(this.trophiesPerRoll)).withColor(ChatFormatting.GREEN.color!!))
+        .append(Component.literal(Galapagos.decimalFormat.format(this.trophiesPerRoll) + " ").withColor(ChatFormatting.GREEN.color!!))
         .append(Glyphs.getGlyphComponent("_fonts/icon/trophy/purple.png"))
 
 }
 
 fun BlueprintLootPreview.mythicCoresPerRollTooltip(): Component {
     return Component.literal("Average Mythic Cores/Roll: ").withColor(ChatFormatting.GRAY.color!!)
-        .append(Component.literal("%.3f ".format(this.mythicCoresPerRoll)).withColor(ChatFormatting.RED.color!!))
+        .append(Component.literal(Galapagos.decimalFormat.format(this.mythicCoresPerRoll) + " ").withColor(ChatFormatting.RED.color!!))
         .append(Component.literal("\uE003").withColor(0xffffff).withStyle(Style.EMPTY.withFont(Galapagos.font)))
 }
 
 fun BlueprintLootPreview.arcaneCoresPerRollTooltip(): Component {
     return Component.literal("Average Arcane Cores/Roll: ").withColor(ChatFormatting.GRAY.color!!)
-        .append(Component.literal("%.3f ".format(this.arcaneCoresPerRoll)).withColor(ChatFormatting.LIGHT_PURPLE.color!!))
+        .append(Component.literal(Galapagos.decimalFormat.format(this.arcaneCoresPerRoll) + " ").withColor(ChatFormatting.LIGHT_PURPLE.color!!))
         .append(Component.literal("\uE004").withColor(0xffffff).withStyle(Style.EMPTY.withFont(Galapagos.font)))
 }

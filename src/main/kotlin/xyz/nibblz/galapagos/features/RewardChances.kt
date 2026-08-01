@@ -60,13 +60,12 @@ object RewardChances : Feature {
             val boostedChance = chance * (boosted - arcane) * 100.0
             val arcaneChance = chance * arcane * 100.0
             val unboostedChance = chance * 100.0 - boostedChance - arcaneChance
-            val formatter = DecimalFormat("#.##")
 
             var newComponent = Component.empty()
                 .append(Component.literal(" • ").withColor(ChatFormatting.DARK_GRAY.color!!))
                 .append(Component.literal("[${rarity.label}]").withColor(rarity.color))
                 .append(Component.literal(" - ").withColor(ChatFormatting.DARK_GRAY.color!!))
-                .append(Component.literal("${formatter.format(unboostedChance)}%"))
+                .append(Component.literal("${Galapagos.decimalFormat.format(unboostedChance)}%"))
 
             if (boostedChance > 0) {
                 newComponent = newComponent
@@ -75,7 +74,7 @@ object RewardChances : Feature {
                         if (isClaim) StylePerk.GLITCHED_CLAIMS.sprite.dropLast(4)
                         else StylePerk.BOOSTED_QUESTS.sprite.dropLast(4))
                     )
-                    .append(Component.literal(" ${formatter.format(boostedChance)}%"))
+                    .append(Component.literal(" ${Galapagos.decimalFormat.format(boostedChance)}%"))
             }
 
             if (arcaneChance > 0) {
@@ -85,7 +84,7 @@ object RewardChances : Feature {
                         if (isClaim) StylePerk.ARCANE_CLAIMS.sprite.dropLast(4)
                         else StylePerk.ARCANE_QUESTS.sprite.dropLast(4))
                     )
-                    .append(Component.literal(" ${formatter.format(arcaneChance)}%"))
+                    .append(Component.literal(" ${Galapagos.decimalFormat.format(arcaneChance)}%"))
             }
 
             components[index] = newComponent
