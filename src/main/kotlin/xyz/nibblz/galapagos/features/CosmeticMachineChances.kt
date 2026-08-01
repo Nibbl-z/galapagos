@@ -17,7 +17,6 @@ import xyz.nibblz.galapagos.events.ContainerOpenEvent
 import xyz.nibblz.galapagos.events.ContainerRenderEvent
 import xyz.nibblz.galapagos.events.SlotClickEvent
 import xyz.nibblz.galapagos.util.Glyphs
-import kotlin.math.round
 import kotlin.reflect.KMutableProperty0
 
 object CosmeticMachineChances : Feature {

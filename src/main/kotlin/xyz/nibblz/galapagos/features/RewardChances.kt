@@ -8,7 +8,6 @@ import xyz.nibblz.galapagos.config.Config
 import xyz.nibblz.galapagos.data.Rarity
 import xyz.nibblz.galapagos.data.StylePerk
 import xyz.nibblz.galapagos.util.mcciTextureComponent
-import java.text.DecimalFormat
 import kotlin.reflect.KMutableProperty0
 
 object RewardChances : Feature {
