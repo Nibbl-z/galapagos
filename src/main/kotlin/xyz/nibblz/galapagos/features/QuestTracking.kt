@@ -110,7 +110,8 @@ object QuestTracking : Feature {
             val count = when(source) {
                 QuestingRewardSource.DAILY_QUEST,
                 QuestingRewardSource.WEEKLY_QUEST,
-                QuestingRewardSource.QUEST_SCROLL,
+                QuestingRewardSource.QUEST_SCROLL -> source.mult * bonus.mult
+
                 QuestingRewardSource.DAILY_METER -> source.mult * bonus.mult * if (Galapagos.save.mccPlus) 2 else 1
             }
 
@@ -214,6 +215,8 @@ object QuestTracking : Feature {
 
         val source = getRewardSource(slot.item)
 
+        Galapagos.logger.info("$source")
+
         if (slot.item.itemName.string == "Weekly Vault" && !slot.item.findLore("Click to Claim")) {
             if (!enabledProperty.get()) return
             clickedVaultHistory = true
@@ -233,6 +236,8 @@ object QuestTracking : Feature {
                         rarity = it
                     }
                 }
+
+                Galapagos.logger.info("$rarity !")
 
                 clickedQuest = QuestingReward(
                     rarity = rarity,
@@ -282,6 +287,8 @@ object QuestTracking : Feature {
 
     fun systemChat(packet: ClientboundSystemChatPacket) {
         if (clickedQuest != null) {
+            Galapagos.logger.info(clickedQuest?.getExpectedChatMessage())
+            Galapagos.logger.info(packet.content.string)
             if (!packet.content.string.contains(clickedQuest?.getExpectedChatMessage() ?: "")) return
             Galapagos.save.questHistory.add(clickedQuest!!)
             clickedQuest = null
