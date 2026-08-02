@@ -33,6 +33,11 @@ Logs all completed quests, daily meter claims, and weekly vaults, allowing you t
 
 Logs all trophy gains, including the type of trophies (Skill, Style, or Angler), what source the trophies were earned from, as well as how many trophies were earned! Trophies are split up by day, showing a summary of how many trophies of each type/category were earned!
 
+### Average Income
+![Average Income Example](https://cdn.modrinth.com/data/cached_images/fa7ef7e40e304eb8792c0969d93bb5f7fe5753a5.png)
+
+Shows an average of how many coins you'll earn on average from daily quests, weekly quests, daily meter, weekly vault, daily login chest, and quest scrolls, as well as how many coins you'll earn on average each day and each week!
+
 ### Crate & Cosmetic Machine Chances + Extra Stats
 ![Crate Chances Example](https://cdn.modrinth.com/data/cached_images/be356e5afdbe2c34fcace5c956bd37203a4eba86.png)
 ![Cosmetic Machine Chances Example](https://cdn.modrinth.com/data/cached_images/a4c55cb355599f2400b04dbe9e301172c79632b5.png)
@@ -49,6 +54,11 @@ per crate or per cosmetic machine pull
 The highest cosmetic/rep chance for both standard and exclusive crates are also highlighted in the Crate Emporium menu! Crates with all cosmetics earned/all royal reputation earned also have an icon in the corner of the crate to signify that!
 
 Also, in the Cosmetic Machine, the exact chances for exclusive or arcane pulls are listed!
+
+### Reward Chances
+![Reward Chances Example](https://cdn.modrinth.com/data/cached_images/5d6c3be66876be20e63702414ca7d0736d4c28c3.png)
+
+Shows the chances for 1x, 2x, and 10x rewards seperately in reward tooltips, as well as the chance for an Arcane Anomaly if you have the perk upgraded!
 
 ### Blueprint Assembler Info
 ![Blueprint Assembler Info Example](https://cdn.modrinth.com/data/cached_images/e2ea3e1de9d69072b64f2901fb3eb152bb32122a.png)
