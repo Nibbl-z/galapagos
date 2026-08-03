@@ -178,6 +178,8 @@ object AverageIncome : Feature {
             if (scroll == null) scrollCounts[it] = 0 else scrollCounts[it] = scroll.count
         }
 
+        if (currentScroll != null) scrollCounts[currentScroll!!] = (scrollCounts[currentScroll] ?: 0) + 1
+
         var coins = 0
 
         repeat(scrolls) {
@@ -202,6 +204,7 @@ object AverageIncome : Feature {
 
     var loginStreak = 0
     var openedScrollMenu = false
+    var currentScroll: Rarity? = null
 
     val loginStreakRegex = Regex("Current Login Streak: (?<streak>\\d+) Days")
     val remainingQuestRegex = Regex("Remaining Daily|Weekly Quests: (?<quests>\\d+)")
@@ -249,6 +252,7 @@ object AverageIncome : Feature {
 
         if (screen.title.string.contains("ISLAND REWARDS")) {
             loginStreak = packet.items[10].findLore(loginStreakRegex)?.get("streak")?.value?.toIntOrNull() ?: 0
+            currentScroll = Rarity.entries.find { packet.items[41].itemName.string.contains(it.label) }
         }
     }
 

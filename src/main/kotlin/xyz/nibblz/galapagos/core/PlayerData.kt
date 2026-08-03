@@ -267,6 +267,7 @@ object PlayerData : CoreFeature {
     var cancellingForging: Int? = null
     var cancellingAssembly: Int? = null
     var craftedBlueprint: String? = null
+    var activatingQuestScroll: String? = null
 
     override fun init() {
         ContainerOpenEvent.EVENT.register { packet -> containerOpen(packet) }
@@ -442,6 +443,7 @@ object PlayerData : CoreFeature {
 
         if (screen.title.string.contains("INFINIBAG")) {
             handleBlueprintAssemblerInfinibag(item)
+            handleInfinibag(item)
             handleVault(item, input)
         }
 
@@ -481,6 +483,10 @@ object PlayerData : CoreFeature {
 
         if (screen.title.string.contains("STYLE PERKS")) {
             handleStylePerkPurchase(item)
+        }
+
+        if (screen.title.string.contains("ACTIVATE THIS QUEST SCROLL?")) {
+            handleActivateQuestScroll(item)
         }
 
         InfinibagUpdateEvent.EVENT.invoker().invoke()
@@ -693,5 +699,19 @@ object PlayerData : CoreFeature {
         }
 
         Galapagos.save.stylePerks[stylePerk] = Galapagos.save.stylePerks[stylePerk]!! + 1
+    }
+
+    fun handleInfinibag(item: ItemStack) {
+        if (item.findLore("Click to Use") && item.itemName.string.contains("Quest Scroll")) {
+            activatingQuestScroll = item.itemName.string
+        }
+    }
+
+    fun handleActivateQuestScroll(item: ItemStack) {
+        if (activatingQuestScroll == null) return // erm
+        if (!item.findLore("Click to activate")) return
+
+        decrementItem(activatingQuestScroll!!, 1)
+        activatingQuestScroll = null
     }
 }
