@@ -25,7 +25,10 @@
 			}
 		],
 		"modmenu": [
-			"xyz.nibblz.galapagos.config.GalapagosModMenuImpl"
+          "xyz.nibblz.galapagos.entry.GalapagosModMenuImpl"
+		],
+		"noxesium": [
+			"xyz.nibblz.galapagos.entry.GalapagosMCCNoxesiumEntrypoint"
 		]
 	},
 	"mixins": [

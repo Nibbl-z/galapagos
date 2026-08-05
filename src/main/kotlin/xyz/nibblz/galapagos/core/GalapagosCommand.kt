@@ -2,6 +2,7 @@ package xyz.nibblz.galapagos.core
 
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.arguments.IntegerArgumentType
+import com.noxcrew.sheeplib.DialogContainer
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
 import net.minecraft.ChatFormatting
@@ -10,6 +11,7 @@ import net.minecraft.network.chat.Component
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
 import xyz.nibblz.galapagos.data.Item
+import xyz.nibblz.galapagos.dialogs.XPInfoDialog
 import xyz.nibblz.galapagos.screens.CoinHistory
 import xyz.nibblz.galapagos.screens.Intro
 import xyz.nibblz.galapagos.screens.QuestHistory
@@ -135,6 +137,12 @@ object GalapagosCommand : CoreFeature {
                         Minecraft.getInstance().execute {
                             Minecraft.getInstance().setScreen(QuestHistory())
                         }
+                    }
+                }
+
+                literal("xpinfodialog") {
+                    executes {
+                        DialogContainer += XPInfoDialog(10, 10)
                     }
                 }
 

@@ -36,7 +36,8 @@ object Galapagos : ModInitializer {
 		ExchangeUnitPrice,
 		CraftingInstructions,
 		BlueprintAssemblerInfo,
-		WeeklyVaultInfo
+		WeeklyVaultInfo,
+		XPInfo
 	)
 
 	val coreFeatures: List<CoreFeature> = listOf(

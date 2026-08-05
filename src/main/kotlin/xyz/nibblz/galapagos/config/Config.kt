@@ -157,6 +157,10 @@ class Config {
     @SerialEntry
     var rewardChancesEnabled: Boolean = true
 
+    // XP Info
+    @SerialEntry
+    var xpInfoEnabled: Boolean = true
+
     // Misc
     @SerialEntry
     var twentyFourHourTime: Boolean = false

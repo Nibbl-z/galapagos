@@ -16,10 +16,9 @@ repositories {
 	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
 	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
 	// for more information about repositories.
+	mavenCentral()
 	maven("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1")
-	maven("https://maven.noxcrew.com/public") {
-		name = "noxcrew-public"
-	}
+	maven("https://maven.noxcrew.com/public")
 	maven("https://maven.wispforest.io/releases/")
 	maven("https://jitpack.io")
 
@@ -27,8 +26,23 @@ repositories {
 		name = "Xander Maven"
 	}
 
-	maven("https://maven.gnomecraft.net/releases") {
-		name = "Gnomecraft"
+	maven("https://maven.enginehub.org/repo/") {
+		name = "EngineHub"
+	}
+
+	maven("https://maven.terraformersmc.com/") {
+		name = "Terraformers"
+	}
+
+	exclusiveContent {
+		forRepository {
+			maven("https://api.modrinth.com/maven") {
+				name = "Modrinth"
+			}
+		}
+		filter {
+			includeGroup("maven.modrinth")
+		}
 	}
 }
 
@@ -43,6 +57,7 @@ dependencies {
 
 	runtimeOnly("me.djtheredstoner:DevAuth-fabric:1.2.2")
 
+	implementation("com.noxcrew.noxesium:fabric:3.1.0")
 	implementation("com.noxcrew.sheeplib:api:1.5.2+26.1.2")
 
 	implementation("io.wispforest:owo-lib:0.13.0+26.1")

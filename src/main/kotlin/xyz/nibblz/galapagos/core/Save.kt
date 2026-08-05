@@ -11,6 +11,7 @@ import xyz.nibblz.galapagos.data.StylePerk
 import xyz.nibblz.galapagos.features.CoinTracking
 import xyz.nibblz.galapagos.features.QuestTracking
 import xyz.nibblz.galapagos.features.TrophyTracking
+import xyz.nibblz.galapagos.features.XPInfo
 import java.nio.file.Files
 
 object Save : CoreFeature {
@@ -37,6 +38,7 @@ object Save : CoreFeature {
         var mccPlus: Boolean = false,
         var rank: Rank? = null,
         var apiKey: String = "",
+        var xpGains: MutableList<XPInfo.XPGain> = mutableListOf()
     )
 
     override fun init() {
