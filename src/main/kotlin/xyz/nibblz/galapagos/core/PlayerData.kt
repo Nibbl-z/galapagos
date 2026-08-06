@@ -25,6 +25,7 @@ import xyz.nibblz.galapagos.data.Item
 import xyz.nibblz.galapagos.data.ItemLocation
 import xyz.nibblz.galapagos.data.Rank
 import xyz.nibblz.galapagos.data.Rarity
+import xyz.nibblz.galapagos.data.StarLevelGame
 import xyz.nibblz.galapagos.data.StylePerk
 import xyz.nibblz.galapagos.events.ContainerOpenEvent
 import xyz.nibblz.galapagos.events.ContainerSetSlotEvent
@@ -110,6 +111,15 @@ object PlayerData : CoreFeature {
                       __typename
                     }
                   }
+                }
+                statistics {
+                  BATTLE_BOX: rotationValue(statisticKey: \"battle_box_xp_earned\")
+                  DYNABALL: rotationValue(statisticKey: \"dynaball_xp_earned\")
+                  HOLE_IN_THE_WALL: rotationValue(statisticKey: \"hole_in_the_wall_xp_earned\")
+                  PARKOUR_WARRIOR: rotationValue(statisticKey: \"pw_xp_earned\")
+                  ROCKET_SPLEEF: rotationValue(statisticKey: \"rocket_spleef_xp_earned\")
+                  SKY_BATTLE: rotationValue(statisticKey: \"sky_battle_xp_earned\")
+                  TGTTOS: rotationValue(statisticKey: \"tgttos_xp_earned\")
                 }
                 ranks
               }
@@ -255,6 +265,15 @@ object PlayerData : CoreFeature {
             if (Galapagos.save.rank == null || (Galapagos.save.rank?.ordinal ?: -1) < rank.ordinal) {
                 Galapagos.save.rank = rank
             }
+        }
+
+        val statistics: HashMap<String, Int> = Json.Default.decodeFromString(
+            jsonElement["data"]?.jsonObject["player"]?.jsonObject["statistics"]?.jsonObject.toString()
+        )
+
+        statistics.forEach { (game, xp) ->
+            val game = StarLevelGame.valueOf(game)
+            Galapagos.save.gameXP[game] = xp
         }
 
         return true

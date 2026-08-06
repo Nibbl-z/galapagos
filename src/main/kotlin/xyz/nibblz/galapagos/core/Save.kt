@@ -7,6 +7,7 @@ import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.data.Cosmetic
 import xyz.nibblz.galapagos.data.Item
 import xyz.nibblz.galapagos.data.Rank
+import xyz.nibblz.galapagos.data.StarLevelGame
 import xyz.nibblz.galapagos.data.StylePerk
 import xyz.nibblz.galapagos.features.CoinTracking
 import xyz.nibblz.galapagos.features.QuestTracking
@@ -38,6 +39,7 @@ object Save : CoreFeature {
         var mccPlus: Boolean = false,
         var rank: Rank? = null,
         var apiKey: String = "",
+        var gameXP: HashMap<StarLevelGame, Int> = hashMapOf(),
         var xpGains: MutableList<XPInfo.XPGain> = mutableListOf()
     )
 

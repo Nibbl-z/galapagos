@@ -11,11 +11,11 @@ import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
 import xyz.nibblz.galapagos.data.Rank
+import xyz.nibblz.galapagos.data.StarLevelGame
 import xyz.nibblz.galapagos.dialogs.XPInfoDialog
 import xyz.nibblz.galapagos.events.ContainerOpenEvent
 import xyz.nibblz.galapagos.events.MCCServerEvent
 import xyz.nibblz.galapagos.events.MCCStatisticEvent
-import xyz.nibblz.galapagos.events.ScoreboardTitleUpdateEvent
 import xyz.nibblz.galapagos.util.findLore
 import kotlin.math.roundToInt
 import kotlin.reflect.KMutableProperty0
@@ -29,18 +29,18 @@ object XPInfo : Feature {
     override val image: Config.ConfigImage = Config.ConfigImage("weekly_vault_info.png", 470, 341)
 
     @Serializable
-    enum class XPSource(val statistic: String, val serverTypes: List<String>, val lobbyServerType: String, val sprite: String, val label: String) {
-        BATTLE_BOX_QUADS("battle_box_quads_xp_earned", listOf("battle_box"), "battle_box", "island_interface/game/battle_box/icon", "Battle Box"),
-        BATTLE_BOX_ARENA("battle_box_arena_xp_earned", listOf("battle_box"), "battle_box", "island_interface/game/battle_box_arena/icon", "Battle Box Arena"),
-        SKY_BATTLE_QUADS("sky_battle_quads_xp_earned", listOf("sky_battle"), "sky_battle", "island_interface/game/sky_battle/icon", "Sky Battle"),
-        SKY_BATTLE_SOLOS("sky_battle_solos_xp_earned", listOf("sky_battle", "solo"), "sky_battle", "island_interface/game/sky_battle_solo/icon", "Sky Battle Solo"),
-        DYNABALL("dynaball_xp_earned", listOf("dynaball"), "dynaball", "island_interface/game/dynaball/icon", "Dynaball"),
-        TGTTOS("tgttos_xp_earned", listOf("tgttos"), "tgttos", "island_interface/game/tgttosawaf/icon", "To Get To The Other Side"), // awaf? but there is no fans.. only chicken..
-        HOLE_IN_THE_WALL("hole_in_the_wall_xp_earned", listOf("hole_in_the_wall"), "hole_in_the_wall", "island_interface/game/hole_in_the_wall/icon", "Hole in the Wall"),
-        PW_SURVIVAL("pw_survival_xp_earned", listOf("parkour_warrior", "survival"), "parkour_warrior", "island_interface/game/parkour_warrior/icon", "Parkour Warrior Survivor"),
-        PW_SOLO("pw_solo_xp_earned", listOf("parkour_warrior", "dojo"), "parkour_warrior", "island_interface/game/parkour_warrior/solo/icon", "Parkour Warrior Dojo"),
-        ROCKET_SPLEEF("rocket_spleef_xp_earned", listOf("rocket_spleef"), "rocket_spleef", "island_interface/game/rocket_spleef/icon", "Rocket Spleef Rush"),
-        FISHING("fishing_xp_earned", listOf("fishing"), "fishing", "island_interface/fishing/perk_icon/speedy_rod", "Fishing"),
+    enum class XPSource(val statistic: String, val serverTypes: List<String>, val lobbyServerType: String, val sprite: String, val label: String, val starLevelGame: StarLevelGame?) {
+        BATTLE_BOX_QUADS("battle_box_quads_xp_earned", listOf("battle_box"), "battle_box", "island_interface/game/battle_box/icon", "Battle Box", StarLevelGame.BATTLE_BOX),
+        BATTLE_BOX_ARENA("battle_box_arena_xp_earned", listOf("battle_box"), "battle_box", "island_interface/game/battle_box_arena/icon", "Battle Box Arena", StarLevelGame.BATTLE_BOX),
+        SKY_BATTLE_QUADS("sky_battle_quads_xp_earned", listOf("sky_battle"), "sky_battle", "island_interface/game/sky_battle/icon", "Sky Battle", StarLevelGame.SKY_BATTLE),
+        SKY_BATTLE_SOLOS("sky_battle_solos_xp_earned", listOf("sky_battle", "solo"), "sky_battle", "island_interface/game/sky_battle_solo/icon", "Sky Battle Solo", StarLevelGame.SKY_BATTLE),
+        DYNABALL("dynaball_xp_earned", listOf("dynaball"), "dynaball", "island_interface/game/dynaball/icon", "Dynaball", StarLevelGame.DYNABALL),
+        TGTTOS("tgttos_xp_earned", listOf("tgttos"), "tgttos", "island_interface/game/tgttosawaf/icon", "To Get To The Other Side", StarLevelGame.TGTTOS), // awaf? but there is no fans.. only chicken..
+        HOLE_IN_THE_WALL("hole_in_the_wall_xp_earned", listOf("hole_in_the_wall"), "hole_in_the_wall", "island_interface/game/hole_in_the_wall/icon", "Hole in the Wall", StarLevelGame.HOLE_IN_THE_WALL),
+        PW_SURVIVAL("pw_survival_xp_earned", listOf("parkour_warrior", "survival"), "parkour_warrior", "island_interface/game/parkour_warrior/icon", "Parkour Warrior Survivor", StarLevelGame.PARKOUR_WARRIOR),
+        PW_SOLO("pw_solo_xp_earned", listOf("parkour_warrior", "dojo"), "parkour_warrior", "island_interface/game/parkour_warrior/solo/icon", "Parkour Warrior Dojo", StarLevelGame.PARKOUR_WARRIOR),
+        ROCKET_SPLEEF("rocket_spleef_xp_earned", listOf("rocket_spleef"), "rocket_spleef", "island_interface/game/rocket_spleef/icon", "Rocket Spleef Rush", StarLevelGame.ROCKET_SPLEEF),
+        FISHING("fishing_xp_earned", listOf("fishing"), "fishing", "island_interface/fishing/perk_icon/speedy_rod", "Fishing", null),
     }
 
     @Serializable
@@ -59,6 +59,7 @@ object XPInfo : Feature {
 
     var dialog: XPInfoDialog? = null
     var currentGames: MutableList<XPSource> = mutableListOf()
+    var currentStarLevelGame: StarLevelGame? = null
     var dailyMeter: Claimable = Claimable(0, 7, 0, 500)
     var weeklyVault: Claimable = Claimable(0, 20, 0, 500)
 
@@ -66,15 +67,15 @@ object XPInfo : Feature {
         MCCStatisticEvent.EVENT.register { packet -> mccStatistic(packet) }
         MCCServerEvent.EVENT.register { packet -> mccServer(packet) }
         ContainerOpenEvent.EVENT.register { packet -> containerOpen(packet) }
-        ScoreboardTitleUpdateEvent.EVENT.register { scoreboardTitleChange() }
+        //ScoreboardTitleUpdateEvent.EVENT.register { scoreboardTitleChange() }
     }
 
-    fun scoreboardTitleChange() {
-        if (dialog == null || dialog?.state == Dialog.State.CLOSED) {
-            dialog = XPInfoDialog(10, 10)
-            DialogContainer += dialog!!
-        }
-    }
+//    fun scoreboardTitleChange() {
+//        if (dialog == null || dialog?.state == Dialog.State.CLOSED) {
+//            dialog = XPInfoDialog(10, 10)
+//            DialogContainer += dialog!!
+//        }
+//    }
 
     fun mccStatistic(packet: ClientboundMccStatisticPacket) {
         val source = XPSource.entries.find { packet.statistic == it.statistic }
@@ -94,14 +95,25 @@ object XPInfo : Feature {
         dailyMeter.currentXP = (dailyMeter.currentXP + amount).coerceIn(0..dailyMeter.requiredXP)
         weeklyVault.currentXP = (weeklyVault.currentXP + amount).coerceIn(0..weeklyVault.requiredXP)
 
+        if (source.starLevelGame != null) {
+            Galapagos.save.gameXP[source.starLevelGame] = Galapagos.save.gameXP[source.starLevelGame]!! + packet.value
+        }
+
         dialog?.refresh()
     }
 
     fun mccServer(packet: ClientboundMccServerPacket) {
+        if (dialog == null || dialog?.state == Dialog.State.CLOSED) {
+            dialog = XPInfoDialog(10, 10)
+            DialogContainer += dialog!!
+        }
+
         currentGames.clear()
+        currentStarLevelGame = null
 
         if (packet.server == "lobby") {
             XPSource.entries.forEach { if (packet.types.contains(it.lobbyServerType)) currentGames.add(it) }
+            currentStarLevelGame = StarLevelGame.entries.find { packet.types.contains(it.name.lowercase()) }
         } else {
             XPSource.entries.forEach {
                 if (it.serverTypes.all { type -> packet.types.contains(type) }) currentGames.add(it)

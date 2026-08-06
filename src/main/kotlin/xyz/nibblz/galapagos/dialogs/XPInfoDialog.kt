@@ -4,6 +4,7 @@ import com.noxcrew.sheeplib.dialog.Dialog
 import com.noxcrew.sheeplib.dialog.title.TextTitleWidget
 import com.noxcrew.sheeplib.layout.linear
 import com.noxcrew.sheeplib.theme.Themed
+import com.noxcrew.sheeplib.widget.TextWidgets
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import net.minecraft.ChatFormatting
@@ -13,6 +14,7 @@ import net.minecraft.client.gui.layouts.LinearLayout
 import net.minecraft.network.chat.Component
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
+import xyz.nibblz.galapagos.data.getStarLevelEvolution
 import xyz.nibblz.galapagos.features.XPInfo
 import xyz.nibblz.galapagos.util.Glyphs
 import xyz.nibblz.galapagos.util.mcciProgressBar
@@ -66,18 +68,16 @@ class XPInfoDialog(x: Int, y: Int) : Dialog(x, y), Themed by GalapagosTheme {
             else -> "island_interface/quest_log/daily/daily_meter_0"
         }
 
-        +StringWidget(
-            mcciTextureComponent(meterSprite)
+        +TextWidgets.multiLine(mcciTextureComponent(meterSprite)
             .append(Component.literal(" Daily Meter: ").withColor(ChatFormatting.GRAY.color!!))
-                .append(Component.literal("${XPInfo.dailyMeter.completed}").withColor(ChatFormatting.WHITE.color!!))
-                .append(Component.literal("/${XPInfo.dailyMeter.total}, ").withColor(ChatFormatting.DARK_GRAY.color!!))
-                .append(Component.literal("%,d".format(XPInfo.dailyMeter.currentXP)).withColor(ChatFormatting.WHITE.color!!))
-                .append(Component.literal("/" + "%,d".format(XPInfo.dailyMeter.requiredXP)).withColor(ChatFormatting.DARK_GRAY.color!!))
-                .append(Component.literal(" XP").withColor(ChatFormatting.GRAY.color!!)),
-                font)
-        +StringWidget(Component.empty()
+            .append(Component.literal("${XPInfo.dailyMeter.completed}").withColor(ChatFormatting.WHITE.color!!))
+            .append(Component.literal("/${XPInfo.dailyMeter.total}, ").withColor(ChatFormatting.DARK_GRAY.color!!))
+            .append(Component.literal("%,d".format(XPInfo.dailyMeter.currentXP)).withColor(ChatFormatting.WHITE.color!!))
+            .append(Component.literal("/" + "%,d".format(XPInfo.dailyMeter.requiredXP)).withColor(ChatFormatting.DARK_GRAY.color!!))
+            .append(Component.literal(" XP\n").withColor(ChatFormatting.GRAY.color!!))
             .append(mcciProgressBar(meterProgress, 5))
-            .append(Component.literal(" ${((XPInfo.dailyMeter.currentXP.toDouble() / XPInfo.dailyMeter.requiredXP.toDouble() * 100.0).toInt())}%")), font)
+            .append(Component.literal(" ${((XPInfo.dailyMeter.currentXP.toDouble() / XPInfo.dailyMeter.requiredXP.toDouble() * 100.0).toInt())}%"))
+        )
 
         val vaultSprite = when (XPInfo.weeklyVault.completed) {
             0 -> "island_interface/quest_log/meters/daily_vault_empty"
@@ -85,18 +85,34 @@ class XPInfoDialog(x: Int, y: Int) : Dialog(x, y), Themed by GalapagosTheme {
             else -> "island_interface/quest_log/meters/daily_vault_partly_full"
         }
 
-        +StringWidget(
+        +TextWidgets.multiLine(
             mcciTextureComponent(vaultSprite)
                 .append(Component.literal(" Weekly Vault: ").withColor(ChatFormatting.GRAY.color!!))
                 .append(Component.literal("${XPInfo.weeklyVault.completed}").withColor(ChatFormatting.WHITE.color!!))
                 .append(Component.literal("/${XPInfo.weeklyVault.total}, ").withColor(ChatFormatting.DARK_GRAY.color!!))
                 .append(Component.literal("%,d".format(XPInfo.weeklyVault.currentXP)).withColor(ChatFormatting.WHITE.color!!))
                 .append(Component.literal("/" + "%,d".format(XPInfo.weeklyVault.requiredXP)).withColor(ChatFormatting.DARK_GRAY.color!!))
-                .append(Component.literal(" XP").withColor(ChatFormatting.GRAY.color!!)),
-            font)
-        +StringWidget(Component.empty()
-            .append(mcciProgressBar(XPInfo.weeklyVault.currentXP.toDouble() / XPInfo.weeklyVault.requiredXP.toDouble(), 5))
-            .append(Component.literal(" ${((XPInfo.weeklyVault.currentXP.toDouble() / XPInfo.weeklyVault.requiredXP.toDouble() * 100.0).toInt())}%")), font)
+                .append(Component.literal(" XP\n").withColor(ChatFormatting.GRAY.color!!))
+                .append(mcciProgressBar(XPInfo.weeklyVault.currentXP.toDouble() / XPInfo.weeklyVault.requiredXP.toDouble(), 5))
+                .append(Component.literal(" ${((XPInfo.weeklyVault.currentXP.toDouble() / XPInfo.weeklyVault.requiredXP.toDouble() * 100.0).toInt())}%"))
+        )
+
+        if (XPInfo.currentStarLevelGame != null) {
+            val starLevel = Galapagos.save.gameXP[XPInfo.currentStarLevelGame]!! / 3000
+            val currentXP = Galapagos.save.gameXP[XPInfo.currentStarLevelGame]!! - (starLevel * 3000)
+
+            +TextWidgets.multiLine(
+                mcciTextureComponent(XPInfo.currentStarLevelGame!!.sprite)
+                    .append(Component.literal(" ${XPInfo.currentStarLevelGame!!.label}: ").withColor(ChatFormatting.GRAY.color!!))
+                    .append(Glyphs.getGlyphComponent(getStarLevelEvolution(starLevel).getSprite() + ".png"))
+                    .append(Component.literal("${starLevel}, ").withColor(ChatFormatting.WHITE.color!!))
+                    .append(Component.literal("%,d".format(currentXP)).withColor(ChatFormatting.WHITE.color!!))
+                    .append(Component.literal("/" + "%,d".format(3000)).withColor(ChatFormatting.DARK_GRAY.color!!))
+                    .append(Component.literal(" XP\n").withColor(ChatFormatting.GRAY.color!!))
+                .append(mcciProgressBar(currentXP.toDouble() / 3000.0, 5))
+                .append(Component.literal(" ${((currentXP.toDouble() / 3000.0 * 100.0).toInt())}%"))
+            )
+        }
     }
 
     override val title = TextTitleWidget(this,
