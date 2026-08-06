@@ -14,6 +14,8 @@ import net.minecraft.client.gui.layouts.LinearLayout
 import net.minecraft.network.chat.Component
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
+import xyz.nibblz.galapagos.data.FACTION_XP_PER_LEVEL
+import xyz.nibblz.galapagos.data.getFactionLevelAndProgress
 import xyz.nibblz.galapagos.data.getStarLevelEvolution
 import xyz.nibblz.galapagos.features.XPInfo
 import xyz.nibblz.galapagos.util.Glyphs
@@ -113,6 +115,26 @@ class XPInfoDialog(x: Int, y: Int) : Dialog(x, y), Themed by GalapagosTheme {
                 .append(Component.literal(" ${((currentXP.toDouble() / 3000.0 * 100.0).toInt())}%"))
             )
         }
+
+        if (Galapagos.save.selectedFaction != null) {
+            val factionData = getFactionLevelAndProgress(Galapagos.save.factionXP[Galapagos.save.selectedFaction] ?: 0)
+            val factionLevel = factionData.first
+            val factionProgress = factionData.second
+            val factionRequiredXP = FACTION_XP_PER_LEVEL.entries.find { factionLevel in it.key }?.value
+                ?: throw IllegalStateException("Attempted to get XP at invalid level $factionLevel")
+
+            +TextWidgets.multiLine(
+                Component.empty()
+                    .append(Glyphs.getGlyphComponent(Galapagos.save.selectedFaction!!.getSprite(factionLevel)))
+                    .append(Component.literal(" ${Galapagos.save.selectedFaction!!.label}: Level ").withColor(ChatFormatting.GRAY.color!!))
+                    .append(Component.literal("${factionLevel}, ").withColor(ChatFormatting.WHITE.color!!))
+                    .append(Component.literal("%,d".format(factionProgress)).withColor(ChatFormatting.WHITE.color!!))
+                    .append(Component.literal("/" + "%,d".format(factionRequiredXP)).withColor(ChatFormatting.DARK_GRAY.color!!))
+                    .append(Component.literal(" XP\n").withColor(ChatFormatting.GRAY.color!!))
+                    .append(mcciProgressBar(factionProgress.toDouble() / factionRequiredXP.toDouble(), 5))
+                    .append(Component.literal(" ${((factionProgress.toDouble() / factionRequiredXP.toDouble() * 100.0).toInt())}%"))
+            )
+        }
     }
 
     override val title = TextTitleWidget(this,
@@ -120,6 +142,4 @@ class XPInfoDialog(x: Int, y: Int) : Dialog(x, y), Themed by GalapagosTheme {
             .append(Glyphs.getGlyphComponent("_fonts/icon/stars/rainbow.png"))
             .append(Component.literal(" XP Info"))
     )
-
-
 }

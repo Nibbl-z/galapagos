@@ -21,6 +21,7 @@ import xyz.nibblz.galapagos.config.Config
 import xyz.nibblz.galapagos.data.CosmeticCollection
 import xyz.nibblz.galapagos.data.Cosmetic
 import xyz.nibblz.galapagos.data.CosmeticTag
+import xyz.nibblz.galapagos.data.Faction
 import xyz.nibblz.galapagos.data.Item
 import xyz.nibblz.galapagos.data.ItemLocation
 import xyz.nibblz.galapagos.data.Rank
@@ -74,6 +75,13 @@ object PlayerData : CoreFeature {
         @SerialName("__typename") val typename: String? = null
     )
 
+    @Serializable
+    data class APIFaction(
+        val selected: Boolean,
+        val totalExperience: Int,
+        val name: String
+    )
+
     val client: HttpClient? = HttpClient.newHttpClient()
 
     fun fetchAPI(): Boolean {
@@ -120,6 +128,11 @@ object PlayerData : CoreFeature {
                   ROCKET_SPLEEF: rotationValue(statisticKey: \"rocket_spleef_xp_earned\")
                   SKY_BATTLE: rotationValue(statisticKey: \"sky_battle_xp_earned\")
                   TGTTOS: rotationValue(statisticKey: \"tgttos_xp_earned\")
+                }
+                factions {
+                  selected
+                  totalExperience
+                  name
                 }
                 ranks
               }
@@ -274,6 +287,16 @@ object PlayerData : CoreFeature {
         statistics.forEach { (game, xp) ->
             val game = StarLevelGame.valueOf(game)
             Galapagos.save.gameXP[game] = xp
+        }
+
+        val factions: List<APIFaction> = Json.Default.decodeFromString(
+            jsonElement["data"]?.jsonObject["player"]?.jsonObject["factions"]?.jsonArray.toString()
+        )
+
+        factions.forEach { 
+            val faction = Faction.valueOf(it.name)
+            if (it.selected) Galapagos.save.selectedFaction = faction
+            Galapagos.save.factionXP[faction] = it.totalExperience
         }
 
         return true
@@ -514,8 +537,14 @@ object PlayerData : CoreFeature {
     // Handles:
     // - Any item gain
     // - Cosmetic claiming
+    // - Faction switching
 
     fun systemChat(packet: ClientboundSystemChatPacket) {
+        handleItemGain(packet)
+        handleFactionSwitch(packet)
+    }
+
+    fun handleItemGain(packet: ClientboundSystemChatPacket) {
         val regex = Regex("You receive: \\[(?<name>.+)](?: x(?<count>[\\d,]+))?")
         val match = regex.find(packet.content.string) ?: return
 
@@ -538,6 +567,14 @@ object PlayerData : CoreFeature {
         }
 
         InfinibagUpdateEvent.EVENT.invoker().invoke()
+    }
+
+    fun handleFactionSwitch(packet: ClientboundSystemChatPacket) {
+        val match = Regex("You are now a part of the (?<faction>.+)\\.").find(packet.content.string)
+            ?.groups?.get("faction")?.value ?: return
+
+        val faction = Faction.entries.find { it.label == match } ?: return
+        Galapagos.save.selectedFaction = faction
     }
 
     fun handleBlueprintAssemblerInfinibag(item: ItemStack) {

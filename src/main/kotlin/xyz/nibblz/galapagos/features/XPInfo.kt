@@ -3,7 +3,6 @@ package xyz.nibblz.galapagos.features
 import com.noxcrew.noxesium.core.mcc.ClientboundMccServerPacket
 import com.noxcrew.noxesium.core.mcc.ClientboundMccStatisticPacket
 import com.noxcrew.sheeplib.DialogContainer
-import com.noxcrew.sheeplib.dialog.Dialog
 import kotlinx.serialization.Serializable
 import net.minecraft.client.Minecraft
 import net.minecraft.network.chat.Component
@@ -99,11 +98,15 @@ object XPInfo : Feature {
             Galapagos.save.gameXP[source.starLevelGame] = Galapagos.save.gameXP[source.starLevelGame]!! + packet.value
         }
 
+        if (Galapagos.save.selectedFaction != null) {
+            Galapagos.save.factionXP[Galapagos.save.selectedFaction!!] = Galapagos.save.factionXP[Galapagos.save.selectedFaction]!! + amount
+        }
+
         dialog?.refresh()
     }
 
     fun mccServer(packet: ClientboundMccServerPacket) {
-        if (dialog == null || dialog?.state == Dialog.State.CLOSED) {
+        if (dialog == null || dialog?.state?.isClosing == true) {
             dialog = XPInfoDialog(10, 10)
             DialogContainer += dialog!!
         }

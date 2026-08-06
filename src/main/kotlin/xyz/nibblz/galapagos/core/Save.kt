@@ -5,6 +5,7 @@ import kotlinx.serialization.json.Json
 import net.fabricmc.loader.api.FabricLoader
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.data.Cosmetic
+import xyz.nibblz.galapagos.data.Faction
 import xyz.nibblz.galapagos.data.Item
 import xyz.nibblz.galapagos.data.Rank
 import xyz.nibblz.galapagos.data.StarLevelGame
@@ -38,6 +39,8 @@ object Save : CoreFeature {
         var finishedOOBE: Boolean = false,
         var mccPlus: Boolean = false,
         var rank: Rank? = null,
+        var selectedFaction: Faction? = null,
+        var factionXP: HashMap<Faction, Int> = hashMapOf(),
         var apiKey: String = "",
         var gameXP: HashMap<StarLevelGame, Int> = hashMapOf(),
         var xpGains: MutableList<XPInfo.XPGain> = mutableListOf()
@@ -48,11 +51,11 @@ object Save : CoreFeature {
     }
 
     fun load() {
-        if (!Files.exists(path)) return
-
-        val jsonText = Files.readString(path) ?: return
-        val loaded = json.decodeFromString<PlayerSave>(jsonText)
-        Galapagos.save = loaded
+        if (Files.exists(path)) {
+            val jsonText = Files.readString(path) ?: return
+            val loaded = json.decodeFromString<PlayerSave>(jsonText)
+            Galapagos.save = loaded
+        }
 
         StylePerk.entries.forEach {
             if (Galapagos.save.stylePerks[it] == null) Galapagos.save.stylePerks[it] = 0
