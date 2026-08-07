@@ -9,6 +9,7 @@ import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
 import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
+import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
 import net.minecraft.world.item.ItemStack
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
@@ -16,6 +17,7 @@ import xyz.nibblz.galapagos.data.Rank
 import xyz.nibblz.galapagos.data.StarLevelGame
 import xyz.nibblz.galapagos.dialogs.XPInfoDialog
 import xyz.nibblz.galapagos.events.ContainerOpenEvent
+import xyz.nibblz.galapagos.events.ContainerSetSlotEvent
 import xyz.nibblz.galapagos.events.MCCServerEvent
 import xyz.nibblz.galapagos.events.MCCStatisticEvent
 import xyz.nibblz.galapagos.util.findLore
@@ -53,10 +55,10 @@ object XPInfo : Feature {
     )
 
     data class Claimable(
-        val completed: Int,
+        var completed: Int,
         val total: Int,
         var currentXP: Int,
-        val requiredXP: Int
+        var requiredXP: Int
     )
 
     var dialog: XPInfoDialog? = null
@@ -70,6 +72,8 @@ object XPInfo : Feature {
         MCCServerEvent.EVENT.register { packet -> mccServer(packet) }
         ContainerOpenEvent.EVENT.register { packet -> containerOpen(packet) }
         ItemTooltipCallback.EVENT.register { item, _, _, components -> tooltipAdd(item, components) }
+        ContainerSetSlotEvent.EVENT.register { packet -> containerSetSlot(packet) }
+        //SlotClickEvent.EVENT.register { slot, screen, _, _, _ -> slotClick(slot, screen) }
         //ScoreboardTitleUpdateEvent.EVENT.register { scoreboardTitleChange() }
     }
 
@@ -96,7 +100,16 @@ object XPInfo : Feature {
         Galapagos.save.xpGains.add(gain)
 
         dailyMeter.currentXP = (dailyMeter.currentXP + amount).coerceIn(0..dailyMeter.requiredXP)
-        weeklyVault.currentXP = (weeklyVault.currentXP + amount).coerceIn(0..weeklyVault.requiredXP)
+        weeklyVault.currentXP = (weeklyVault.currentXP + amount)
+        if (weeklyVault.currentXP >= weeklyVault.requiredXP) {
+            weeklyVault.completed++
+            if (weeklyVault.completed != weeklyVault.total) {
+                weeklyVault.currentXP -= weeklyVault.requiredXP
+                weeklyVault.requiredXP = WeeklyVaultInfo.claimXP(weeklyVault.completed)
+            } else {
+                weeklyVault.currentXP = weeklyVault.requiredXP
+            }
+        }
 
         if (source.starLevelGame != null) {
             Galapagos.save.gameXP[source.starLevelGame] = Galapagos.save.gameXP[source.starLevelGame]!! + packet.value
@@ -134,18 +147,12 @@ object XPInfo : Feature {
     val vaultRewardsRegex = Regex("Stored Rewards: (?<claims>\\d+)/(?<max>\\d+)")
     val xpProgressRegex = Regex("Progress: (?<completed>[\\d,]+)/(?<total>[\\d,]+)")
 
-    fun containerOpen(packet: ClientboundContainerSetContentPacket) {
-        val screen = Minecraft.getInstance().screen ?: return
-        if (!screen.title.string.contains("ISLAND REWARDS")) return
-
-        val dailyMeterItem = packet.items[13]
-        val weeklyVaultItem = packet.items[16]
-
-        val meterClaimsMatch = dailyMeterItem.findLore(meterClaimsRegex) ?: return
+    fun updateDailyMeter(item: ItemStack) {
+        val meterClaimsMatch = item.findLore(meterClaimsRegex) ?: return
         val completedMeterClaims = meterClaimsMatch["completed"]?.value?.toIntOrNull() ?: return
         val totalMeterClaims = meterClaimsMatch["total"]?.value?.toIntOrNull() ?: return
 
-        val meterProgressMatch = dailyMeterItem.findLore(xpProgressRegex) ?: return
+        val meterProgressMatch = item.findLore(xpProgressRegex) ?: return
         val meterProgressCompleted = meterProgressMatch["completed"]?.value?.replace(",", "")?.toIntOrNull() ?: return
         val meterProgressTotal = meterProgressMatch["total"]?.value?.replace(",", "")?.toIntOrNull() ?: return
 
@@ -155,12 +162,14 @@ object XPInfo : Feature {
             meterProgressCompleted,
             meterProgressTotal
         )
+    }
 
-        val vaultRewardsMatch = weeklyVaultItem.findLore(vaultRewardsRegex) ?: return
+    fun updateWeeklyVault(item: ItemStack) {
+        val vaultRewardsMatch = item.findLore(vaultRewardsRegex) ?: return
         val completedVaultRewards = vaultRewardsMatch["claims"]?.value?.toIntOrNull() ?: return
         val totalVaultRewards = vaultRewardsMatch["max"]?.value?.toIntOrNull() ?: return
 
-        val vaultProgressMatch = weeklyVaultItem.findLore(xpProgressRegex) ?: return
+        val vaultProgressMatch = item.findLore(xpProgressRegex) ?: return
         val vaultProgressCompleted = vaultProgressMatch["completed"]?.value?.replace(",", "")?.toIntOrNull() ?: return
         val vaultProgressTotal = vaultProgressMatch["total"]?.value?.replace(",", "")?.toIntOrNull() ?: return
 
@@ -170,6 +179,17 @@ object XPInfo : Feature {
             vaultProgressCompleted,
             vaultProgressTotal
         )
+    }
+
+    fun containerOpen(packet: ClientboundContainerSetContentPacket) {
+        val screen = Minecraft.getInstance().screen ?: return
+        if (!screen.title.string.contains("ISLAND REWARDS")) return
+
+        val dailyMeterItem = packet.items[13]
+        val weeklyVaultItem = packet.items[16]
+
+        updateDailyMeter(dailyMeterItem)
+        updateWeeklyVault(weeklyVaultItem)
 
         dialog?.refresh()
     }
@@ -197,5 +217,12 @@ object XPInfo : Feature {
         }
 
         components.add(index, Component.empty())
+    }
+
+    fun containerSetSlot(packet: ClientboundContainerSetSlotPacket) {
+        val screen = Minecraft.getInstance().screen ?: return
+
+        if (packet.item.itemName.string == "Daily Meter" && screen.title.string.contains("ISLAND REWARDS")) updateDailyMeter(packet.item)
+        if (packet.item.itemName.string == "Weekly Vault" && screen.title.string.contains("ISLAND REWARDS")) updateWeeklyVault(packet.item)
     }
 }
