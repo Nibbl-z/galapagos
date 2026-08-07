@@ -36,6 +36,7 @@ import xyz.nibblz.galapagos.events.RoyalReputationIncreaseEvent
 import xyz.nibblz.galapagos.events.SlotClickEvent
 import xyz.nibblz.galapagos.events.SystemChatEvent
 import xyz.nibblz.galapagos.features.CraftingInstructions
+import xyz.nibblz.galapagos.features.XPInfo
 import xyz.nibblz.galapagos.util.findLore
 import xyz.nibblz.galapagos.util.sendGalapagosChatMessage
 import xyz.nibblz.galapagos.util.toDataItem
@@ -121,13 +122,29 @@ object PlayerData : CoreFeature {
                   }
                 }
                 statistics {
-                  BATTLE_BOX: rotationValue(statisticKey: \"battle_box_xp_earned\")
-                  DYNABALL: rotationValue(statisticKey: \"dynaball_xp_earned\")
-                  HOLE_IN_THE_WALL: rotationValue(statisticKey: \"hole_in_the_wall_xp_earned\")
-                  PARKOUR_WARRIOR: rotationValue(statisticKey: \"pw_xp_earned\")
-                  ROCKET_SPLEEF: rotationValue(statisticKey: \"rocket_spleef_xp_earned\")
-                  SKY_BATTLE: rotationValue(statisticKey: \"sky_battle_xp_earned\")
-                  TGTTOS: rotationValue(statisticKey: \"tgttos_xp_earned\")
+                  battle_box_xp_earned: rotationValue(statisticKey: \"battle_box_xp_earned\")
+                  battle_box_quads_xp_earned: rotationValue(statisticKey: \"battle_box_quads_xp_earned\")
+                  battle_box_arena_xp_earned: rotationValue(statisticKey: \"battle_box_arena_xp_earned\")
+                  dynaball_xp_earned: rotationValue(statisticKey: \"dynaball_xp_earned\")
+                  hole_in_the_wall_xp_earned: rotationValue(statisticKey: \"hole_in_the_wall_xp_earned\")
+                  pw_xp_earned: rotationValue(statisticKey: \"pw_xp_earned\")
+                  pw_survival_xp_earned: rotationValue(statisticKey: \"pw_survival_xp_earned\")
+                  pw_solo_xp_earned: rotationValue(statisticKey: \"pw_solo_xp_earned\")
+                  rocket_spleef_xp_earned: rotationValue(statisticKey: \"rocket_spleef_xp_earned\")
+                  sky_battle_xp_earned: rotationValue(statisticKey: \"sky_battle_xp_earned\")
+                  sky_battle_quads_xp_earned: rotationValue(statisticKey: \"sky_battle_quads_xp_earned\")
+                  sky_battle_solos_xp_earned: rotationValue(statisticKey: \"sky_battle_solos_xp_earned\")
+                  tgttos_xp_earned: rotationValue(statisticKey: \"tgttos_xp_earned\")
+                  
+                  battle_box_quads_games_played: rotationValue(statisticKey: \"battle_box_quads_games_played\")
+                  battle_box_arena_games_played: rotationValue(statisticKey: \"battle_box_arena_games_played\")
+                  dynaball_games_played: rotationValue(statisticKey: \"dynaball_games_played\")
+                  hole_in_the_wall_games_played: rotationValue(statisticKey: \"hole_in_the_wall_games_played\")
+                  pw_survival_games_played: rotationValue(statisticKey: \"pw_survival_games_played\")
+                  rocket_spleef_games_played: rotationValue(statisticKey: \"rocket_spleef_games_played\")
+                  sky_battle_quads_games_played: rotationValue(statisticKey: \"sky_battle_quads_games_played\")
+                  sky_battle_solos_games_played: rotationValue(statisticKey: \"sky_battle_solos_games_played\")
+                  tgttos_games_played: rotationValue(statisticKey: \"tgttos_games_played\")
                 }
                 factions {
                   selected
@@ -284,9 +301,15 @@ object PlayerData : CoreFeature {
             jsonElement["data"]?.jsonObject["player"]?.jsonObject["statistics"]?.jsonObject.toString()
         )
 
-        statistics.forEach { (game, xp) ->
-            val game = StarLevelGame.valueOf(game)
-            Galapagos.save.gameXP[game] = xp
+        statistics.forEach { (statistic, stat) ->
+            val starLevelGame = StarLevelGame.entries.find { it.statistic == statistic }
+            if (starLevelGame != null) Galapagos.save.starLevelXP[starLevelGame] = stat
+
+            val xpSource = XPInfo.XPSource.entries.find { it.xpStatistic() == statistic }
+            if (xpSource != null) Galapagos.save.gameXP[xpSource] = stat
+
+            val gamePlayedSource = XPInfo.XPSource.entries.find { it.gamesPlayedStatistic() == statistic }
+            if (gamePlayedSource != null) Galapagos.save.gamesPlayed[gamePlayedSource] = stat
         }
 
         val factions: List<APIFaction> = Json.Default.decodeFromString(

@@ -123,8 +123,8 @@ class XPInfoDialog(x: Int, y: Int) : Dialog(x, y), Themed by GalapagosTheme {
         )
 
         if (XPInfo.currentStarLevelGame != null) {
-            val starLevel = Galapagos.save.gameXP[XPInfo.currentStarLevelGame]!! / 3000
-            val currentXP = Galapagos.save.gameXP[XPInfo.currentStarLevelGame]!! - (starLevel * 3000)
+            val starLevel = Galapagos.save.starLevelXP[XPInfo.currentStarLevelGame]!! / 3000
+            val currentXP = Galapagos.save.starLevelXP[XPInfo.currentStarLevelGame]!! - (starLevel * 3000)
 
             +TextWidgets.multiLine(
                 mcciTextureComponent(XPInfo.currentStarLevelGame!!.sprite)

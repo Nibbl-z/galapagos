@@ -33,18 +33,21 @@ object XPInfo : Feature {
     override val image: Config.ConfigImage = Config.ConfigImage("weekly_vault_info.png", 470, 341)
 
     @Serializable
-    enum class XPSource(val statistic: String, val serverTypes: List<String>, val lobbyServerType: String, val sprite: String, val label: String, val starLevelGame: StarLevelGame?) {
-        BATTLE_BOX_QUADS("battle_box_quads_xp_earned", listOf("battle_box"), "battle_box", "island_interface/game/battle_box/icon", "Battle Box", StarLevelGame.BATTLE_BOX),
-        BATTLE_BOX_ARENA("battle_box_arena_xp_earned", listOf("battle_box"), "battle_box", "island_interface/game/battle_box_arena/icon", "Battle Box Arena", StarLevelGame.BATTLE_BOX),
-        SKY_BATTLE_QUADS("sky_battle_quads_xp_earned", listOf("sky_battle"), "sky_battle", "island_interface/game/sky_battle/icon", "Sky Battle", StarLevelGame.SKY_BATTLE),
-        SKY_BATTLE_SOLOS("sky_battle_solos_xp_earned", listOf("sky_battle", "solo"), "sky_battle", "island_interface/game/sky_battle_solo/icon", "Sky Battle Solo", StarLevelGame.SKY_BATTLE),
-        DYNABALL("dynaball_xp_earned", listOf("dynaball"), "dynaball", "island_interface/game/dynaball/icon", "Dynaball", StarLevelGame.DYNABALL),
-        TGTTOS("tgttos_xp_earned", listOf("tgttos"), "tgttos", "island_interface/game/tgttosawaf/icon", "To Get To The Other Side", StarLevelGame.TGTTOS), // awaf? but there is no fans.. only chicken..
-        HOLE_IN_THE_WALL("hole_in_the_wall_xp_earned", listOf("hole_in_the_wall"), "hole_in_the_wall", "island_interface/game/hole_in_the_wall/icon", "Hole in the Wall", StarLevelGame.HOLE_IN_THE_WALL),
-        PW_SURVIVAL("pw_survival_xp_earned", listOf("parkour_warrior", "survival"), "parkour_warrior", "island_interface/game/parkour_warrior/icon", "Parkour Warrior Survivor", StarLevelGame.PARKOUR_WARRIOR),
-        PW_SOLO("pw_solo_xp_earned", listOf("parkour_warrior", "dojo"), "parkour_warrior", "island_interface/game/parkour_warrior/solo/icon", "Parkour Warrior Dojo", StarLevelGame.PARKOUR_WARRIOR),
-        ROCKET_SPLEEF("rocket_spleef_xp_earned", listOf("rocket_spleef"), "rocket_spleef", "island_interface/game/rocket_spleef/icon", "Rocket Spleef Rush", StarLevelGame.ROCKET_SPLEEF),
-        FISHING("fishing_xp_earned", listOf("fishing"), "fishing", "island_interface/fishing/perk_icon/speedy_rod", "Fishing", null),
+    enum class XPSource(val serverTypes: List<String>, val lobbyServerType: String, val sprite: String, val label: String, val starLevelGame: StarLevelGame?) {
+        BATTLE_BOX_QUADS(listOf("battle_box"), "battle_box", "island_interface/game/battle_box/icon", "Battle Box", StarLevelGame.BATTLE_BOX),
+        BATTLE_BOX_ARENA(listOf("battle_box"), "battle_box", "island_interface/game/battle_box_arena/icon", "Battle Box Arena", StarLevelGame.BATTLE_BOX),
+        SKY_BATTLE_QUADS(listOf("sky_battle"), "sky_battle", "island_interface/game/sky_battle/icon", "Sky Battle", StarLevelGame.SKY_BATTLE),
+        SKY_BATTLE_SOLOS(listOf("sky_battle", "solo"), "sky_battle", "island_interface/game/sky_battle_solo/icon", "Sky Battle Solo", StarLevelGame.SKY_BATTLE),
+        DYNABALL(listOf("dynaball"), "dynaball", "island_interface/game/dynaball/icon", "Dynaball", StarLevelGame.DYNABALL),
+        TGTTOS(listOf("tgttos"), "tgttos", "island_interface/game/tgttosawaf/icon", "To Get To The Other Side", StarLevelGame.TGTTOS), // awaf? but there is no fans.. only chicken..
+        HOLE_IN_THE_WALL(listOf("hole_in_the_wall"), "hole_in_the_wall", "island_interface/game/hole_in_the_wall/icon", "Hole in the Wall", StarLevelGame.HOLE_IN_THE_WALL),
+        PW_SURVIVAL(listOf("parkour_warrior", "survival"), "parkour_warrior", "island_interface/game/parkour_warrior/icon", "Parkour Warrior Survivor", StarLevelGame.PARKOUR_WARRIOR),
+        PW_SOLO(listOf("parkour_warrior", "dojo"), "parkour_warrior", "island_interface/game/parkour_warrior/solo/icon", "Parkour Warrior Dojo", StarLevelGame.PARKOUR_WARRIOR),
+        ROCKET_SPLEEF( listOf("rocket_spleef"), "rocket_spleef", "island_interface/game/rocket_spleef/icon", "Rocket Spleef Rush", StarLevelGame.ROCKET_SPLEEF),
+        FISHING(listOf("fishing"), "fishing", "island_interface/fishing/perk_icon/speedy_rod", "Fishing", null);
+
+        fun xpStatistic(): String { return "${name.lowercase()}_xp_earned" }
+        fun gamesPlayedStatistic(): String { return "${name.lowercase()}_games_played" }
     }
 
     @Serializable
@@ -85,7 +88,7 @@ object XPInfo : Feature {
 //    }
 
     fun mccStatistic(packet: ClientboundMccStatisticPacket) {
-        val source = XPSource.entries.find { packet.statistic == it.statistic }
+        val source = XPSource.entries.find { packet.statistic == it.xpStatistic() }
         if (source == null) return
 
         val bonus = 1.0 +
@@ -112,7 +115,7 @@ object XPInfo : Feature {
         }
 
         if (source.starLevelGame != null) {
-            Galapagos.save.gameXP[source.starLevelGame] = Galapagos.save.gameXP[source.starLevelGame]!! + packet.value
+            Galapagos.save.starLevelXP[source.starLevelGame] = Galapagos.save.starLevelXP[source.starLevelGame]!! + packet.value
         }
 
         if (Galapagos.save.selectedFaction != null) {
@@ -208,12 +211,24 @@ object XPInfo : Feature {
         )
         index++
 
-        if (game != XPSource.PW_SOLO && game != XPSource.FISHING && dialog?.todayXPEntries[game]!! != 0) { // doesn't make sense to have this line for these games
-            components.add(index,
-                Component.literal("Average XP/Game: ").withColor(ChatFormatting.AQUA.color!!)
-                    .append(Component.literal("%,d".format(dialog?.todayXP[game]!! / dialog?.todayXPEntries[game]!!)).withColor(0xFFFFFF))
-            )
-            index++
+        if (game != XPSource.PW_SOLO && game != XPSource.FISHING) { // doesn't make sense to have this line for these games
+            if (dialog?.todayXPEntries[game]!! != 0) {
+                components.add(index,
+                    Component.literal("Average XP/Game: ").withColor(ChatFormatting.AQUA.color!!)
+                        .append(Component.literal("%,d".format(dialog?.todayXP[game]!! / dialog?.todayXPEntries[game]!!)).withColor(0xFFFFFF))
+                        .append(Component.literal(" (Today)").withColor(ChatFormatting.GRAY.color!!))
+                )
+                index++
+            }
+
+            if (Galapagos.save.gamesPlayed[game]!! != 0) {
+                components.add(index,
+                    Component.literal("Average XP/Game: ").withColor(ChatFormatting.AQUA.color!!)
+                        .append(Component.literal("%,d".format(Galapagos.save.gameXP[game]!! / Galapagos.save.gamesPlayed[game]!!)).withColor(0xFFFFFF))
+                        .append(Component.literal(" (All-Time, Unmultiplied)").withColor(ChatFormatting.GRAY.color!!))
+                )
+                index++
+            }
         }
 
         components.add(index, Component.empty())

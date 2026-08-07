@@ -42,7 +42,9 @@ object Save : CoreFeature {
         var selectedFaction: Faction? = null,
         var factionXP: HashMap<Faction, Int> = hashMapOf(),
         var apiKey: String = "",
-        var gameXP: HashMap<StarLevelGame, Int> = hashMapOf(),
+        var starLevelXP: HashMap<StarLevelGame, Int> = hashMapOf(),
+        var gameXP: HashMap<XPInfo.XPSource, Int> = hashMapOf(),
+        var gamesPlayed: HashMap<XPInfo.XPSource, Int> = hashMapOf(),
         var xpGains: MutableList<XPInfo.XPGain> = mutableListOf()
     )
 
