@@ -10,7 +10,7 @@ object GalapagosTheme : Theme by DefaultTheme {
         override val dialogBackgroundAlt = 0x000000 opacity 200
     }
     override val dimensions = Theme.Dimensions(
-        buttonWidth = 70,
+        buttonWidth = 100,
         buttonHeight = 14,
         paddingInner = 3,
         paddingOuter = 5,

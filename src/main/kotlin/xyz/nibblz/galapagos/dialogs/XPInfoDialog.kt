@@ -5,6 +5,7 @@ import com.noxcrew.sheeplib.dialog.title.TextTitleWidget
 import com.noxcrew.sheeplib.layout.linear
 import com.noxcrew.sheeplib.theme.Themed
 import com.noxcrew.sheeplib.widget.TextWidgets
+import com.noxcrew.sheeplib.widget.ThemedButton
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import net.minecraft.ChatFormatting
@@ -30,6 +31,10 @@ class XPInfoDialog(x: Int, y: Int) : Dialog(x, y), Themed by GalapagosTheme {
         super.init()
     }
 
+    var showBreakdown = false
+    val todayXP = XPInfo.XPSource.entries.associateWithTo(EnumMap(XPInfo.XPSource::class.java)) { 0 }
+    val todayXPEntries = XPInfo.XPSource.entries.associateWithTo(EnumMap(XPInfo.XPSource::class.java)) { 0 }
+
     override fun layout() = linear(LinearLayout.Orientation.VERTICAL) {
         val font = Minecraft.getInstance().font
 
@@ -38,8 +43,8 @@ class XPInfoDialog(x: Int, y: Int) : Dialog(x, y), Themed by GalapagosTheme {
         else Instant.fromEpochSeconds(Clock.System.now().epochSeconds).toLocalDateTime(TimeZone.currentSystemDefault())
 
         Galapagos.logger.info("${today.day}")
-
-        val todayXP = XPInfo.XPSource.entries.associateWithTo(EnumMap(XPInfo.XPSource::class.java)) { 0 }
+        todayXP.replaceAll { _, _ -> 0 }
+        todayXPEntries.replaceAll { _, _ -> 0 }
 
         Galapagos.save.xpGains.forEach {
             val date = if (Config.values::startDayAtQuestRefresh.get())
@@ -49,14 +54,32 @@ class XPInfoDialog(x: Int, y: Int) : Dialog(x, y), Themed by GalapagosTheme {
             if (date.day != today.day || date.month != today.month || date.year != today.year) return@forEach
 
             todayXP[it.source] = todayXP[it.source]!! + it.amount
+            todayXPEntries[it.source] = todayXPEntries[it.source]!! + 1
         }
 
-        +StringWidget(Component.literal("Today's XP: ${todayXP.entries.sumOf { it.value }}"), font)
+        val totalXPToday = todayXP.entries.sumOf { it.value }
 
-        XPInfo.currentGames.forEach {
-            +StringWidget(Component.empty()
-                .append(mcciTextureComponent(it.sprite))
-                .append(Component.literal(" ${it.label} XP: ${todayXP[it]}")), font)
+        +StringWidget(Component.literal("Today's XP: ${"%,d".format(totalXPToday)}"), font)
+
+        if (!showBreakdown) {
+            XPInfo.currentGames.forEach {
+                +StringWidget(Component.empty()
+                    .append(mcciTextureComponent(it.sprite))
+                    .append(Component.literal(" ${it.label} XP: ${"%,d".format(todayXP[it])}")), font)
+            }
+        } else {
+            var component = Component.empty()
+            val games = todayXP.toList().sortedByDescending { it.second }.filter { it.second != 0 }
+            games.forEachIndexed { index, (game, xp) ->
+                component = component.append(
+                    Component.empty()
+                        .append(mcciTextureComponent(game.sprite))
+                        .append(Component.literal(" ${game.label} XP: ${"%,d".format(xp)} "))
+                        .append(Component.literal("(${(xp.toDouble() / totalXPToday.toDouble() * 100.0).toInt()}%)${if (index != games.size - 1) "\n" else ""}").withColor(ChatFormatting.GRAY.color!!))
+                )
+            }
+
+            +TextWidgets.multiLine(component)
         }
 
         val meterProgress = XPInfo.dailyMeter.currentXP.toDouble() / XPInfo.dailyMeter.requiredXP.toDouble()
@@ -134,6 +157,11 @@ class XPInfoDialog(x: Int, y: Int) : Dialog(x, y), Themed by GalapagosTheme {
                     .append(mcciProgressBar(factionProgress.toDouble() / factionRequiredXP.toDouble(), 5))
                     .append(Component.literal(" ${((factionProgress.toDouble() / factionRequiredXP.toDouble() * 100.0).toInt())}%"))
             )
+
+            +ThemedButton(Component.literal("${if (showBreakdown) "Hide" else "View"} XP Breakdown"), theme=this@XPInfoDialog) {
+                showBreakdown = !showBreakdown
+                refresh()
+            }
         }
     }
 

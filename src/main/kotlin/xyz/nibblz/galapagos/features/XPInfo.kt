@@ -4,9 +4,12 @@ import com.noxcrew.noxesium.core.mcc.ClientboundMccServerPacket
 import com.noxcrew.noxesium.core.mcc.ClientboundMccStatisticPacket
 import com.noxcrew.sheeplib.DialogContainer
 import kotlinx.serialization.Serializable
+import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback
+import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
 import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
+import net.minecraft.world.item.ItemStack
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
 import xyz.nibblz.galapagos.data.Rank
@@ -66,6 +69,7 @@ object XPInfo : Feature {
         MCCStatisticEvent.EVENT.register { packet -> mccStatistic(packet) }
         MCCServerEvent.EVENT.register { packet -> mccServer(packet) }
         ContainerOpenEvent.EVENT.register { packet -> containerOpen(packet) }
+        ItemTooltipCallback.EVENT.register { item, _, _, components -> tooltipAdd(item, components) }
         //ScoreboardTitleUpdateEvent.EVENT.register { scoreboardTitleChange() }
     }
 
@@ -168,5 +172,30 @@ object XPInfo : Feature {
         )
 
         dialog?.refresh()
+    }
+
+    fun tooltipAdd(item: ItemStack, components: MutableList<Component>) {
+        val screen = Minecraft.getInstance().screen ?: return
+        if (!screen.title.string.contains("NAVIGATOR")) return
+
+        val game = XPSource.entries.find { it.label == item.itemName.string } ?: return
+        var index = components.indexOfFirst { it.string.contains("Click to") }
+        if (index == -1) return
+
+        components.add(index,
+            Component.literal("Today's XP: ").withColor(ChatFormatting.AQUA.color!!)
+                .append(Component.literal("%,d".format(dialog?.todayXP[game])).withColor(0xFFFFFF))
+        )
+        index++
+
+        if (game != XPSource.PW_SOLO && game != XPSource.FISHING && dialog?.todayXPEntries[game]!! != 0) { // doesn't make sense to have this line for these games
+            components.add(index,
+                Component.literal("Average XP/Game: ").withColor(ChatFormatting.AQUA.color!!)
+                    .append(Component.literal("%,d".format(dialog?.todayXP[game]!! / dialog?.todayXPEntries[game]!!)).withColor(0xFFFFFF))
+            )
+            index++
+        }
+
+        components.add(index, Component.empty())
     }
 }
