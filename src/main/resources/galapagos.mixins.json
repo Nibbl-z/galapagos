@@ -16,6 +16,7 @@
   },
   "client": [
     "ClientHandshakePacketListenerImplMixin",
-    "GuiMixin"
+    "GuiMixin",
+    "PlayerTabOverlayAccessor"
   ]
 }

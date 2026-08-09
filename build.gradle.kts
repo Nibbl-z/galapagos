@@ -66,6 +66,10 @@ dependencies {
 	implementation("com.terraformersmc:modmenu:18.0.0-beta.1")
 }
 
+loom {
+	accessWidenerPath = file("src/main/resources/galapagos.accesswidener")
+}
+
 tasks.processResources {
 	val version = version
 	inputs.property("version", version)

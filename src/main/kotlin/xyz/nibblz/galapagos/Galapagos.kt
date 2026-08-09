@@ -10,6 +10,7 @@ import xyz.nibblz.galapagos.config.Config
 import xyz.nibblz.galapagos.core.CoreFeature
 import xyz.nibblz.galapagos.core.DataCollection
 import xyz.nibblz.galapagos.core.GalapagosCommand
+import xyz.nibblz.galapagos.core.GameStateHandler
 import xyz.nibblz.galapagos.data.ConstantIslandData
 import xyz.nibblz.galapagos.features.*
 import xyz.nibblz.galapagos.core.OOBE
@@ -45,7 +46,8 @@ object Galapagos : ModInitializer {
 		PlayerData,
 		OOBE,
 		GalapagosCommand,
-		DataCollection
+		DataCollection,
+		GameStateHandler
 	)
 
 	fun registerFeatures() {

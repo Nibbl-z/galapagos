@@ -45,6 +45,7 @@ object Save : CoreFeature {
         var starLevelXP: HashMap<StarLevelGame, Int> = hashMapOf(),
         var gameXP: HashMap<XPInfo.XPSource, Int> = hashMapOf(),
         var gamesPlayed: HashMap<XPInfo.XPSource, Int> = hashMapOf(),
+        var battleBoxHistory: MutableList<GameStateHandler.GameState.BattleBox> = mutableListOf(),
         var xpGains: MutableList<XPInfo.XPGain> = mutableListOf()
     )
 

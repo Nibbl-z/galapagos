@@ -305,10 +305,10 @@ object PlayerData : CoreFeature {
             val starLevelGame = StarLevelGame.entries.find { it.statistic == statistic }
             if (starLevelGame != null) Galapagos.save.starLevelXP[starLevelGame] = stat
 
-            val xpSource = XPInfo.XPSource.entries.find { it.xpStatistic() == statistic }
+            val xpSource = XPInfo.XPSource.entries.find { it.xpStatistic == statistic }
             if (xpSource != null) Galapagos.save.gameXP[xpSource] = stat
 
-            val gamePlayedSource = XPInfo.XPSource.entries.find { it.gamesPlayedStatistic() == statistic }
+            val gamePlayedSource = XPInfo.XPSource.entries.find { it.gamesPlayedStatistic == statistic }
             if (gamePlayedSource != null) Galapagos.save.gamesPlayed[gamePlayedSource] = stat
         }
 

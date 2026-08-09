@@ -5,22 +5,30 @@ import com.noxcrew.noxesium.core.mcc.ClientboundMccStatisticPacket
 import com.noxcrew.sheeplib.DialogContainer
 import kotlinx.serialization.Serializable
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry
 import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
 import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.FontDescription
+import net.minecraft.network.chat.Style
 import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
+import net.minecraft.resources.Identifier
+import net.minecraft.util.ARGB
 import net.minecraft.world.item.ItemStack
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
 import xyz.nibblz.galapagos.data.Rank
 import xyz.nibblz.galapagos.data.StarLevelGame
+import xyz.nibblz.galapagos.data.XP_TABLE
 import xyz.nibblz.galapagos.dialogs.XPInfoDialog
 import xyz.nibblz.galapagos.events.ContainerOpenEvent
 import xyz.nibblz.galapagos.events.ContainerSetSlotEvent
 import xyz.nibblz.galapagos.events.MCCServerEvent
 import xyz.nibblz.galapagos.events.MCCStatisticEvent
 import xyz.nibblz.galapagos.util.findLore
+import xyz.nibblz.galapagos.util.onIsland
 import kotlin.math.roundToInt
 import kotlin.reflect.KMutableProperty0
 import kotlin.time.Clock
@@ -34,8 +42,8 @@ object XPInfo : Feature {
 
     @Serializable
     enum class XPSource(val serverTypes: List<String>, val lobbyServerType: String, val sprite: String, val label: String, val starLevelGame: StarLevelGame?) {
-        BATTLE_BOX_QUADS(listOf("battle_box"), "battle_box", "island_interface/game/battle_box/icon", "Battle Box", StarLevelGame.BATTLE_BOX),
-        BATTLE_BOX_ARENA(listOf("battle_box"), "battle_box", "island_interface/game/battle_box_arena/icon", "Battle Box Arena", StarLevelGame.BATTLE_BOX),
+        BATTLE_BOX_QUADS(listOf("battle_box", "!arena"), "battle_box", "island_interface/game/battle_box/icon", "Battle Box", StarLevelGame.BATTLE_BOX),
+        BATTLE_BOX_ARENA(listOf("battle_box", "arena"), "battle_box", "island_interface/game/battle_box_arena/icon", "Battle Box Arena", StarLevelGame.BATTLE_BOX),
         SKY_BATTLE_QUADS(listOf("sky_battle"), "sky_battle", "island_interface/game/sky_battle/icon", "Sky Battle", StarLevelGame.SKY_BATTLE),
         SKY_BATTLE_SOLOS(listOf("sky_battle", "solo"), "sky_battle", "island_interface/game/sky_battle_solo/icon", "Sky Battle Solo", StarLevelGame.SKY_BATTLE),
         DYNABALL(listOf("dynaball"), "dynaball", "island_interface/game/dynaball/icon", "Dynaball", StarLevelGame.DYNABALL),
@@ -46,8 +54,8 @@ object XPInfo : Feature {
         ROCKET_SPLEEF( listOf("rocket_spleef"), "rocket_spleef", "island_interface/game/rocket_spleef/icon", "Rocket Spleef Rush", StarLevelGame.ROCKET_SPLEEF),
         FISHING(listOf("fishing"), "fishing", "island_interface/fishing/perk_icon/speedy_rod", "Fishing", null);
 
-        fun xpStatistic(): String { return "${name.lowercase()}_xp_earned" }
-        fun gamesPlayedStatistic(): String { return "${name.lowercase()}_games_played" }
+        val xpStatistic = "${name.lowercase()}_xp_earned"
+        val gamesPlayedStatistic = "${name.lowercase()}_games_played"
     }
 
     @Serializable
@@ -64,6 +72,8 @@ object XPInfo : Feature {
         var requiredXP: Int
     )
 
+    var projectedXP = 0
+
     var dialog: XPInfoDialog? = null
     var currentGames: MutableList<XPSource> = mutableListOf()
     var currentStarLevelGame: StarLevelGame? = null
@@ -76,19 +86,16 @@ object XPInfo : Feature {
         ContainerOpenEvent.EVENT.register { packet -> containerOpen(packet) }
         ItemTooltipCallback.EVENT.register { item, _, _, components -> tooltipAdd(item, components) }
         ContainerSetSlotEvent.EVENT.register { packet -> containerSetSlot(packet) }
-        //SlotClickEvent.EVENT.register { slot, screen, _, _, _ -> slotClick(slot, screen) }
-        //ScoreboardTitleUpdateEvent.EVENT.register { scoreboardTitleChange() }
+        HudElementRegistry.addFirst(Identifier.fromNamespaceAndPath(Galapagos.MOD_ID, id), hotbarXPInfoLayer())
     }
 
-//    fun scoreboardTitleChange() {
-//        if (dialog == null || dialog?.state == Dialog.State.CLOSED) {
-//            dialog = XPInfoDialog(10, 10)
-//            DialogContainer += dialog!!
-//        }
-//    }
-
     fun mccStatistic(packet: ClientboundMccStatisticPacket) {
-        val source = XPSource.entries.find { packet.statistic == it.xpStatistic() }
+        handleXPStatistic(packet)
+        handleProjectedXPStatistics(packet)
+    }
+
+    fun handleXPStatistic(packet: ClientboundMccStatisticPacket) {
+        val source = XPSource.entries.find { packet.statistic == it.xpStatistic }
         if (source == null) return
 
         val bonus = 1.0 +
@@ -125,6 +132,15 @@ object XPInfo : Feature {
         dialog?.refresh()
     }
 
+    fun handleProjectedXPStatistics(packet: ClientboundMccStatisticPacket) {
+        if (currentGames.size != 1) return
+        val currentGame = currentGames.first()
+        val xpData = XP_TABLE[currentGame] ?: return
+        xpData.basicStatisticTable.forEach { (statistic, xp) ->
+            if (packet.statistic == statistic) projectedXP += xp
+        }
+    }
+
     fun mccServer(packet: ClientboundMccServerPacket) {
         if (dialog == null || dialog?.state?.isClosing == true) {
             dialog = XPInfoDialog(10, 10)
@@ -139,8 +155,12 @@ object XPInfo : Feature {
             currentStarLevelGame = StarLevelGame.entries.find { packet.types.contains(it.name.lowercase()) }
         } else {
             XPSource.entries.forEach {
-                if (it.serverTypes.all { type -> packet.types.contains(type) }) currentGames.add(it)
+                if (it.serverTypes.all { type ->
+                    if (type.startsWith("!")) !packet.types.contains(type.removePrefix("!")) else packet.types.contains(type)
+                }) currentGames.add(it)
             }
+
+            projectedXP = 0
         }
 
         dialog?.refresh()
@@ -239,5 +259,20 @@ object XPInfo : Feature {
 
         if (packet.item.itemName.string == "Daily Meter" && screen.title.string.contains("ISLAND REWARDS")) updateDailyMeter(packet.item)
         if (packet.item.itemName.string == "Weekly Vault" && screen.title.string.contains("ISLAND REWARDS")) updateWeeklyVault(packet.item)
+    }
+
+    fun hotbarXPInfoLayer(): HudElement {
+        return element@{ graphics, _ ->
+            if (!onIsland()) return@element
+            val font = FontDescription.Resource(Identifier.fromNamespaceAndPath("mcc", "hud"))
+
+            graphics.text(
+                Minecraft.getInstance().font,
+                Component.literal("Projected XP: ").withColor(ChatFormatting.GRAY.color!!).withStyle(Style.EMPTY.withFont(font))
+                    .append(Component.literal("%,d".format(projectedXP)).withColor(0xFFFFFF)),
+                graphics.guiWidth() / 2 + 93, graphics.guiHeight() - 22,
+                ARGB.opaque(0xFFFFFF)
+            )
+        }
     }
 }

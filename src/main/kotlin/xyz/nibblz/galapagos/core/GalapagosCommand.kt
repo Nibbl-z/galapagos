@@ -12,6 +12,7 @@ import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
 import xyz.nibblz.galapagos.data.Item
 import xyz.nibblz.galapagos.dialogs.XPInfoDialog
+import xyz.nibblz.galapagos.mixin.PlayerTabOverlayAccessor
 import xyz.nibblz.galapagos.screens.CoinHistory
 import xyz.nibblz.galapagos.screens.Intro
 import xyz.nibblz.galapagos.screens.QuestHistory
@@ -84,6 +85,20 @@ object GalapagosCommand : CoreFeature {
             }
 
             literal("debug") {
+                literal("dumpPlayers") {
+                    executes {
+                        (Minecraft.getInstance().gui.tabList as PlayerTabOverlayAccessor).`galapagos$getPlayerInfos`().forEachIndexed { index, info ->
+                            Galapagos.logger.info("#${index} - ${info.tabListDisplayName?.string} ${info.profile.name}")
+                        }
+                    }
+                }
+
+                literal("dumpGameState") {
+                    executes {
+                        Galapagos.logger.info("${(GameStateHandler.currentState as GameStateHandler.GameState.BattleBox).playerStates}")
+                    }
+                }
+
                 literal("fusionforge") {
                     executes {
                         Minecraft.getInstance().gui.chat.addClientSystemMessage(
