@@ -63,8 +63,8 @@ enum class BattleBoxArenaCoreKits(val label: String) {
     }
 }
 
-enum class BattleBoxRound {
-    WIN,
-    LOSS,
-    DRAW
+enum class BattleBoxRound(val scoreboardLetter: Char) {
+    WIN('W'),
+    LOSS('L'),
+    DRAW('D')
 }

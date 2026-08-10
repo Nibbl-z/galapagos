@@ -19,6 +19,7 @@ import net.minecraft.util.ARGB
 import net.minecraft.world.item.ItemStack
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
+import xyz.nibblz.galapagos.core.GameStateHandler
 import xyz.nibblz.galapagos.data.Rank
 import xyz.nibblz.galapagos.data.StarLevelGame
 import xyz.nibblz.galapagos.data.XP_TABLE
@@ -44,7 +45,7 @@ object XPInfo : Feature {
     enum class XPSource(val serverTypes: List<String>, val lobbyServerType: String, val sprite: String, val label: String, val starLevelGame: StarLevelGame?) {
         BATTLE_BOX_QUADS(listOf("battle_box", "!arena"), "battle_box", "island_interface/game/battle_box/icon", "Battle Box", StarLevelGame.BATTLE_BOX),
         BATTLE_BOX_ARENA(listOf("battle_box", "arena"), "battle_box", "island_interface/game/battle_box_arena/icon", "Battle Box Arena", StarLevelGame.BATTLE_BOX),
-        SKY_BATTLE_QUADS(listOf("sky_battle"), "sky_battle", "island_interface/game/sky_battle/icon", "Sky Battle", StarLevelGame.SKY_BATTLE),
+        SKY_BATTLE_QUADS(listOf("sky_battle", "team"), "sky_battle", "island_interface/game/sky_battle/icon", "Sky Battle", StarLevelGame.SKY_BATTLE),
         SKY_BATTLE_SOLOS(listOf("sky_battle", "solo"), "sky_battle", "island_interface/game/sky_battle_solo/icon", "Sky Battle Solo", StarLevelGame.SKY_BATTLE),
         DYNABALL(listOf("dynaball"), "dynaball", "island_interface/game/dynaball/icon", "Dynaball", StarLevelGame.DYNABALL),
         TGTTOS(listOf("tgttos"), "tgttos", "island_interface/game/tgttosawaf/icon", "To Get To The Other Side", StarLevelGame.TGTTOS), // awaf? but there is no fans.. only chicken..
@@ -269,7 +270,7 @@ object XPInfo : Feature {
             graphics.text(
                 Minecraft.getInstance().font,
                 Component.literal("Projected XP: ").withColor(ChatFormatting.GRAY.color!!).withStyle(Style.EMPTY.withFont(font))
-                    .append(Component.literal("%,d".format(projectedXP)).withColor(0xFFFFFF)),
+                    .append(Component.literal("%,d".format(GameStateHandler.currentState?.projectedXP() ?: 0)).withColor(0xFFFFFF)),
                 graphics.guiWidth() / 2 + 93, graphics.guiHeight() - 22,
                 ARGB.opaque(0xFFFFFF)
             )

@@ -19,6 +19,7 @@ import xyz.nibblz.galapagos.screens.QuestHistory
 import xyz.nibblz.galapagos.screens.TrophyHistory
 import xyz.nibblz.galapagos.screens.VaultHistory
 import xyz.nibblz.galapagos.util.Command
+import xyz.nibblz.galapagos.util.getScoreboardLines
 import xyz.nibblz.galapagos.util.sendGalapagosChatMessage
 
 object GalapagosCommand : CoreFeature {
@@ -90,6 +91,12 @@ object GalapagosCommand : CoreFeature {
                         (Minecraft.getInstance().gui.tabList as PlayerTabOverlayAccessor).`galapagos$getPlayerInfos`().forEachIndexed { index, info ->
                             Galapagos.logger.info("#${index} - ${info.tabListDisplayName?.string} ${info.profile.name}")
                         }
+                    }
+                }
+
+                literal("dumpScoreboard") {
+                    executes {
+                        getScoreboardLines().forEach { Galapagos.logger.info(it) }
                     }
                 }
 

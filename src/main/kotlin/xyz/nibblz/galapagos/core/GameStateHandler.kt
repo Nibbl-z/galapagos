@@ -3,6 +3,7 @@ package xyz.nibblz.galapagos.core
 import com.noxcrew.noxesium.core.mcc.ClientboundMccGameStatePacket
 import com.noxcrew.noxesium.core.mcc.ClientboundMccServerPacket
 import kotlinx.serialization.Serializable
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.minecraft.client.Minecraft
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket
 import xyz.nibblz.galapagos.Galapagos
@@ -11,9 +12,11 @@ import xyz.nibblz.galapagos.data.BattleBoxKit
 import xyz.nibblz.galapagos.data.BattleBoxRound
 import xyz.nibblz.galapagos.events.MCCGameStateEvent
 import xyz.nibblz.galapagos.events.MCCServerEvent
+import xyz.nibblz.galapagos.events.MCCStatisticEvent
 import xyz.nibblz.galapagos.events.SystemChatEvent
 import xyz.nibblz.galapagos.features.XPInfo
 import xyz.nibblz.galapagos.mixin.PlayerTabOverlayAccessor
+import xyz.nibblz.galapagos.util.findScoreboardLines
 import kotlin.time.Clock
 
 object GameStateHandler : CoreFeature {
@@ -30,6 +33,14 @@ object GameStateHandler : CoreFeature {
             var map: String = "Map"
             var kit: BattleBoxKit? = null
             var rounds: MutableList<BattleBoxRound> = mutableListOf()
+
+            override fun projectedXP(): Int {
+                val eliminations = (playerStates[Minecraft.getInstance().user.name]?.kills ?: 0) + (playerStates[Minecraft.getInstance().user.name]?.assists ?: 0)
+                val roundsWon = rounds.sumOf { if (it == BattleBoxRound.WIN) 1 else 0 }
+                val roundsPlayed = rounds.size
+
+                return (eliminations * 10 + roundsPlayed * 30 + roundsWon * 45)
+            }
         }
 
         class BattleBoxArena(override var players: List<PlayerState>) : GameState() {
@@ -37,6 +48,14 @@ object GameStateHandler : CoreFeature {
             var map: String = "Map"
             var kits: MutableList<Pair<BattleBoxKit, BattleBoxArenaCoreKits>> = mutableListOf()
             var rounds: MutableList<BattleBoxRound> = mutableListOf()
+
+            override fun projectedXP(): Int {
+                val eliminations = playerStates[Minecraft.getInstance().user.name]!!.kills + playerStates[Minecraft.getInstance().user.name]!!.assists
+                val roundsWon = rounds.sumOf { if (it == BattleBoxRound.WIN) 1 else 0 }
+                val roundsPlayed = rounds.size
+
+                return (eliminations * 10 + roundsPlayed * 30 + roundsWon * 45)
+            }
         }
 
         fun getScore(): Int {
@@ -53,6 +72,8 @@ object GameStateHandler : CoreFeature {
 
             return placement
         }
+
+        abstract fun projectedXP(): Int
     }
 
     @Serializable
@@ -73,11 +94,28 @@ object GameStateHandler : CoreFeature {
 
     var currentGame: XPInfo.XPSource? = null
     var currentState: GameState? = null
+    var updateState = false
+    var updateDelay = 5
 
     override fun init() {
         MCCServerEvent.EVENT.register { packet -> mccServer(packet) }
         MCCGameStateEvent.EVENT.register { packet -> mccGameState(packet) }
+        MCCStatisticEvent.EVENT.register { mccStatistic() }
         SystemChatEvent.EVENT.register { packet -> systemChat(packet) }
+        ClientTickEvents.END_CLIENT_TICK.register {
+            if (!updateState) return@register
+            updateDelay--
+
+            if (updateDelay == 0) {
+                updateDelay = 5
+                updateState = false
+
+                when(currentGame) {
+                    XPInfo.XPSource.BATTLE_BOX_QUADS -> updateBattleBoxState()
+                    else -> {}
+                }
+            }
+        }
     }
 
     fun mccServer(packet: ClientboundMccServerPacket) {
@@ -90,7 +128,15 @@ object GameStateHandler : CoreFeature {
 
         Galapagos.logger.info("$currentGame")
 
-        if (currentGame == null) return
+        if (currentGame == null) {
+            if (currentState != null) {
+                when(currentState!!::class) {
+                    GameState.BattleBox::class -> Galapagos.save.battleBoxHistory.add(currentState as GameState.BattleBox)
+                }
+            }
+            currentState = null
+            return
+        }
         currentState = when(currentGame) {
             XPInfo.XPSource.BATTLE_BOX_QUADS -> GameState.BattleBox(listOf())
             else -> GameState.BattleBox(listOf())
@@ -106,6 +152,10 @@ object GameStateHandler : CoreFeature {
         }
     }
 
+    fun mccStatistic() {
+        updateState = true
+    }
+
     fun systemChat(packet: ClientboundSystemChatPacket) {
         when(currentGame) {
             XPInfo.XPSource.BATTLE_BOX_QUADS -> updateBattleBoxState(packet)
@@ -117,6 +167,12 @@ object GameStateHandler : CoreFeature {
         val state: GameState.BattleBox = currentState as GameState.BattleBox
 
         state.map = packet.mapName
+
+        updateState = true
+    }
+
+    fun updateBattleBoxState() {
+        val state: GameState.BattleBox = currentState as GameState.BattleBox
 
         // The Concept Of Programming has filed a restraining order against me.
         val tabListTeamIndexes: HashMap<Int, List<Pair<Int, Int>>> = hashMapOf(
@@ -132,7 +188,7 @@ object GameStateHandler : CoreFeature {
         val playerStates: HashMap<String, BattleBoxPlayerState> = hashMapOf()
 
         tabListTeamIndexes.forEach { (teamIndex, playerIndexes) ->
-            val teamName = Regex("(?<team>[a-zA-Z]+) Team").find(tabList[teamIndex].tabListDisplayName?.string ?: "")
+            val teamName = Regex("(?<team>[a-zA-Z]+) Team").find(tabList.getOrNull(teamIndex)?.tabListDisplayName?.string ?: "")
                 ?.groups?.get("team")?.value ?: return@forEach
 
             playerIndexes.forEach {
@@ -158,10 +214,19 @@ object GameStateHandler : CoreFeature {
         state.players = players
         state.playerStates = playerStates
 
-        if (packet.phaseType == "post_game") {
-            Galapagos.save.battleBoxHistory.add(state)
-            currentState = null
-            currentGame = null
+        val roundsMatch = findScoreboardLines(Regex("\\[.]"))
+
+        if (roundsMatch != null) {
+            val rounds: MutableList<BattleBoxRound> = mutableListOf()
+
+            roundsMatch.forEach {
+                Galapagos.logger.info("bb round says ${it.value}")
+                val letter = it.value[1]
+                val round = BattleBoxRound.entries.find { r -> r.scoreboardLetter == letter } ?: return@forEach
+                rounds.add(round)
+            }
+
+            state.rounds = rounds
         }
     }
 
@@ -178,8 +243,6 @@ object GameStateHandler : CoreFeature {
             state.kit = kit
         }
 
-        if (message.contains("you lost Round")) state.rounds.add(BattleBoxRound.LOSS)
-        if (message.contains("you won Round")) state.rounds.add(BattleBoxRound.WIN)
-        // todo: i have no idea what it says if you draw.... figure that out... :P
+        updateState = true
     }
 }
