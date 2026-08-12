@@ -268,6 +268,7 @@ object XPInfo : Feature {
     fun hotbarXPInfoLayer(): HudElement {
         return element@{ graphics, _ ->
             if (!onIsland()) return@element
+            if (GameStateHandler.currentState == null) return@element
             val font = FontDescription.Resource(Identifier.fromNamespaceAndPath("mcc", "hud"))
 
             graphics.text(
