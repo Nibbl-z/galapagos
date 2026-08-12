@@ -62,6 +62,7 @@ val XP_TABLE: HashMap<XPInfo.XPSource, XPData> = hashMapOf(
     XPInfo.XPSource.HOLE_IN_THE_WALL to XPData(
         customStatisticTables = hashMapOf(
             "placement" to hashMapOf(
+                9 to 0,
                 8 to 50,
                 7 to 60,
                 6 to 70,
@@ -72,6 +73,7 @@ val XP_TABLE: HashMap<XPInfo.XPSource, XPData> = hashMapOf(
                 1 to 180
             ),
             "walls_survived" to hashMapOf(
+                0 to 0,
                 2 to 15,
                 4 to 25,
                 5 to 35,

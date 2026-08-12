@@ -19,6 +19,7 @@ import xyz.nibblz.galapagos.screens.QuestHistory
 import xyz.nibblz.galapagos.screens.TrophyHistory
 import xyz.nibblz.galapagos.screens.VaultHistory
 import xyz.nibblz.galapagos.util.Command
+import xyz.nibblz.galapagos.util.getBossbarLines
 import xyz.nibblz.galapagos.util.getScoreboardLines
 import xyz.nibblz.galapagos.util.sendGalapagosChatMessage
 
@@ -100,11 +101,18 @@ object GalapagosCommand : CoreFeature {
                     }
                 }
 
-                literal("dumpGameState") {
+                literal("dumpBossbar") {
                     executes {
-                        Galapagos.logger.info("${(GameStateHandler.currentState as GameStateHandler.GameState.BattleBox).playerStates}")
+                        getBossbarLines().forEach { Galapagos.logger.info(it) }
                     }
                 }
+
+                literal("dumpGameState") {
+                    executes {
+                        Galapagos.logger.info("${(GameStateHandler.currentState as GameStateHandler.GameState.HoleInTheWall).players}")
+                    }
+                }
+
 
                 literal("fusionforge") {
                     executes {

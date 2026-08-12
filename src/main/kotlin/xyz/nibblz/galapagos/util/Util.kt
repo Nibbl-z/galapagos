@@ -16,6 +16,14 @@ fun formatTimeString(seconds: Int): String {
     return "${if (hours > 0) "${hours}h${if (minutes > 0) " " else ""}" else ""}${if (minutes > 0) "${minutes}m" else ""}"
 }
 
+fun HashMap<Int, Int>.getHighest(value: Int): Int {
+    return get(keys.sorted().lastOrNull { value >= it }) ?: get(keys.minOf { it })!!
+}
+
+fun HashMap<Int, Int>.getLowest(value: Int): Int {
+    return get(keys.sorted().firstOrNull { value <= it }) ?: get(keys.maxOf { it })!!
+}
+
 //fun shortenedNumberToInt(number: String): Int {
 //    val input = number.uppercase()
 //
