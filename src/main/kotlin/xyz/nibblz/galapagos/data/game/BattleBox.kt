@@ -1,4 +1,4 @@
-package xyz.nibblz.galapagos.data
+package xyz.nibblz.galapagos.data.game
 
 enum class BattleBoxKit(val label: String) {
     RANGER("Ranger"),

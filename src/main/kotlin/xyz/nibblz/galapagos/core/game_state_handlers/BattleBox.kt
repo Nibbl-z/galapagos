@@ -5,11 +5,10 @@ import net.minecraft.client.Minecraft
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket
 import xyz.nibblz.galapagos.core.GameStateHandler.BattleBoxPlayerState
 import xyz.nibblz.galapagos.core.GameStateHandler.GameState
-import xyz.nibblz.galapagos.core.GameStateHandler.PlayerState
 import xyz.nibblz.galapagos.core.GameStateHandler.currentState
 import xyz.nibblz.galapagos.core.GameStateHandler.usernameRegex
-import xyz.nibblz.galapagos.data.BattleBoxKit
-import xyz.nibblz.galapagos.data.BattleBoxRound
+import xyz.nibblz.galapagos.data.game.BattleBoxKit
+import xyz.nibblz.galapagos.data.game.BattleBoxRound
 import xyz.nibblz.galapagos.mixin.PlayerTabOverlayAccessor
 import xyz.nibblz.galapagos.util.findScoreboardLines
 import kotlin.sequences.forEach
@@ -39,26 +38,22 @@ object BattleBox : Handler {
         val state: GameState.BattleBox = currentState as GameState.BattleBox
 
         // The Concept Of Programming has filed a restraining order against me.
-        val tabListTeamIndexes: HashMap<Int, List<Pair<Int, Int>>> = hashMapOf(
-            0 to listOf(1 to 21, 2 to 22, 3 to 23, 4 to 24),
-            6 to listOf(7 to 27, 8 to 28, 9 to 29, 10 to 30),
-            40 to listOf(41 to 61, 42 to 62, 43 to 63, 44 to 64),
-            46 to listOf(47 to 67, 48 to 68, 49 to 69, 50 to 70)
+        val tabListTeamIndexes: HashMap<Int, HashMap<Int, Int>> = hashMapOf(
+            0 to hashMapOf(1 to 21, 2 to 22, 3 to 23, 4 to 24),
+            6 to hashMapOf(7 to 27, 8 to 28, 9 to 29, 10 to 30),
+            40 to hashMapOf(41 to 61, 42 to 62, 43 to 63, 44 to 64),
+            46 to hashMapOf(47 to 67, 48 to 68, 49 to 69, 50 to 70)
         )
 
         val tabList = (Minecraft.getInstance().gui.tabList as PlayerTabOverlayAccessor).`galapagos$getPlayerInfos`()
 
-        val players: MutableList<PlayerState> = mutableListOf()
-        val playerStates: HashMap<String, BattleBoxPlayerState> = hashMapOf()
+        val players: MutableList<BattleBoxPlayerState> = mutableListOf()
 
         tabListTeamIndexes.forEach { (teamIndex, playerIndexes) ->
             val teamName = Regex("(?<team>[a-zA-Z]+) Team").find(tabList.getOrNull(teamIndex)?.tabListDisplayName?.string ?: "")
                 ?.groups?.get("team")?.value ?: return@forEach
 
-            playerIndexes.forEach {
-                val usernameIndex = it.first
-                val statsIndex = it.second
-
+            playerIndexes.forEach { (usernameIndex, statsIndex) ->
                 val playerName = usernameRegex.find(tabList[usernameIndex].tabListDisplayName?.string ?: "")
                     ?.groups?.get("username")?.value ?: return@forEach
 
@@ -70,13 +65,11 @@ object BattleBox : Handler {
                 val assists = statsMatch["assists"]?.value?.toIntOrNull() ?: return@forEach
                 val score = statsMatch["score"]?.value?.toIntOrNull() ?: return@forEach
 
-                players.add(PlayerState(playerName, score))
-                playerStates[playerName] = BattleBoxPlayerState(kills, deaths, assists, teamName)
+                players.add(BattleBoxPlayerState(playerName, score, kills, deaths, assists, teamName))
             }
         }
 
         state.players = players
-        state.playerStates = playerStates
 
         val roundsMatch = findScoreboardLines(Regex("\\[.]"))
 

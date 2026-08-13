@@ -67,6 +67,7 @@ object Galapagos : ModInitializer {
 	}
 
 	private fun onShutdown() {
+		GameStateHandler.saveState()
 		Save.save()
 	}
 

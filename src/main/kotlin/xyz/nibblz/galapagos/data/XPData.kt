@@ -150,6 +150,7 @@ val XP_TABLE: HashMap<XPInfo.XPSource, XPData> = hashMapOf(
         ),
         customStatisticTables = hashMapOf(
             "survival" to hashMapOf(
+                0 to 0,
                 30 to 25,
                 60 to 50,
                 90 to 75,
@@ -159,6 +160,7 @@ val XP_TABLE: HashMap<XPInfo.XPSource, XPData> = hashMapOf(
                 210 to 250
             ),
             "placement" to hashMapOf(
+                5 to 0,
                 4 to 100,
                 3 to 150,
                 2 to 200,
