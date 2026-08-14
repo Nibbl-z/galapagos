@@ -47,7 +47,8 @@ object Save : CoreFeature {
         var gamesPlayed: HashMap<XPInfo.XPSource, Int> = hashMapOf(),
         var battleBoxHistory: MutableList<GameStateHandler.GameState.BattleBox> = mutableListOf(),
         var hitwHistory: MutableList<GameStateHandler.GameState.HoleInTheWall> = mutableListOf(),
-        val skyBattleSoloHistory: MutableList<GameStateHandler.GameState.SkyBattleSolo> = mutableListOf(),
+        var skyBattleSoloHistory: MutableList<GameStateHandler.GameState.SkyBattleSolo> = mutableListOf(),
+        var parkourWarriorSurvivorHistory: MutableList<GameStateHandler.GameState.ParkourWarriorSurvivor> = mutableListOf(),
         var xpGains: MutableList<XPInfo.XPGain> = mutableListOf()
     )
 

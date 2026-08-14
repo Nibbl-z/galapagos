@@ -23,6 +23,7 @@ import xyz.nibblz.galapagos.core.GameStateHandler
 import xyz.nibblz.galapagos.core.game_state_handlers.BattleBox
 import xyz.nibblz.galapagos.core.game_state_handlers.Handler
 import xyz.nibblz.galapagos.core.game_state_handlers.HoleInTheWall
+import xyz.nibblz.galapagos.core.game_state_handlers.ParkourWarriorSurvivor
 import xyz.nibblz.galapagos.core.game_state_handlers.SkyBattleSolo
 import xyz.nibblz.galapagos.data.Rank
 import xyz.nibblz.galapagos.data.StarLevelGame
@@ -101,7 +102,8 @@ object XPInfo : Feature {
             "parkour_warrior",
             "island_interface/game/parkour_warrior/icon",
             "Parkour Warrior Survivor",
-            StarLevelGame.PARKOUR_WARRIOR
+            StarLevelGame.PARKOUR_WARRIOR,
+            ParkourWarriorSurvivor
         ),
         PW_SOLO(listOf("parkour_warrior", "dojo"),
             "parkour_warrior",

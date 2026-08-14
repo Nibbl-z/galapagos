@@ -100,13 +100,15 @@ val XP_TABLE: HashMap<XPInfo.XPSource, XPData> = hashMapOf(
         ),
         customStatisticTables = hashMapOf(
             "leap_reached" to hashMapOf(
+                1 to 0,
                 2 to 25,
                 3 to 50,
                 4 to 75,
                 5 to 100,
                 6 to 125,
                 7 to 175,
-                8 to 275
+                8 to 275,
+                9 to 350
             )
         )
     ),

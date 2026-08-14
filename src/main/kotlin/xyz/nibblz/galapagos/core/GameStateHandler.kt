@@ -80,6 +80,35 @@ object GameStateHandler : CoreFeature {
         }
 
         @Serializable
+        class ParkourWarriorSurvivor(override var players: List<BasicPlayerState> = listOf()) : GameState<BasicPlayerState>() {
+            var leapPlacements: MutableList<Int> = mutableListOf()
+            var leapCompletionTimes: MutableList<Int> = mutableListOf()
+            var obstaclesCompleted: Int = 0
+            var playersEliminated: Int = 0
+
+            override fun projectedXP(): Int {
+                /* todo: none of this is right, the wiki is out of date, i dont knowwwwww
+
+                what ive gotten from testing is that for leap champions its actually
+                1: 30
+                2: 50
+                3: 60
+                4: 70
+                5: ??
+                6: 90
+                7: 105 ??
+                 */
+
+
+                val leapReachedXP = XP_TABLE[XPInfo.XPSource.PW_SURVIVAL]!!.customStatisticTables["leap_reached"]!!.getHighest(leapPlacements.size + 2)
+
+                return leapReachedXP + leapChampions() * 20
+            }
+
+            fun leapChampions() = leapPlacements.count { it == 1 } - if (leapPlacements.getOrNull(7) == 1) 1 else 0
+        }
+
+        @Serializable
         class SkyBattleSolo(override var players: List<SkyBattleSoloPlayerState> = listOf()) : GameState<SkyBattleSoloPlayerState>() {
             var map: String = "Unknown"
             var timeSurvived: Int = 0
@@ -180,6 +209,7 @@ object GameStateHandler : CoreFeature {
                 GameState.BattleBox::class -> Galapagos.save.battleBoxHistory.add(currentState as GameState.BattleBox)
                 GameState.HoleInTheWall::class -> Galapagos.save.hitwHistory.add(currentState as GameState.HoleInTheWall)
                 GameState.SkyBattleSolo::class -> Galapagos.save.skyBattleSoloHistory.add(currentState as GameState.SkyBattleSolo)
+                GameState.ParkourWarriorSurvivor::class -> Galapagos.save.parkourWarriorSurvivorHistory.add(currentState as GameState.ParkourWarriorSurvivor)
             }
         }
     }
@@ -203,6 +233,7 @@ object GameStateHandler : CoreFeature {
             XPInfo.XPSource.BATTLE_BOX_QUADS -> GameState.BattleBox(listOf())
             XPInfo.XPSource.HOLE_IN_THE_WALL -> GameState.HoleInTheWall(listOf())
             XPInfo.XPSource.SKY_BATTLE_SOLOS -> GameState.SkyBattleSolo(listOf())
+            XPInfo.XPSource.PW_SURVIVAL -> GameState.ParkourWarriorSurvivor(listOf())
             else -> return
         }
 

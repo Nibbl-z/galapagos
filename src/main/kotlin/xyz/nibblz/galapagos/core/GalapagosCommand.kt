@@ -92,6 +92,8 @@ object GalapagosCommand : CoreFeature {
                         (Minecraft.getInstance().gui.tabList as PlayerTabOverlayAccessor).`galapagos$getPlayerInfos`().forEachIndexed { index, info ->
                             Galapagos.logger.info("#${index} - ${info.tabListDisplayName?.string} ${info.profile.name}")
                         }
+
+                        Galapagos.logger.info((Minecraft.getInstance().gui.tabList as PlayerTabOverlayAccessor).`galapagos$getFooter`().string)
                     }
                 }
 
