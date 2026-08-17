@@ -7,10 +7,17 @@ import net.minecraft.network.chat.Style
 import net.minecraft.resources.Identifier
 
 object Glyphs {
+    data class GlyphData(
+        val path: String,
+        val glyph: String
+    )
+
     val glyphs: HashMap<String, String> = hashMapOf()
+    val allGlyphs: MutableList<GlyphData> = mutableListOf()
 
     fun addGlyph(path: String, glyph: String) {
         glyphs[path] = glyph
+        allGlyphs.add(GlyphData(path, glyph))
     }
 
     fun getGlyphComponent(path: String): MutableComponent {
@@ -22,5 +29,9 @@ object Glyphs {
 
     fun getGlyph(path: String): String {
         return glyphs[path] ?: "?????"
+    }
+
+    fun getGlyphs(path: String): List<String> {
+        return allGlyphs.filter { it.path == path }.map { it.glyph }
     }
 }

@@ -1,5 +1,6 @@
 package xyz.nibblz.galapagos.data.game
 
+
 enum class DeathCause(val messages: List<String> = listOf()) {
     NONE,
     MELEE(listOf("slain")),
@@ -10,6 +11,7 @@ enum class DeathCause(val messages: List<String> = listOf()) {
     VOID(listOf("the same world", "fell out of the world")),
     SUFFOCATE(listOf("suffocat")),
     SPLEEF(listOf("spleefed")),
+    LAVA(listOf("lava")),
     KNOCKBACK(listOf("knocked back")), // i believe this is from someone dying to the void (or maybe fall damage too?) via the knockback effect
     UNKNOWN(listOf("died")) // probably from disconnect?
 }

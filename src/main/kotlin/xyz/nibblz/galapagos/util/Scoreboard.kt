@@ -1,6 +1,7 @@
 package xyz.nibblz.galapagos.util
 
 import net.minecraft.client.Minecraft
+import net.minecraft.network.chat.Component
 import net.minecraft.world.scores.DisplaySlot
 
 fun findScoreboardLine(regex: Regex): MatchGroupCollection? {
@@ -22,14 +23,16 @@ fun findScoreboardLines(regex: Regex): Sequence<MatchResult>? {
     return null
 }
 
-fun getScoreboardLines(): List<String> {
+fun getScoreboardLines(): List<String> = getScoreboardLinesComponents().map { it.string }
+
+fun getScoreboardLinesComponents(): List<Component> {
     val scoreboard = Minecraft.getInstance().level?.scoreboard ?: return listOf()
     val objective = scoreboard.getDisplayObjective(DisplaySlot.SIDEBAR) ?: return listOf()
-    val lines: MutableList<String> = mutableListOf()
+    val lines: MutableList<Component> = mutableListOf()
 
     scoreboard.listPlayerScores(objective).forEach {
         if (it.display == null) return@forEach
-        lines.add(it.display!!.string)
+        lines.add(it.display!!)
     }
 
     return lines

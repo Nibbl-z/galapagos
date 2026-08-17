@@ -30,12 +30,14 @@ object Save : CoreFeature {
         var coinChanges: MutableList<CoinTracking.CoinChange> = mutableListOf(),
         var questHistory: MutableList<QuestTracking.QuestingReward> = mutableListOf(),
         var weeklyVaultHistory: MutableList<QuestTracking.WeeklyVault> = mutableListOf(),
+
         var cosmetics: HashMap<String, Cosmetic> = hashMapOf(),
         var infinibag: HashMap<String, Item> = hashMapOf(),
         var infinivault: HashMap<String, Item> = hashMapOf(),
         var fusionForge: MutableList<Item> = mutableListOf(),
         var blueprintAssembler: MutableList<Item> = mutableListOf(),
         var stylePerks: HashMap<StylePerk, Int> = hashMapOf(),
+
         var finishedOOBE: Boolean = false,
         var mccPlus: Boolean = false,
         var rank: Rank? = null,
@@ -45,10 +47,13 @@ object Save : CoreFeature {
         var starLevelXP: HashMap<StarLevelGame, Int> = hashMapOf(),
         var gameXP: HashMap<XPInfo.XPSource, Int> = hashMapOf(),
         var gamesPlayed: HashMap<XPInfo.XPSource, Int> = hashMapOf(),
+
         var battleBoxHistory: MutableList<GameStateHandler.GameState.BattleBox> = mutableListOf(),
         var hitwHistory: MutableList<GameStateHandler.GameState.HoleInTheWall> = mutableListOf(),
         var skyBattleSoloHistory: MutableList<GameStateHandler.GameState.SkyBattleSolo> = mutableListOf(),
         var parkourWarriorSurvivorHistory: MutableList<GameStateHandler.GameState.ParkourWarriorSurvivor> = mutableListOf(),
+        var battleBoxArenaHistory: MutableList<GameStateHandler.GameState.BattleBoxArena> = mutableListOf(),
+
         var xpGains: MutableList<XPInfo.XPGain> = mutableListOf()
     )
 

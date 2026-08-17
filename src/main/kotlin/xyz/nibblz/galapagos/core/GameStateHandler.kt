@@ -8,11 +8,11 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.minecraft.client.Minecraft
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket
 import xyz.nibblz.galapagos.Galapagos
-import xyz.nibblz.galapagos.data.game.BattleBoxArenaCoreKits
 import xyz.nibblz.galapagos.data.game.BattleBoxKit
 import xyz.nibblz.galapagos.data.game.BattleBoxRound
 import xyz.nibblz.galapagos.data.game.WallType
 import xyz.nibblz.galapagos.data.XP_TABLE
+import xyz.nibblz.galapagos.data.game.BattleBoxArenaKitChoice
 import xyz.nibblz.galapagos.data.game.DeathCause
 import xyz.nibblz.galapagos.events.MCCGameStateEvent
 import xyz.nibblz.galapagos.events.MCCServerEvent
@@ -37,6 +37,8 @@ object GameStateHandler : CoreFeature {
             var map: String = "Unknown"
             var kit: BattleBoxKit? = null
             var rounds: MutableList<BattleBoxRound> = mutableListOf()
+            var killCauses: MutableList<DeathCause> = mutableListOf()
+            var deathCauses: MutableList<DeathCause> = mutableListOf()
 
             override fun projectedXP(): Int {
                 val player = players.firstOrNull { it.username == Minecraft.getInstance().user.name } ?: return 0
@@ -49,14 +51,29 @@ object GameStateHandler : CoreFeature {
             }
         }
 
+        /*
+
+        HATE. LET ME TELL YOU HOW MUCH I'VE COME TO HATE BATTLE BOX ARENA SINCE I BEGAN TO LIVE.
+        THERE ARE 79.3 THOUSAND MILES OF VEINS AND ARTERIES IN WAFER THIN LAYERS THAT FILL MY BODY.
+        IF THE WORD HATE WAS ENGRAVED ON EACH NANOANGSTROM OF THOSE TENS OF THOUSANDS OF MILES
+        IT WOULD NOT EQUAL ONE ONE-BILLIONTH OF THE HATE I FEEL FOR BATTLE BOX ARENA AT THIS MICRO-INSTANT.
+        HATE. HATE.
+
+        */
+
+        @Serializable
         class BattleBoxArena(override var players: List<BattleBoxPlayerState>) : GameState<BattleBoxPlayerState>() {
             var playerStates: HashMap<String, BattleBoxPlayerState> = hashMapOf()
             var map: String = "Unknown"
-            var kits: MutableList<Pair<BattleBoxKit, BattleBoxArenaCoreKits>> = mutableListOf()
+            var kits: MutableList<BattleBoxArenaKitChoice> = mutableListOf()
             var rounds: MutableList<BattleBoxRound> = mutableListOf()
+            var roundStats: MutableList<BattleBoxRoundStats> = mutableListOf()
+            var killCauses: MutableList<DeathCause> = mutableListOf()
+            var deathCauses: MutableList<DeathCause> = mutableListOf()
+            var rankPoints: Int = 0
 
             override fun projectedXP(): Int {
-                val eliminations = playerStates[Minecraft.getInstance().user.name]!!.kills + playerStates[Minecraft.getInstance().user.name]!!.assists
+                val eliminations = (playerStates[Minecraft.getInstance().user.name]?.kills ?: 0) + (playerStates[Minecraft.getInstance().user.name]?.assists ?: 0)
                 val roundsWon = rounds.sumOf { if (it == BattleBoxRound.WIN) 1 else 0 }
                 val roundsPlayed = rounds.size
 
@@ -94,7 +111,7 @@ object GameStateHandler : CoreFeature {
                 2: 50
                 3: 60
                 4: 70
-                5: ??
+                5: 80
                 6: 90
                 7: 105 ??
                  */
@@ -129,6 +146,10 @@ object GameStateHandler : CoreFeature {
 
         fun getScore(): Int {
             return players.find { it.username == Minecraft.getInstance().user.name }?.score ?: -1
+        }
+
+        fun getPlayer(): T? {
+            return players.find { it.username == Minecraft.getInstance().user.name }
         }
 
         fun getPlacement(incrementTies: Boolean): Int {
@@ -171,6 +192,14 @@ object GameStateHandler : CoreFeature {
     ) : PlayerState
 
     @Serializable
+    data class BattleBoxRoundStats(
+        var kills: Int,
+        var deaths: Int,
+        var assists: Int,
+        var score: Int
+    )
+
+    @Serializable
     data class SkyBattleSoloPlayerState(
         override var username: String,
         override var score: Int,
@@ -207,6 +236,7 @@ object GameStateHandler : CoreFeature {
         if (currentState != null) {
             when(currentState!!::class) {
                 GameState.BattleBox::class -> Galapagos.save.battleBoxHistory.add(currentState as GameState.BattleBox)
+                GameState.BattleBoxArena::class -> Galapagos.save.battleBoxArenaHistory.add(currentState as GameState.BattleBoxArena)
                 GameState.HoleInTheWall::class -> Galapagos.save.hitwHistory.add(currentState as GameState.HoleInTheWall)
                 GameState.SkyBattleSolo::class -> Galapagos.save.skyBattleSoloHistory.add(currentState as GameState.SkyBattleSolo)
                 GameState.ParkourWarriorSurvivor::class -> Galapagos.save.parkourWarriorSurvivorHistory.add(currentState as GameState.ParkourWarriorSurvivor)
@@ -231,6 +261,7 @@ object GameStateHandler : CoreFeature {
 
         currentState = when(currentGame) {
             XPInfo.XPSource.BATTLE_BOX_QUADS -> GameState.BattleBox(listOf())
+            XPInfo.XPSource.BATTLE_BOX_ARENA -> GameState.BattleBoxArena(listOf())
             XPInfo.XPSource.HOLE_IN_THE_WALL -> GameState.HoleInTheWall(listOf())
             XPInfo.XPSource.SKY_BATTLE_SOLOS -> GameState.SkyBattleSolo(listOf())
             XPInfo.XPSource.PW_SURVIVAL -> GameState.ParkourWarriorSurvivor(listOf())

@@ -9,6 +9,7 @@ import xyz.nibblz.galapagos.core.GameStateHandler.currentState
 import xyz.nibblz.galapagos.core.GameStateHandler.usernameRegex
 import xyz.nibblz.galapagos.data.game.BattleBoxKit
 import xyz.nibblz.galapagos.data.game.BattleBoxRound
+import xyz.nibblz.galapagos.data.game.DeathCause
 import xyz.nibblz.galapagos.mixin.PlayerTabOverlayAccessor
 import xyz.nibblz.galapagos.util.findScoreboardLines
 import kotlin.sequences.forEach
@@ -31,6 +32,20 @@ object BattleBox : Handler {
             val kit = BattleBoxKit.entries.find { it.label == kitName } ?: return
 
             state.kit = kit
+        }
+
+        if (message.contains(Minecraft.getInstance().user.name, true)) {
+            val cause = DeathCause.entries.find { it.messages.any { phrase -> message.contains(phrase, true) } } ?: DeathCause.UNKNOWN
+
+            // is this stupid? yes. will it work? maybe.
+            val nameLocation = message.indexOf(Minecraft.getInstance().user.name, 0, false)
+            val causeLocation = cause.messages.firstNotNullOfOrNull {
+                val index = message.indexOf(it)
+                if (index == -1) null else index
+            } ?: -1
+            val isKill = nameLocation > causeLocation
+
+            if (isKill) state.killCauses.add(cause) else state.deathCauses.add(cause)
         }
     }
 

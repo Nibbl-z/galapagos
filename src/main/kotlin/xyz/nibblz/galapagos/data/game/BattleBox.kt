@@ -1,5 +1,7 @@
 package xyz.nibblz.galapagos.data.game
 
+import kotlinx.serialization.Serializable
+
 enum class BattleBoxKit(val label: String) {
     RANGER("Ranger"),
     FLANKER("Flanker"),
@@ -56,9 +58,11 @@ enum class BattleBoxArenaCoreKits(val label: String) {
     SWORD("Sword"),
     TELE("Tele"),
     TNT("TNT"),
-    VOID("Void"); // unused
+    VOID("Void"), // unused
+    NONE("");
 
     fun sprite(): String {
+        if (this == NONE) return ""
         return "island_items/battle_box/core_kit_types/${name.lowercase()}"
     }
 }
@@ -68,3 +72,10 @@ enum class BattleBoxRound(val scoreboardLetter: Char) {
     LOSS('L'),
     DRAW('D')
 }
+
+@Serializable
+data class BattleBoxArenaKitChoice(
+    val kit: BattleBoxKit,
+    val core: BattleBoxArenaCoreKits,
+    val round: Int
+)

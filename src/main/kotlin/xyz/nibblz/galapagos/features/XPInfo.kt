@@ -21,6 +21,7 @@ import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
 import xyz.nibblz.galapagos.core.GameStateHandler
 import xyz.nibblz.galapagos.core.game_state_handlers.BattleBox
+import xyz.nibblz.galapagos.core.game_state_handlers.BattleBoxArena
 import xyz.nibblz.galapagos.core.game_state_handlers.Handler
 import xyz.nibblz.galapagos.core.game_state_handlers.HoleInTheWall
 import xyz.nibblz.galapagos.core.game_state_handlers.ParkourWarriorSurvivor
@@ -61,7 +62,9 @@ object XPInfo : Feature {
             "battle_box",
             "island_interface/game/battle_box_arena/icon",
             "Battle Box Arena",
-            StarLevelGame.BATTLE_BOX)
+            StarLevelGame.BATTLE_BOX,
+            BattleBoxArena
+        )
         ,
         SKY_BATTLE_QUADS(listOf("sky_battle", "team"),
             "sky_battle",

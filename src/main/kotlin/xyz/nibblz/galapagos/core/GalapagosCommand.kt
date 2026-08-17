@@ -94,12 +94,17 @@ object GalapagosCommand : CoreFeature {
                         }
 
                         Galapagos.logger.info((Minecraft.getInstance().gui.tabList as PlayerTabOverlayAccessor).`galapagos$getFooter`().string)
+                        Galapagos.logger.info((Minecraft.getInstance().gui.tabList as PlayerTabOverlayAccessor).`galapagos$getFooter`().toString())
+                        (Minecraft.getInstance().gui.tabList as PlayerTabOverlayAccessor).`galapagos$getFooter`().toFlatList().forEach {
+                            Galapagos.logger.info(it.toString())
+                        }
                     }
                 }
 
                 literal("dumpScoreboard") {
                     executes {
                         getScoreboardLines().forEach { Galapagos.logger.info(it) }
+
                     }
                 }
 
