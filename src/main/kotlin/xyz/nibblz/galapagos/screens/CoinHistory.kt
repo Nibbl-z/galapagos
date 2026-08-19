@@ -43,7 +43,7 @@ class CoinHistory : BaseOwoScreen<FlowLayout>() {
 
             val date = Instant.fromEpochSeconds(it.timestamp).toLocalDateTime(TimeZone.currentSystemDefault())
             val newDayDate = if (Config.values::startDayAtQuestRefresh.get())
-                Instant.fromEpochSeconds(it.timestamp + (60 * 60 * 10)).toLocalDateTime(TimeZone.UTC) else date
+                Instant.fromEpochSeconds(it.timestamp - (60 * 60 * 10)).toLocalDateTime(TimeZone.UTC) else date
 
             if (previousDay != newDayDate.day) {
                 dayGain = 0
