@@ -20,12 +20,7 @@ import net.minecraft.world.item.ItemStack
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
 import xyz.nibblz.galapagos.core.GameStateHandler
-import xyz.nibblz.galapagos.core.game_state_handlers.BattleBox
-import xyz.nibblz.galapagos.core.game_state_handlers.BattleBoxArena
-import xyz.nibblz.galapagos.core.game_state_handlers.Handler
-import xyz.nibblz.galapagos.core.game_state_handlers.HoleInTheWall
-import xyz.nibblz.galapagos.core.game_state_handlers.ParkourWarriorSurvivor
-import xyz.nibblz.galapagos.core.game_state_handlers.SkyBattleSolo
+import xyz.nibblz.galapagos.core.game_state_handlers.*
 import xyz.nibblz.galapagos.data.Rank
 import xyz.nibblz.galapagos.data.StarLevelGame
 import xyz.nibblz.galapagos.data.XP_TABLE
@@ -34,17 +29,16 @@ import xyz.nibblz.galapagos.events.ContainerOpenEvent
 import xyz.nibblz.galapagos.events.ContainerSetSlotEvent
 import xyz.nibblz.galapagos.events.MCCServerEvent
 import xyz.nibblz.galapagos.events.MCCStatisticEvent
+import xyz.nibblz.galapagos.util.Glyphs
 import xyz.nibblz.galapagos.util.findLore
 import xyz.nibblz.galapagos.util.onIsland
 import kotlin.math.roundToInt
-import kotlin.reflect.KMutableProperty0
 import kotlin.time.Clock
 
 object XPInfo : Feature {
     override val id: String = "xp_info"
     override val name: String = "XP Info"
     override val description: List<Component> = listOf()
-    override val enabledProperty: KMutableProperty0<Boolean> = Config.values::xpInfoEnabled
     override val image: Config.ConfigImage = Config.ConfigImage("weekly_vault_info.png", 470, 341)
 
     @Serializable
@@ -55,8 +49,8 @@ object XPInfo : Feature {
             "island_interface/game/battle_box/icon",
             "Battle Box",
             StarLevelGame.BATTLE_BOX,
-            BattleBox)
-        ,
+            BattleBox
+        ),
         BATTLE_BOX_ARENA(
             listOf("battle_box", "arena"),
             "battle_box",
@@ -326,6 +320,29 @@ object XPInfo : Feature {
         }
 
         components.add(index, Component.empty())
+
+
+        var endIndex = components.indexOfFirst { it.string.contains("minecraft:") } // if you have f3+h on :P
+        if (endIndex == -1) { endIndex = components.size - 1 } // if you dont !
+
+        if (game.stateHandler != null) {
+            components.add(
+                endIndex, Component.empty()
+                    .append(Glyphs.getGlyphComponent("_fonts/icon/click_action_shift.png"))
+                    .append(Component.literal("+").withColor(0xecd584))
+                    .append(Glyphs.getGlyphComponent("_fonts/icon/click_action_right.png"))
+                    .append(Component.literal(" > ").withColor(ChatFormatting.DARK_GRAY.color!!))
+                    .append(Component.literal("Shift-Right-Click to ").withColor(0xecd584))
+                    .append(Component.literal("View Past Games").withColor(0xfee761))
+            )
+        } else if (game != XPSource.PW_SOLO && game != XPSource.FISHING) {
+            components.add(
+                endIndex, Component.empty()
+                    .append(Glyphs.getGlyphComponent("_fonts/icon/warning_blue.png"))
+                    .append(Component.literal(" History for this game is coming Soon™!").withColor(ChatFormatting.AQUA.color!!))
+            )
+        }
+
     }
 
     fun containerSetSlot(packet: ClientboundContainerSetSlotPacket) {

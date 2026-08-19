@@ -8,7 +8,6 @@ import xyz.nibblz.galapagos.config.Config
 import xyz.nibblz.galapagos.data.Rarity
 import xyz.nibblz.galapagos.data.StylePerk
 import xyz.nibblz.galapagos.util.mcciTextureComponent
-import kotlin.reflect.KMutableProperty0
 
 object RewardChances : Feature {
     override val id: String = "reward_chances"
@@ -18,7 +17,6 @@ object RewardChances : Feature {
         Component.empty(),
         Component.literal("Your chance for an Arcane Anomaly will also appear if you have the perk upgraded.")
     )
-    override val enabledProperty: KMutableProperty0<Boolean> = Config.values::rewardChancesEnabled
     override val image: Config.ConfigImage = Config.ConfigImage("reward_chances.png", 618, 472)
 
     val rarityChanceRegex = Regex("] - (?<chance>\\d+)%")
@@ -28,7 +26,7 @@ object RewardChances : Feature {
     }
 
     fun tooltipAdd(components: MutableList<Component>) {
-        if (!enabledProperty.get()) return
+        if (!enabled) return
 
         if (components.any {it.string.contains("Reward Chances:")}) editRewardChancesTooltip(
             components,

@@ -13,11 +13,7 @@ import xyz.nibblz.galapagos.config.Config
 import xyz.nibblz.galapagos.data.Item
 import xyz.nibblz.galapagos.dialogs.XPInfoDialog
 import xyz.nibblz.galapagos.mixin.PlayerTabOverlayAccessor
-import xyz.nibblz.galapagos.screens.CoinHistory
-import xyz.nibblz.galapagos.screens.Intro
-import xyz.nibblz.galapagos.screens.QuestHistory
-import xyz.nibblz.galapagos.screens.TrophyHistory
-import xyz.nibblz.galapagos.screens.VaultHistory
+import xyz.nibblz.galapagos.screens.*
 import xyz.nibblz.galapagos.util.Command
 import xyz.nibblz.galapagos.util.getBossbarLines
 import xyz.nibblz.galapagos.util.getScoreboardLines
@@ -141,6 +137,14 @@ object GalapagosCommand : CoreFeature {
                     executes {
                         Minecraft.getInstance().execute {
                             Minecraft.getInstance().setScreen(CoinHistory())
+                        }
+                    }
+                }
+
+                literal("gamehistory") {
+                    executes {
+                        Minecraft.getInstance().execute {
+                            Minecraft.getInstance().setScreen(GameHistory())
                         }
                     }
                 }

@@ -21,7 +21,6 @@ import xyz.nibblz.galapagos.dialogs.CraftingInstructionsDialog
 import xyz.nibblz.galapagos.events.*
 import xyz.nibblz.galapagos.util.*
 import kotlin.math.ceil
-import kotlin.reflect.KMutableProperty0
 
 object CraftingInstructions : Feature {
     override val id: String = "crafting_instructions"
@@ -31,7 +30,6 @@ object CraftingInstructions : Feature {
         Component.literal("This will open a window including step-by-step instructions on what to spend your gloop on and what to craft, in order to use the minimum gloop required to craft the cosmetic."),
         Component.literal("The window also shows how much time all the crafting of materials will take.")
     )
-    override val enabledProperty: KMutableProperty0<Boolean> = Config.values::craftingInstructionsEnabled
     override val image: Config.ConfigImage = Config.ConfigImage("crafting_instructions.png", 539, 490)
 
     var tempInfinibag: HashMap<String, Item> = hashMapOf()
@@ -161,7 +159,7 @@ object CraftingInstructions : Feature {
     }
 
     fun slotClick(slot: Slot, type: ContainerInput, ci: CallbackInfo, button: Int) {
-        if (!enabledProperty.get()) return
+        if (!enabled) return
         if (type != ContainerInput.QUICK_MOVE) return
         if (button != 1) return
         if (!hasValidInstructions(slot.item)) return
@@ -243,7 +241,7 @@ object CraftingInstructions : Feature {
     }
 
     fun tooltipAdd(stack: ItemStack, components: MutableList<Component>) {
-        if (!enabledProperty.get()) return
+        if (!enabled) return
         if (!hasValidInstructions(stack, components)) return
 
         var index = components.indexOfFirst { it.string.contains("Click to") && !it.string.contains("Right") && !it.string.contains("Middle") }

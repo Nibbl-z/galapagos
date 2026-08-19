@@ -17,17 +17,16 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
+import xyz.nibblz.galapagos.data.StylePerk
 import xyz.nibblz.galapagos.events.ContainerCloseEvent
 import xyz.nibblz.galapagos.events.ContainerOpenEvent
 import xyz.nibblz.galapagos.events.SlotClickEvent
 import xyz.nibblz.galapagos.events.SystemChatEvent
 import xyz.nibblz.galapagos.screens.CoinHistory
 import xyz.nibblz.galapagos.util.Glyphs
-import xyz.nibblz.galapagos.data.StylePerk
 import xyz.nibblz.galapagos.util.findLore
 import xyz.nibblz.galapagos.util.playMcciSound
 import java.util.*
-import kotlin.reflect.KMutableProperty0
 import kotlin.time.Clock
 
 object CoinTracking : Feature {
@@ -48,7 +47,6 @@ object CoinTracking : Feature {
         Component.empty(),
         Component.literal("Note: Disabling this feature will NOT disable coin tracking, but will disable the coin history menu.")
     )
-    override val enabledProperty: KMutableProperty0<Boolean> = Config.values::coinTrackingEnabled
     override val image: Config.ConfigImage = Config.ConfigImage("coin_tracking.png", 1021, 456)
 
 
@@ -195,7 +193,7 @@ object CoinTracking : Feature {
 
     fun slotClick(slot: Slot, screen: ContainerScreen, type: ContainerInput, button: Int) {
         if (slot.item.itemName.string == "Coins" && screen.title.string.contains("INFINIBAG") && button == 0) {
-            if (!enabledProperty.get()) return
+            if (!enabled) return
             clickedCoinHistory = true
             playMcciSound("ui.click_normal")
             playMcciSound("ui.pickup_coins")
@@ -337,7 +335,7 @@ object CoinTracking : Feature {
 //    }
 
     fun tooltipAdd(stack: ItemStack, components: MutableList<Component>) {
-        if (!enabledProperty.get()) return
+        if (!enabled) return
         val screen = Minecraft.getInstance().screen ?: return
         if (!screen.title.string.contains("INFINIBAG")) return
         if (stack.itemName.string != "Coins") return

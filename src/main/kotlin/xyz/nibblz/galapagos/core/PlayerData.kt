@@ -18,23 +18,8 @@ import net.minecraft.world.inventory.Slot
 import net.minecraft.world.item.ItemStack
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
-import xyz.nibblz.galapagos.data.CosmeticCollection
-import xyz.nibblz.galapagos.data.Cosmetic
-import xyz.nibblz.galapagos.data.CosmeticTag
-import xyz.nibblz.galapagos.data.Faction
-import xyz.nibblz.galapagos.data.Item
-import xyz.nibblz.galapagos.data.ItemLocation
-import xyz.nibblz.galapagos.data.Rank
-import xyz.nibblz.galapagos.data.Rarity
-import xyz.nibblz.galapagos.data.StarLevelGame
-import xyz.nibblz.galapagos.data.StylePerk
-import xyz.nibblz.galapagos.events.ContainerOpenEvent
-import xyz.nibblz.galapagos.events.ContainerSetSlotEvent
-import xyz.nibblz.galapagos.events.InfinibagUpdateEvent
-import xyz.nibblz.galapagos.events.JoinMCCIEvent
-import xyz.nibblz.galapagos.events.RoyalReputationIncreaseEvent
-import xyz.nibblz.galapagos.events.SlotClickEvent
-import xyz.nibblz.galapagos.events.SystemChatEvent
+import xyz.nibblz.galapagos.data.*
+import xyz.nibblz.galapagos.events.*
 import xyz.nibblz.galapagos.features.CraftingInstructions
 import xyz.nibblz.galapagos.features.XPInfo
 import xyz.nibblz.galapagos.util.findLore
@@ -44,7 +29,6 @@ import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
-import kotlin.text.get
 
 object PlayerData : CoreFeature {
     @Serializable

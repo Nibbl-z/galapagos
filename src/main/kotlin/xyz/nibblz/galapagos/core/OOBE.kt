@@ -13,12 +13,7 @@ import net.minecraft.resources.Identifier
 import net.minecraft.util.ARGB
 import net.minecraft.world.inventory.Slot
 import xyz.nibblz.galapagos.Galapagos
-import xyz.nibblz.galapagos.events.ContainerCloseEvent
-import xyz.nibblz.galapagos.events.ContainerOpenEvent
-import xyz.nibblz.galapagos.events.ContainerRenderEvent
-import xyz.nibblz.galapagos.events.ContainerSetSlotEvent
-import xyz.nibblz.galapagos.events.JoinMCCIEvent
-import xyz.nibblz.galapagos.events.SlotRenderEvent
+import xyz.nibblz.galapagos.events.*
 import xyz.nibblz.galapagos.screens.Intro
 import xyz.nibblz.galapagos.util.onIsland
 import xyz.nibblz.galapagos.util.sendGalapagosChatMessage

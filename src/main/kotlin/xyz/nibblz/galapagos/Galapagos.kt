@@ -7,15 +7,9 @@ import net.minecraft.resources.Identifier
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import xyz.nibblz.galapagos.config.Config
-import xyz.nibblz.galapagos.core.CoreFeature
-import xyz.nibblz.galapagos.core.DataCollection
-import xyz.nibblz.galapagos.core.GalapagosCommand
-import xyz.nibblz.galapagos.core.GameStateHandler
+import xyz.nibblz.galapagos.core.*
 import xyz.nibblz.galapagos.data.ConstantIslandData
 import xyz.nibblz.galapagos.features.*
-import xyz.nibblz.galapagos.core.OOBE
-import xyz.nibblz.galapagos.core.PlayerData
-import xyz.nibblz.galapagos.core.Save
 import java.text.DecimalFormat
 
 object Galapagos : ModInitializer {
@@ -51,14 +45,16 @@ object Galapagos : ModInitializer {
 	)
 
 	fun registerFeatures() {
-		features.forEach { it.init() }
+		features.forEach {
+			it.init()
+		}
 		coreFeatures.forEach { it.init() }
 	}
 
 	override fun onInitialize() {
 		Config.handler.load()
-		decimalFormat = DecimalFormat("#${if (Config.values::decimalPoints.get() > 0) "." else ""}${"#".repeat(Config.values::decimalPoints.get())}")
 		registerFeatures()
+		decimalFormat = DecimalFormat("#${if (Config.values::decimalPoints.get() > 0) "." else ""}${"#".repeat(Config.values::decimalPoints.get())}")
 		ConstantIslandData.load()
 
 		ClientLifecycleEvents.CLIENT_STOPPING.register { onShutdown() }

@@ -4,11 +4,7 @@ import dev.isxander.yacl3.api.OptionDescription
 import dev.isxander.yacl3.config.v2.api.ConfigClassHandler
 import dev.isxander.yacl3.config.v2.api.SerialEntry
 import dev.isxander.yacl3.config.v2.api.serializer.GsonConfigSerializerBuilder
-import dev.isxander.yacl3.dsl.YetAnotherConfigLib
-import dev.isxander.yacl3.dsl.binding
-import dev.isxander.yacl3.dsl.enumSwitch
-import dev.isxander.yacl3.dsl.slider
-import dev.isxander.yacl3.dsl.tickBox
+import dev.isxander.yacl3.dsl.*
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.ChatFormatting
 import net.minecraft.client.gui.screens.Screen
@@ -30,17 +26,12 @@ class Config {
     @SerialEntry
     var usePersonalApiKey: Boolean = false
 
-    // Coin Tracking
-    @SerialEntry
-    var coinTrackingEnabled: Boolean = true
+    // Features
 
-    // Quest Tracking
     @SerialEntry
-    var questTrackingEnabled: Boolean = true
+    var features: MutableMap<String, Boolean> = mutableMapOf()
 
     // Crate Chances
-    @SerialEntry
-    var crateChancesEnabled: Boolean = true
     @SerialEntry
     var highlightBestRepChance: Boolean = true
     @SerialEntry
@@ -62,8 +53,6 @@ class Config {
 
     // Cosmetic Machine Chances
     @SerialEntry
-    var cosmeticMachineChancesEnabled: Boolean = true
-    @SerialEntry
     var detailedCosmeticMachineChances: Boolean = true
     @SerialEntry
     var showNewCosmeticChancePerPull: Boolean = true
@@ -78,8 +67,6 @@ class Config {
 
     // Island Exchange Unit Price
     @SerialEntry
-    var exchangeUnitPriceEnabled: Boolean = true
-    @SerialEntry
     var exchangeShowUnitPrice: Boolean = true
     @SerialEntry
     var exchangeShowSoulEquivalent: Boolean = true
@@ -88,15 +75,11 @@ class Config {
 
     // Crafting Instructions
     @SerialEntry
-    var craftingInstructionsEnabled: Boolean = true
-    @SerialEntry
     var craftingInstructionsShowCraftTime: Boolean = true
     @SerialEntry
     var craftingInstructionsShowGloop: Boolean = true
 
     // Blueprint Assembler Info
-    @SerialEntry
-    var assemblerInfoEnabled: Boolean = true
     @SerialEntry
     var assemblerInfoShowNewTrophies: Boolean = true
     @SerialEntry
@@ -125,23 +108,17 @@ class Config {
 
     // Weekly Vault Info
     @SerialEntry
-    var weeklyVaultInfoEnabled: Boolean = true
-    @SerialEntry
     var weeklyVaultInfoShowTotalProgress: Boolean = true
     @SerialEntry
     var weeklyVaultInfoShowNeededXPPerDay: Boolean = true
 
     // Trophy Tracking
     @SerialEntry
-    var trophyTrackingEnabled: Boolean = true
-    @SerialEntry
     var trophyTrackingShowTypeBreakdown: Boolean = true
     @SerialEntry
     var trophyTrackingShowCategoryBreakdown: Boolean = true
 
     // Average Income
-    @SerialEntry
-    var averageIncomeEnabled: Boolean = true
     @SerialEntry
     var averageIncomeIncludeQuestScrolls: Boolean = true
     @SerialEntry
@@ -153,13 +130,7 @@ class Config {
     @SerialEntry
     var averageIncomeVaultClaims: Int = 60
 
-    // Reward Chances
-    @SerialEntry
-    var rewardChancesEnabled: Boolean = true
-
     // XP Info
-    @SerialEntry
-    var xpInfoEnabled: Boolean = true
 
     // Misc
     @SerialEntry
@@ -176,6 +147,7 @@ class Config {
                 .setPath(FabricLoader.getInstance().configDir.resolve("galapagos.json"))
                 .build()
             }
+
             .build()
 
         val values: Config
@@ -232,7 +204,7 @@ class Config {
                                 .build()
                             )
                             controller(tickBox())
-                            binding(feature.enabledProperty, true)
+                            binding(true, { feature.enabled }, { value -> feature.enabled = value })
                         }
                     }
                 }

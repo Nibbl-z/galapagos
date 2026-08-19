@@ -1,18 +1,19 @@
 package xyz.nibblz.galapagos.data.game
 
 import kotlinx.serialization.Serializable
+import net.minecraft.ChatFormatting
 
-enum class BattleBoxKit(val label: String) {
-    RANGER("Ranger"),
-    FLANKER("Flanker"),
-    SPECTRE("Spectre"),
-    TRICKSTER("Trickster"),
-    BALLER("Baller"),
-    SHARPSHOOTER("Sharpshooter"),
-    SCRAPPER("Scrapper"),
-    HERO("Hero"),
-    HEALER("Healer"),
-    GADGETEER("Gadgeteer");
+enum class BattleBoxKit(val label: String, val bbColor: Int) {
+    RANGER("Ranger", 0xffffff),
+    FLANKER("Flanker", 0x5bfca4),
+    SPECTRE("Spectre", 0xffffff),
+    TRICKSTER("Trickster", 0xb95bfc),
+    BALLER("Baller", 0x5aaffa),
+    SHARPSHOOTER("Sharpshooter", 0xfac55a),
+    SCRAPPER("Scrapper", 0xeb4b4b),
+    HERO("Hero", 0xffffff),
+    HEALER("Healer", 0x6fff4f),
+    GADGETEER("Gadgeteer", 0xed702d);
 
     fun bbSprite(): String { return "island_items/battle_box/classic_kit/${name.lowercase()}" }
     fun bbaSprite(): String { return "island_items/battle_box/kit/${name.lowercase()}" }
@@ -67,10 +68,10 @@ enum class BattleBoxArenaCoreKits(val label: String) {
     }
 }
 
-enum class BattleBoxRound(val scoreboardLetter: Char) {
-    WIN('W'),
-    LOSS('L'),
-    DRAW('D')
+enum class BattleBoxRound(val scoreboardLetter: Char, val color: Int) {
+    WIN('W', ChatFormatting.GREEN.color!!),
+    LOSS('L', ChatFormatting.RED.color!!),
+    DRAW('D', ChatFormatting.YELLOW.color!!)
 }
 
 @Serializable

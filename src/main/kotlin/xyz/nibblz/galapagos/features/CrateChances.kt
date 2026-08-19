@@ -15,7 +15,6 @@ import xyz.nibblz.galapagos.config.Config
 import xyz.nibblz.galapagos.data.*
 import xyz.nibblz.galapagos.events.*
 import xyz.nibblz.galapagos.util.Glyphs
-import kotlin.reflect.KMutableProperty0
 
 object CrateChances: Feature {
     override val id: String = "crate_chances"
@@ -30,7 +29,6 @@ object CrateChances: Feature {
         Component.empty(),
         Component.literal("The crate with the highest chance for a new cosmetic or new royal reputation will be highlighted with a yellow star and a purple star respectively. The best chance is determined for both standard and exclusive crates seperately, showing both of these stars for both types of crate.")
     )
-    override val enabledProperty: KMutableProperty0<Boolean> = Config.values::crateChancesEnabled
     override val image: Config.ConfigImage = Config.ConfigImage("crate_chances.png", 636, 639)
 
     var currentCrate: String? = null
@@ -118,7 +116,7 @@ object CrateChances: Feature {
     }
 
     fun tooltipAdd(stack: ItemStack, components: MutableList<Component>) {
-        if (!enabledProperty.get()) return
+        if (!enabled) return
         val screen = Minecraft.getInstance().screen ?: return
         if (!screen.title.string.contains("CRATE EMPORIUM", false)) return
         if (!stack.itemName.string.contains("Crate")) return
@@ -182,7 +180,7 @@ object CrateChances: Feature {
     }
 
     fun containerRender(screen: ContainerScreen, graphics: GuiGraphicsExtractor, x: Int, y: Int, w: Int) {
-        if (!enabledProperty.get()) return
+        if (!enabled) return
         if (!screen.title.string.contains("LOOT PREVIEW", true)) return
         if (currentCrate == null) return
 
@@ -190,7 +188,7 @@ object CrateChances: Feature {
     }
 
     fun slotRender(graphics: GuiGraphicsExtractor, slot: Slot) {
-        if (!enabledProperty.get()) return
+        if (!enabled) return
         val screen = Minecraft.getInstance().screen ?: return
         if (!screen.title.string.contains("CRATE EMPORIUM", false)) return
         if (!slot.item.itemName.string.contains("Crate")) return

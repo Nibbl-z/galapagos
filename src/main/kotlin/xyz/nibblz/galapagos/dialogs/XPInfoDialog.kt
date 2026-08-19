@@ -22,7 +22,7 @@ import xyz.nibblz.galapagos.features.XPInfo
 import xyz.nibblz.galapagos.util.Glyphs
 import xyz.nibblz.galapagos.util.mcciProgressBar
 import xyz.nibblz.galapagos.util.mcciTextureComponent
-import java.util.EnumMap
+import java.util.*
 import kotlin.time.Clock
 import kotlin.time.Instant
 

@@ -6,7 +6,6 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.TooltipFlag
 import xyz.nibblz.galapagos.data.CosmeticTag
 import xyz.nibblz.galapagos.data.Item
-import kotlin.collections.forEach
 
 fun ItemStack.findLore(regex: Regex): MatchGroupCollection? {
     val lore = this.getTooltipLines(

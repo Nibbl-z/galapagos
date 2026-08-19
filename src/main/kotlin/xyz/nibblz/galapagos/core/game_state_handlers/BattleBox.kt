@@ -12,7 +12,6 @@ import xyz.nibblz.galapagos.data.game.BattleBoxRound
 import xyz.nibblz.galapagos.data.game.DeathCause
 import xyz.nibblz.galapagos.mixin.PlayerTabOverlayAccessor
 import xyz.nibblz.galapagos.util.findScoreboardLines
-import kotlin.sequences.forEach
 
 object BattleBox : Handler {
     override fun handleGameStatePacket(packet: ClientboundMccGameStatePacket) {

@@ -13,5 +13,6 @@ enum class DeathCause(val messages: List<String> = listOf()) {
     SPLEEF(listOf("spleefed")),
     LAVA(listOf("lava")),
     KNOCKBACK(listOf("knocked back")), // i believe this is from someone dying to the void (or maybe fall damage too?) via the knockback effect
+    DROWNED(listOf("drowned")),
     UNKNOWN(listOf("died")) // probably from disconnect?
 }

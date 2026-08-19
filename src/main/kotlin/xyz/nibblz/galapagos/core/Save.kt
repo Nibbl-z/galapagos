@@ -4,12 +4,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import net.fabricmc.loader.api.FabricLoader
 import xyz.nibblz.galapagos.Galapagos
-import xyz.nibblz.galapagos.data.Cosmetic
-import xyz.nibblz.galapagos.data.Faction
-import xyz.nibblz.galapagos.data.Item
-import xyz.nibblz.galapagos.data.Rank
-import xyz.nibblz.galapagos.data.StarLevelGame
-import xyz.nibblz.galapagos.data.StylePerk
+import xyz.nibblz.galapagos.data.*
 import xyz.nibblz.galapagos.features.CoinTracking
 import xyz.nibblz.galapagos.features.QuestTracking
 import xyz.nibblz.galapagos.features.TrophyTracking

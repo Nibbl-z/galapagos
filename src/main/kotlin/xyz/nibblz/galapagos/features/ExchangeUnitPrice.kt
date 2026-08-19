@@ -18,7 +18,6 @@ import xyz.nibblz.galapagos.events.ContainerSetSlotEvent
 import xyz.nibblz.galapagos.events.SlotClickEvent
 import xyz.nibblz.galapagos.util.Glyphs
 import xyz.nibblz.galapagos.util.findLore
-import kotlin.reflect.KMutableProperty0
 
 object ExchangeUnitPrice : Feature {
     override val id: String = "exchange_unit_price"
@@ -26,7 +25,6 @@ object ExchangeUnitPrice : Feature {
     override val description: List<Component> = listOf(
         Component.literal("Shows the unit price of listings on the Island Exchange, as well as the equivalent of cosmetic/weapon skin listings in Style Souls and Weapon Wisps.")
     )
-    override val enabledProperty: KMutableProperty0<Boolean> = Config.values::exchangeUnitPriceEnabled
     override val image: Config.ConfigImage = Config.ConfigImage("exchange_unit.png", 425, 906)
 
     override fun init() {
@@ -144,7 +142,7 @@ object ExchangeUnitPrice : Feature {
     }
 
     fun tooltipAdd(item: ItemStack, list: MutableList<Component>) {
-        if (!enabledProperty.get()) return
+        if (!enabled) return
         val screen = Minecraft.getInstance().screen ?: return
         if (!screen.title.string.contains("ISLAND EXCHANGE", false)) return
 

@@ -13,11 +13,7 @@ import net.minecraft.world.inventory.Slot
 import net.minecraft.world.item.ItemStack
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
-import xyz.nibblz.galapagos.data.ConstantIslandData
-import xyz.nibblz.galapagos.data.CosmeticCollection
-import xyz.nibblz.galapagos.data.FishingResearch
-import xyz.nibblz.galapagos.data.FishingUpgrade
-import xyz.nibblz.galapagos.data.repPerDonation
+import xyz.nibblz.galapagos.data.*
 import xyz.nibblz.galapagos.events.ContainerCloseEvent
 import xyz.nibblz.galapagos.events.RoyalReputationIncreaseEvent
 import xyz.nibblz.galapagos.events.SlotClickEvent
@@ -26,7 +22,6 @@ import xyz.nibblz.galapagos.screens.TrophyHistory
 import xyz.nibblz.galapagos.util.Glyphs
 import xyz.nibblz.galapagos.util.findLore
 import xyz.nibblz.galapagos.util.playMcciSound
-import kotlin.reflect.KMutableProperty0
 import kotlin.time.Clock
 
 object TrophyTracking : Feature {
@@ -39,7 +34,6 @@ object TrophyTracking : Feature {
         Component.empty(),
         Component.literal("Note: Disabling this feature will NOT disable trophy tracking, but will disable the trophy history menu.")
     )
-    override val enabledProperty: KMutableProperty0<Boolean> = Config.values::trophyTrackingEnabled
     override val image: Config.ConfigImage = Config.ConfigImage("trophy_tracking.png", 1044, 561)
 
     override fun init() {
@@ -121,7 +115,7 @@ object TrophyTracking : Feature {
 
     fun slotClick(slot: Slot, screen: ContainerScreen) {
         if (slot.item.itemName.string == "Crown Level" && screen.title.string.contains("MY PROFILE")) {
-            if (!enabledProperty.get()) return
+            if (!enabled) return
             clickedTrophyHistory = true
             playMcciSound("ui.click_normal")
             playMcciSound("ui.experience_receive")
@@ -177,7 +171,7 @@ object TrophyTracking : Feature {
     }
 
     fun tooltipAdd(stack: ItemStack, components: MutableList<Component>) {
-        if (!enabledProperty.get()) return
+        if (!enabled) return
         val screen = Minecraft.getInstance().screen ?: return
         if (stack.itemName.string != "Crown Level") return
         if (!screen.title.string.contains("MY PROFILE")) return

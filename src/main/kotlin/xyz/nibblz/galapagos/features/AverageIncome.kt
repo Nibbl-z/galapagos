@@ -13,11 +13,7 @@ import net.minecraft.world.inventory.Slot
 import net.minecraft.world.item.ItemStack
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
-import xyz.nibblz.galapagos.data.ARCANE_ANOMALY_CHANCES
-import xyz.nibblz.galapagos.data.LUCKY_UPGRADE_CHANCES
-import xyz.nibblz.galapagos.data.Rarity
-import xyz.nibblz.galapagos.data.StylePerk
-import xyz.nibblz.galapagos.data.WEEKLY_VAULT_CHANCES
+import xyz.nibblz.galapagos.data.*
 import xyz.nibblz.galapagos.events.ContainerCloseEvent
 import xyz.nibblz.galapagos.events.ContainerOpenEvent
 import xyz.nibblz.galapagos.events.ContainerRenderEvent
@@ -27,7 +23,6 @@ import xyz.nibblz.galapagos.features.WeeklyVaultInfo.maxClaims
 import xyz.nibblz.galapagos.util.Glyphs
 import xyz.nibblz.galapagos.util.findLore
 import kotlin.math.min
-import kotlin.reflect.KMutableProperty0
 
 object AverageIncome : Feature {
     override val id: String = "average_income"
@@ -43,7 +38,6 @@ object AverageIncome : Feature {
         Component.empty(),
         Component.literal("You can also view the total amount of coins you'll earn every day and every week in the info icon at the top-right of the journal.")
     )
-    override val enabledProperty: KMutableProperty0<Boolean> = Config.values::averageIncomeEnabled
     override val image: Config.ConfigImage = Config.ConfigImage("average_income.png", 850, 474)
 
     val CRATE_AVERAGE_COINS: HashMap<Rarity, Int> = hashMapOf(
@@ -224,7 +218,7 @@ object AverageIncome : Feature {
     }
 
     fun tooltipAdd(item: ItemStack, components: MutableList<Component>) {
-        if (!enabledProperty.get()) return
+        if (!enabled) return
         if (item.itemName.string == "Remaining Daily Quests") handleQuestIncomeTooltip(components, false)
         if (item.itemName.string == "Remaining Weekly Quests") handleQuestIncomeTooltip(components, true)
         if (item.itemName.string == "Daily Meter") handleDailyMeterIncomeTooltip(components)
@@ -421,7 +415,7 @@ object AverageIncome : Feature {
     }
 
     fun containerRender(screen: ContainerScreen, graphics: GuiGraphicsExtractor, x: Int, y: Int, w: Int) {
-        if (!enabledProperty.get()) return
+        if (!enabled) return
         if (!openedScrollMenu) return
         if (!screen.title.string.contains("INFINIBAG")) return
 

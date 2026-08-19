@@ -26,7 +26,6 @@ import xyz.nibblz.galapagos.util.Glyphs
 import xyz.nibblz.galapagos.util.findLore
 import xyz.nibblz.galapagos.util.getItemCount
 import xyz.nibblz.galapagos.util.playMcciSound
-import kotlin.reflect.KMutableProperty0
 import kotlin.time.Clock
 
 object QuestTracking : Feature {
@@ -39,7 +38,6 @@ object QuestTracking : Feature {
         Component.empty(),
         Component.literal("Note: Disabling this feature will NOT disable quest tracking, but will disable the quest/vault history menu.")
     )
-    override val enabledProperty: KMutableProperty0<Boolean> = Config.values::questTrackingEnabled
     override val image: Config.ConfigImage = Config.ConfigImage("quest_tracking.png", 1097, 465)
 
     override fun init() {
@@ -202,7 +200,7 @@ object QuestTracking : Feature {
     fun slotClick(slot: Slot, screen: ContainerScreen, button: Int) {
         if (screen.title.string.contains("JOURNAL") || screen.title.string.contains("MAILBOX")) {
             if (slot.item.itemName.string.contains("Island Rewards") && button == 0 && slot.index == 8) {
-                if (!enabledProperty.get()) return
+                if (!enabled) return
                 clickedQuestHistory = true
                 playMcciSound("ui.click_normal")
                 playMcciSound("ui.quest_complete")
@@ -216,7 +214,7 @@ object QuestTracking : Feature {
         val source = getRewardSource(slot.item)
 
         if (slot.item.itemName.string == "Weekly Vault" && !slot.item.findLore("Click to Claim")) {
-            if (!enabledProperty.get()) return
+            if (!enabled) return
             clickedVaultHistory = true
             playMcciSound("ui.click_normal")
             playMcciSound("ui.explosion_rare")
@@ -250,7 +248,7 @@ object QuestTracking : Feature {
     }
 
     fun tooltipAdd(stack: ItemStack, components: MutableList<Component>) {
-        if (!enabledProperty.get()) return
+        if (!enabled) return
         val screen = Minecraft.getInstance().screen ?: return
         if (!screen.title.string.contains("JOURNAL")) return
 

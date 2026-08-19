@@ -8,12 +8,8 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.minecraft.client.Minecraft
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket
 import xyz.nibblz.galapagos.Galapagos
-import xyz.nibblz.galapagos.data.game.BattleBoxKit
-import xyz.nibblz.galapagos.data.game.BattleBoxRound
-import xyz.nibblz.galapagos.data.game.WallType
 import xyz.nibblz.galapagos.data.XP_TABLE
-import xyz.nibblz.galapagos.data.game.BattleBoxArenaKitChoice
-import xyz.nibblz.galapagos.data.game.DeathCause
+import xyz.nibblz.galapagos.data.game.*
 import xyz.nibblz.galapagos.events.MCCGameStateEvent
 import xyz.nibblz.galapagos.events.MCCServerEvent
 import xyz.nibblz.galapagos.events.MCCStatisticEvent
@@ -48,6 +44,21 @@ object GameStateHandler : CoreFeature {
                 val roundsPlayed = rounds.size
 
                 return (eliminations * 10 + roundsPlayed * 30 + roundsWon * 45)
+            }
+
+            companion object {
+                fun teamPlacement(game: BattleBox): Int {
+                    val teamScores: HashMap<String, Int> = hashMapOf()
+                    var team = ""
+
+                    game.players.forEach {
+                        teamScores[it.team] = (teamScores[it.team] ?: 0) + it.score
+                        if (it.username == Minecraft.getInstance().user.name) team = it.team
+                    }
+
+                    val sorted = teamScores.entries.sortedByDescending { it.value }
+                    return sorted.indexOfFirst { it.key == team } + 1
+                }
             }
         }
 

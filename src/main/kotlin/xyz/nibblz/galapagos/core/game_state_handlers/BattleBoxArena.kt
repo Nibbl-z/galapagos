@@ -9,11 +9,7 @@ import xyz.nibblz.galapagos.core.GameStateHandler.BattleBoxPlayerState
 import xyz.nibblz.galapagos.core.GameStateHandler.GameState
 import xyz.nibblz.galapagos.core.GameStateHandler.currentState
 import xyz.nibblz.galapagos.core.GameStateHandler.usernameRegex
-import xyz.nibblz.galapagos.data.game.BattleBoxArenaCoreKits
-import xyz.nibblz.galapagos.data.game.BattleBoxArenaKitChoice
-import xyz.nibblz.galapagos.data.game.BattleBoxKit
-import xyz.nibblz.galapagos.data.game.BattleBoxRound
-import xyz.nibblz.galapagos.data.game.DeathCause
+import xyz.nibblz.galapagos.data.game.*
 import xyz.nibblz.galapagos.mixin.PlayerTabOverlayAccessor
 import xyz.nibblz.galapagos.util.Glyphs
 import xyz.nibblz.galapagos.util.getScoreboardLinesComponents

@@ -37,7 +37,6 @@ object BlueprintAssemblerInfo : Feature {
         Component.literal("For example, if your current owned blueprints will yield 10 standard cores and 1 exclusive core from scavenging, exclusive cores will be labelled as \"1 exclusive core, 2 converted\"")
 
     )
-    override val enabledProperty: KMutableProperty0<Boolean> = Config.values::assemblerInfoEnabled
     override val image: Config.ConfigImage = Config.ConfigImage("assembler_info.png", 842, 364)
 
 
@@ -147,7 +146,7 @@ object BlueprintAssemblerInfo : Feature {
     }
 
     fun containerRender(screen: ContainerScreen, graphics: GuiGraphicsExtractor, x: Int, y: Int, w: Int) {
-        if (!enabledProperty.get()) return
+        if (!enabled) return
         if (!screen.title.string.contains("BLUEPRINT ASSEMBLER") && !displayData) return
 
         var yOffset = if (screen.title.string.contains("INFINIBAG")) 130 else 30

@@ -11,7 +11,6 @@ import xyz.nibblz.galapagos.config.Config
 import xyz.nibblz.galapagos.events.ContainerOpenEvent
 import xyz.nibblz.galapagos.util.findLore
 import xyz.nibblz.galapagos.util.mcciProgressBar
-import kotlin.reflect.KMutableProperty0
 
 object WeeklyVaultInfo : Feature {
     override val id: String = "weekly_vault_info"
@@ -19,7 +18,6 @@ object WeeklyVaultInfo : Feature {
     override val description: List<Component> = listOf(
         Component.literal("Shows a progress bar on the weekly vault's tooltip showing the overall progress towards a max vault, as well as how much XP you'll need on average per day to max your vault."),
     )
-    override val enabledProperty: KMutableProperty0<Boolean> = Config.values::weeklyVaultInfoEnabled
     override val image: Config.ConfigImage = Config.ConfigImage("weekly_vault_info.png", 470, 341)
 
     val xpPerLevel: HashMap<IntRange, Int> = hashMapOf(
@@ -110,7 +108,7 @@ object WeeklyVaultInfo : Feature {
     }
 
     fun tooltipAdd(stack: ItemStack, components: MutableList<Component>) {
-        if (!enabledProperty.get()) return
+        if (!enabled) return
         val screen = Minecraft.getInstance().screen ?: return
         if (!screen.title.string.contains("ISLAND REWARDS")) return
 

@@ -17,7 +17,6 @@ import xyz.nibblz.galapagos.events.ContainerOpenEvent
 import xyz.nibblz.galapagos.events.ContainerRenderEvent
 import xyz.nibblz.galapagos.events.SlotClickEvent
 import xyz.nibblz.galapagos.util.Glyphs
-import kotlin.reflect.KMutableProperty0
 
 object CosmeticMachineChances : Feature {
     override val id: String = "cosmetic_machine_chances"
@@ -32,7 +31,6 @@ object CosmeticMachineChances : Feature {
         Component.empty(),
         Component.literal("The chances for each type of pull is also changed to be more descriptive, showing the exact non-exclusive, exclusive, or arcane chances on a pull for each rarity.")
     )
-    override val enabledProperty: KMutableProperty0<Boolean> = Config.values::cosmeticMachineChancesEnabled
     override val image: Config.ConfigImage = Config.ConfigImage("cosmetic_machine_chances.png", 669, 554)
 
     val BASIC_CHANCES: Map<Rarity, Double> = mapOf(
@@ -197,7 +195,7 @@ object CosmeticMachineChances : Feature {
     }
 
     fun tooltipAdd(item: ItemStack, list: MutableList<Component>) {
-        if (!enabledProperty.get()) return
+        if (!enabled) return
         if (!inCosmeticMachine) return
 
         if(item.itemName.string == "Basic Pull") {
@@ -297,9 +295,9 @@ object CosmeticMachineChances : Feature {
     }
 
     fun containerRender(screen: ContainerScreen, graphics: GuiGraphicsExtractor, x: Int, y: Int, w: Int) {
+        if (!enabled) return
         if (!screen.title.string.contains("LOOT PREVIEW", true)) return
         if (!inCosmeticMachine) return
-        if (!enabledProperty.get()) return
 
         val data = if (isUltimate) ultimateData else basicData
 
