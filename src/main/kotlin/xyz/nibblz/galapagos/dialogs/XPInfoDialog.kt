@@ -122,6 +122,22 @@ class XPInfoDialog(x: Int, y: Int) : Dialog(x, y), Themed by GalapagosTheme {
                 .append(Component.literal(" ${((XPInfo.weeklyVault.currentXP.toDouble() / XPInfo.weeklyVault.requiredXP.toDouble() * 100.0).toInt())}%"))
         )
 
+        if (XPInfo.seaMonstersActive) {
+            val energyMeterProgress = XPInfo.seaMonstersEnergyMeter.currentXP.toDouble() / XPInfo.seaMonstersEnergyMeter.requiredXP.toDouble()
+
+            +TextWidgets.multiLine(Component.empty()
+                .append(mcciTextureComponent("island_interface/navigator/sea_monster_event"))
+                .append(Component.literal(" Energy Meter: ").withColor(ChatFormatting.GRAY.color!!))
+                .append(Component.literal("${XPInfo.seaMonstersEnergyMeter.completed}").withColor(ChatFormatting.WHITE.color!!))
+                .append(Component.literal("/${XPInfo.seaMonstersEnergyMeter.total}, ").withColor(ChatFormatting.DARK_GRAY.color!!))
+                .append(Component.literal("%,d".format(XPInfo.seaMonstersEnergyMeter.currentXP)).withColor(ChatFormatting.WHITE.color!!))
+                .append(Component.literal("/" + "%,d".format(XPInfo.seaMonstersEnergyMeter.requiredXP)).withColor(ChatFormatting.DARK_GRAY.color!!))
+                .append(Component.literal(" XP\n").withColor(ChatFormatting.GRAY.color!!))
+                .append(mcciProgressBar(energyMeterProgress, 5))
+                .append(Component.literal(" ${((XPInfo.seaMonstersEnergyMeter.currentXP.toDouble() / XPInfo.seaMonstersEnergyMeter.requiredXP.toDouble() * 100.0).toInt())}%"))
+            )
+        }
+
         if (XPInfo.currentStarLevelGame != null) {
             val starLevel = Galapagos.save.starLevelXP[XPInfo.currentStarLevelGame]!! / 3000
             val currentXP = Galapagos.save.starLevelXP[XPInfo.currentStarLevelGame]!! - (starLevel * 3000)

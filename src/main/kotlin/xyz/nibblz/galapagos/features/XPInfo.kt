@@ -148,6 +148,10 @@ object XPInfo : Feature {
     var dailyMeter: Claimable = Claimable(0, 7, 0, 500)
     var weeklyVault: Claimable = Claimable(0, 20, 0, 500)
 
+    // Event related
+    var seaMonstersActive = false
+    var seaMonstersEnergyMeter: Claimable = Claimable(0, 40, 0, 500)
+
     override fun init() {
         MCCStatisticEvent.EVENT.register { packet -> mccStatistic(packet) }
         MCCServerEvent.EVENT.register { packet -> mccServer(packet) }
@@ -272,15 +276,44 @@ object XPInfo : Feature {
         )
     }
 
+    fun updateSeaMonstersEnergyMeter(item: ItemStack) {
+        val meterClaimsMatch = item.findLore(meterClaimsRegex) ?: return
+        val completedMeterClaims = meterClaimsMatch["completed"]?.value?.toIntOrNull() ?: return
+        val totalMeterClaims = meterClaimsMatch["total"]?.value?.toIntOrNull() ?: return
+
+        val meterProgressMatch = item.findLore(xpProgressRegex) ?: return
+        val meterProgressCompleted = meterProgressMatch["completed"]?.value?.replace(",", "")?.toIntOrNull() ?: return
+        val meterProgressTotal = meterProgressMatch["total"]?.value?.replace(",", "")?.toIntOrNull() ?: return
+
+        seaMonstersEnergyMeter = Claimable(
+            completedMeterClaims,
+            totalMeterClaims,
+            meterProgressCompleted,
+            meterProgressTotal
+        )
+
+        Galapagos.logger.info("$seaMonstersEnergyMeter")
+    }
+
     fun containerOpen(packet: ClientboundContainerSetContentPacket) {
         val screen = Minecraft.getInstance().screen ?: return
-        if (!screen.title.string.contains("ISLAND REWARDS")) return
 
-        val dailyMeterItem = packet.items[13]
-        val weeklyVaultItem = packet.items[16]
+        if (screen.title.string.contains("ISLAND REWARDS")) {
+            val dailyMeterItem = packet.items[13]
+            val weeklyVaultItem = packet.items[16]
 
-        updateDailyMeter(dailyMeterItem)
-        updateWeeklyVault(weeklyVaultItem)
+            updateDailyMeter(dailyMeterItem)
+            updateWeeklyVault(weeklyVaultItem)
+
+            val eventOrdersItem = packet.items[67] // 6767676767
+            seaMonstersActive = eventOrdersItem.itemName.string == "Event Orders"
+        }
+
+        if (screen.title.string.contains("EVENT ORDERS")) {
+            val energyMeterItem = packet.items[20]
+
+            updateSeaMonstersEnergyMeter(energyMeterItem)
+        }
 
         dialog?.refresh()
     }
@@ -321,7 +354,6 @@ object XPInfo : Feature {
 
         components.add(index, Component.empty())
 
-
         var endIndex = components.indexOfFirst { it.string.contains("minecraft:") } // if you have f3+h on :P
         if (endIndex == -1) { endIndex = components.size - 1 } // if you dont !
 
@@ -350,6 +382,8 @@ object XPInfo : Feature {
 
         if (packet.item.itemName.string == "Daily Meter" && screen.title.string.contains("ISLAND REWARDS")) updateDailyMeter(packet.item)
         if (packet.item.itemName.string == "Weekly Vault" && screen.title.string.contains("ISLAND REWARDS")) updateWeeklyVault(packet.item)
+        // Event
+        if (packet.item.itemName.string == "Event Energy Meter" && screen.title.string.contains("EVENT ORDERS")) updateSeaMonstersEnergyMeter(packet.item)
     }
 
     fun hotbarXPInfoLayer(): HudElement {
