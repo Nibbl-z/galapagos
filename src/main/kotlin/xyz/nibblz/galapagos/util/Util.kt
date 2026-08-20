@@ -24,6 +24,11 @@ fun HashMap<Int, Int>.getLowest(value: Int): Int {
     return get(keys.sorted().firstOrNull { value <= it }) ?: get(keys.maxOf { it })!!
 }
 
+data class Vector2(
+    val x: Int,
+    val y: Int
+)
+
 //fun shortenedNumberToInt(number: String): Int {
 //    val input = number.uppercase()
 //

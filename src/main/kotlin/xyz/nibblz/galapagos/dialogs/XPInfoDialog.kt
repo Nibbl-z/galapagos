@@ -27,10 +27,6 @@ import kotlin.time.Clock
 import kotlin.time.Instant
 
 class XPInfoDialog(x: Int, y: Int) : Dialog(x, y), Themed by GalapagosTheme {
-    fun refresh() {
-        super.init()
-    }
-
     var showBreakdown = false
     val todayXP = XPInfo.XPSource.entries.associateWithTo(EnumMap(XPInfo.XPSource::class.java)) { 0 }
     val todayXPEntries = XPInfo.XPSource.entries.associateWithTo(EnumMap(XPInfo.XPSource::class.java)) { 0 }
@@ -176,7 +172,7 @@ class XPInfoDialog(x: Int, y: Int) : Dialog(x, y), Themed by GalapagosTheme {
 
             +ThemedButton(Component.literal("${if (showBreakdown) "Hide" else "View"} XP Breakdown"), theme=this@XPInfoDialog) {
                 showBreakdown = !showBreakdown
-                refresh()
+                super.init()
             }
         }
     }

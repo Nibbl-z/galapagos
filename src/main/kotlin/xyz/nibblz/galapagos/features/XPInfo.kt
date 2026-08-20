@@ -30,6 +30,7 @@ import xyz.nibblz.galapagos.events.ContainerSetSlotEvent
 import xyz.nibblz.galapagos.events.MCCServerEvent
 import xyz.nibblz.galapagos.events.MCCStatisticEvent
 import xyz.nibblz.galapagos.util.Glyphs
+import xyz.nibblz.galapagos.util.Vector2
 import xyz.nibblz.galapagos.util.findLore
 import xyz.nibblz.galapagos.util.onIsland
 import kotlin.math.roundToInt
@@ -143,6 +144,7 @@ object XPInfo : Feature {
     var projectedXP = 0
 
     var dialog: XPInfoDialog? = null
+    var dialogLocation: Vector2 = Vector2(10, 10)
     var currentGames: MutableList<XPSource> = mutableListOf()
     var currentStarLevelGame: StarLevelGame? = null
     var dailyMeter: Claimable = Claimable(0, 7, 0, 500)
@@ -166,6 +168,17 @@ object XPInfo : Feature {
         handleProjectedXPStatistics(packet)
     }
 
+    fun refreshDialog() {
+        dialogLocation = Vector2(dialog?.x ?: 10, dialog?.y ?: 10)
+
+        if (dialog != null) {
+            dialog!!.close()
+        }
+
+        dialog = XPInfoDialog(dialogLocation.x, dialogLocation.y)
+        DialogContainer += dialog!!
+    }
+
     fun handleXPStatistic(packet: ClientboundMccStatisticPacket) {
         val source = XPSource.entries.find { packet.statistic == it.xpStatistic }
         if (source == null) return
@@ -174,6 +187,7 @@ object XPInfo : Feature {
                 (if (Galapagos.save.mccPlus) 0.3 else 0.0) +
                 (if (Galapagos.save.rank == Rank.GRAND_CHAMP_SUPREME) 0.2 else 0.0)
         // todo: track party state to see if a gcs is in your party
+        // todo: implement this with the new awesome fixed thing in the actionbar
 
         // fishing xp stat returns the boosted amount, games don't, soo...
         val amount = if (source == XPSource.FISHING) packet.value else (packet.value.toDouble() * bonus).roundToInt()
@@ -193,6 +207,8 @@ object XPInfo : Feature {
             }
         }
 
+        seaMonstersEnergyMeter.currentXP = (seaMonstersEnergyMeter.currentXP + amount).coerceIn(0..seaMonstersEnergyMeter.requiredXP)
+
         if (source.starLevelGame != null) {
             Galapagos.save.starLevelXP[source.starLevelGame] = Galapagos.save.starLevelXP[source.starLevelGame]!! + packet.value
         }
@@ -201,7 +217,7 @@ object XPInfo : Feature {
             Galapagos.save.factionXP[Galapagos.save.selectedFaction!!] = Galapagos.save.factionXP[Galapagos.save.selectedFaction]!! + amount
         }
 
-        dialog?.refresh()
+        refreshDialog()
     }
 
     fun handleProjectedXPStatistics(packet: ClientboundMccStatisticPacket) {
@@ -215,7 +231,7 @@ object XPInfo : Feature {
 
     fun mccServer(packet: ClientboundMccServerPacket) {
         if (dialog == null || dialog?.state?.isClosing == true) {
-            dialog = XPInfoDialog(10, 10)
+            dialog = XPInfoDialog(dialogLocation.x, dialogLocation.y)
             DialogContainer += dialog!!
         }
 
@@ -235,7 +251,7 @@ object XPInfo : Feature {
             projectedXP = 0
         }
 
-        dialog?.refresh()
+        refreshDialog()
     }
 
     val meterClaimsRegex = Regex("Daily Claims: (?<completed>\\d+)/(?<total>\\d+)")
@@ -315,7 +331,7 @@ object XPInfo : Feature {
             updateSeaMonstersEnergyMeter(energyMeterItem)
         }
 
-        dialog?.refresh()
+        refreshDialog()
     }
 
     fun tooltipAdd(item: ItemStack, components: MutableList<Component>) {
@@ -384,6 +400,8 @@ object XPInfo : Feature {
         if (packet.item.itemName.string == "Weekly Vault" && screen.title.string.contains("ISLAND REWARDS")) updateWeeklyVault(packet.item)
         // Event
         if (packet.item.itemName.string == "Event Energy Meter" && screen.title.string.contains("EVENT ORDERS")) updateSeaMonstersEnergyMeter(packet.item)
+
+        refreshDialog()
     }
 
     fun hotbarXPInfoLayer(): HudElement {
