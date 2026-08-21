@@ -21,7 +21,6 @@ import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
 import xyz.nibblz.galapagos.core.GameStateHandler
 import xyz.nibblz.galapagos.core.game_state_handlers.*
-import xyz.nibblz.galapagos.data.Rank
 import xyz.nibblz.galapagos.data.StarLevelGame
 import xyz.nibblz.galapagos.data.XP_TABLE
 import xyz.nibblz.galapagos.dialogs.XPInfoDialog
@@ -29,6 +28,7 @@ import xyz.nibblz.galapagos.events.ContainerOpenEvent
 import xyz.nibblz.galapagos.events.ContainerSetSlotEvent
 import xyz.nibblz.galapagos.events.MCCServerEvent
 import xyz.nibblz.galapagos.events.MCCStatisticEvent
+import xyz.nibblz.galapagos.mixin.GuiAccessor
 import xyz.nibblz.galapagos.util.Glyphs
 import xyz.nibblz.galapagos.util.Vector2
 import xyz.nibblz.galapagos.util.findLore
@@ -179,18 +179,23 @@ object XPInfo : Feature {
         DialogContainer += dialog!!
     }
 
+    fun getXPBoost(): Double {
+        val actionBar = (Minecraft.getInstance().gui as GuiAccessor).`galapagos$getOverlayMesssageString`() ?: Component.empty()
+
+        return when {
+            actionBar.string.contains(Glyphs.getGlyph("_fonts/icon/xp_bonus_20.png")) -> 1.2
+            actionBar.string.contains(Glyphs.getGlyph("_fonts/icon/xp_bonus.png")) -> 1.3
+            actionBar.string.contains(Glyphs.getGlyph("_fonts/icon/xp_bonus_50.png")) -> 1.5
+            else -> 1.0
+        }
+    }
+
     fun handleXPStatistic(packet: ClientboundMccStatisticPacket) {
         val source = XPSource.entries.find { packet.statistic == it.xpStatistic }
         if (source == null) return
 
-        val bonus = 1.0 +
-                (if (Galapagos.save.mccPlus) 0.3 else 0.0) +
-                (if (Galapagos.save.rank == Rank.GRAND_CHAMP_SUPREME) 0.2 else 0.0)
-        // todo: track party state to see if a gcs is in your party
-        // todo: implement this with the new awesome fixed thing in the actionbar
-
         // fishing xp stat returns the boosted amount, games don't, soo...
-        val amount = if (source == XPSource.FISHING) packet.value else (packet.value.toDouble() * bonus).roundToInt()
+        val amount = if (source == XPSource.FISHING) packet.value else (packet.value.toDouble() * getXPBoost()).roundToInt()
 
         val gain = XPGain(amount = amount, source = source, timestamp = Clock.System.now().epochSeconds)
         Galapagos.save.xpGains.add(gain)
@@ -413,7 +418,7 @@ object XPInfo : Feature {
             graphics.text(
                 Minecraft.getInstance().font,
                 Component.literal("Projected XP: ").withColor(ChatFormatting.GRAY.color!!).withStyle(Style.EMPTY.withFont(font))
-                    .append(Component.literal("%,d".format(GameStateHandler.currentState?.projectedXP() ?: 0)).withColor(0xFFFFFF)),
+                    .append(Component.literal("%,d".format(((GameStateHandler.currentState?.projectedXP()?.toDouble() ?: 0.0) * getXPBoost()).roundToInt())).withColor(0xFFFFFF)),
                 graphics.guiWidth() / 2 + 93, graphics.guiHeight() - 22,
                 ARGB.opaque(0xFFFFFF)
             )
