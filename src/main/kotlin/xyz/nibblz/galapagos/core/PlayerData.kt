@@ -274,7 +274,12 @@ object PlayerData : CoreFeature {
         )
 
         ranks.forEach {
-            val rank = Rank.valueOf(it)
+            val rank = Rank.entries.find { entry -> entry.name == it }
+
+            if (rank == null) {
+                Galapagos.logger.warn("Unknown rank $it, ignoring it")
+                return@forEach
+            }
 
             if (Galapagos.save.rank == null || (Galapagos.save.rank?.ordinal ?: -1) < rank.ordinal) {
                 Galapagos.save.rank = rank
