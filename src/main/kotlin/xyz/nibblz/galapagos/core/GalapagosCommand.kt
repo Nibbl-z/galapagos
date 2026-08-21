@@ -43,8 +43,8 @@ object GalapagosCommand : CoreFeature {
                                     Component.literal("If you just enabled your API settings, you may have to try again in a few minutes by running /galapagos api manualFetch!")
                                         .withColor(ChatFormatting.BLUE.color!!)
                                 )
-                                Galapagos.save.finishedOOBE = true
-                                OOBE.active = false
+                                OOBE.finishedApiSettings = true
+                                OOBE.state = OOBE.OOBEState.JOIN_STYLE_PERKS
                             }
 
                             val status = PlayerData.fetchAPI()

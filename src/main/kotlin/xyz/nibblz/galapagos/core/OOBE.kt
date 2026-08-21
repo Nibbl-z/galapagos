@@ -48,7 +48,12 @@ object OOBE : CoreFeature {
         SETTINGS,
         API_SETTINGS,
         API_SETTINGS_GOOD,
-        SET_API_KEY
+        SET_API_KEY,
+        JOIN_STYLE_PERKS,
+        POCKET_MENU_STYLE_PERKS,
+        PROFILE,
+        COSMETIC_COLLECTION,
+        STYLE_PERKS
     }
 
     var active = true
@@ -59,6 +64,7 @@ object OOBE : CoreFeature {
     var ticks = 0
     var collectionEnabled = false
     var infinibagEnabled = false
+    var finishedApiSettings = false
     var hasAPIKey = false
 
     fun updateAPIToggleState() {
@@ -82,11 +88,21 @@ object OOBE : CoreFeature {
         if (!active) return
         val screen = Minecraft.getInstance().screen ?: return
 
-        state = when {
-            screen.title.string.contains("POCKET MENU") -> OOBEState.POCKET_MENU
-            screen.title.string.contains("SETTINGS") && !screen.title.string.contains("API") -> OOBEState.SETTINGS
-            screen.title.string.contains("SETTINGS") && screen.title.string.contains("API") -> OOBEState.API_SETTINGS
-            else -> OOBEState.NONE
+        if (!finishedApiSettings) {
+            state = when {
+                screen.title.string.contains("POCKET MENU") -> OOBEState.POCKET_MENU
+                screen.title.string.contains("SETTINGS") && !screen.title.string.contains("API") -> OOBEState.SETTINGS
+                screen.title.string.contains("SETTINGS") && screen.title.string.contains("API") -> OOBEState.API_SETTINGS
+                else -> OOBEState.NONE
+            }
+        } else {
+            state = when {
+                screen.title.string.contains("POCKET MENU") -> OOBEState.POCKET_MENU_STYLE_PERKS
+                screen.title.string.contains("MY PROFILE") && !screen.title.string.contains("COSMETIC COLLECTION") -> OOBEState.PROFILE
+                screen.title.string.contains("MY PROFILE") && screen.title.string.contains("COSMETIC COLLECTION") -> OOBEState.COSMETIC_COLLECTION
+                screen.title.string.contains("STYLE PERKS") -> OOBEState.STYLE_PERKS
+                else -> OOBEState.NONE
+            }
         }
 
         if (state == OOBEState.API_SETTINGS) {
@@ -103,14 +119,20 @@ object OOBE : CoreFeature {
             openIntroScreenDelay = 5
         }
 
-        if (state == OOBEState.API_SETTINGS_GOOD && !hasAPIKey) {
+        if (state == OOBEState.STYLE_PERKS) {
+            state = OOBEState.NONE
             active = false
             Galapagos.save.finishedOOBE = true
+        }
+
+        if (state == OOBEState.API_SETTINGS_GOOD && !hasAPIKey) {
             sendGalapagosChatMessage(
                 Component.literal("It may take a few minutes for API changes to go into effect. If an error occurs, run /galapagos api manualFetch after a few minutes!")
                     .withColor(ChatFormatting.AQUA.color!!)
             )
             PlayerData.fetchAPI()
+            finishedApiSettings = true
+            state = OOBEState.JOIN_STYLE_PERKS
             return
         }
 
@@ -125,7 +147,11 @@ object OOBE : CoreFeature {
             OOBEState.POCKET_MENU,
             OOBEState.SETTINGS,
             OOBEState.API_SETTINGS,
-            OOBEState.API_SETTINGS_GOOD -> {
+            OOBEState.API_SETTINGS_GOOD,
+            OOBEState.POCKET_MENU_STYLE_PERKS,
+            OOBEState.PROFILE,
+            OOBEState.COSMETIC_COLLECTION,
+            OOBEState.STYLE_PERKS -> {
                 graphics.fill(x, y - 60, x + w, y - 30, ARGB.color(0.5f, 0x000000))
             }
             else -> {}
@@ -146,7 +172,7 @@ object OOBE : CoreFeature {
                 when {
                     collectionEnabled && infinibagEnabled -> {
                         graphics.text(Minecraft.getInstance().font, "Collections and Infinibag are", x + 10, y - 53, ARGB.opaque(0xFFFFFF))
-                        graphics.text(Minecraft.getInstance().font, "enabled! ${if (hasAPIKey) "Now, close this menu..." else "You're good to go!"}", x + 10, y - 43, ARGB.opaque(0xFFFFFF))
+                        graphics.text(Minecraft.getInstance().font, "enabled! Now, close this menu...", x + 10, y - 43, ARGB.opaque(0xFFFFFF))
                     }
                     collectionEnabled && !infinibagEnabled -> {
                         graphics.text(Minecraft.getInstance().font, "Enable ", x + 10, y - 53, ARGB.opaque(0xFFFFFF))
@@ -170,6 +196,22 @@ object OOBE : CoreFeature {
                                 ChatFormatting.AQUA.color!!))
                     }
                 }
+            }
+            OOBEState.POCKET_MENU_STYLE_PERKS -> {
+                graphics.text(Minecraft.getInstance().font, "Navigate to", x + 10, y - 53, ARGB.opaque(0xFFFFFF))
+                graphics.text(Minecraft.getInstance().font, "My Profile...", x + 70, y - 53, ARGB.opaque(ChatFormatting.AQUA.color!!))
+            }
+            OOBEState.PROFILE -> {
+                graphics.text(Minecraft.getInstance().font, "Navigate to", x + 10, y - 53, ARGB.opaque(0xFFFFFF))
+                graphics.text(Minecraft.getInstance().font, "Cosmetic Collection...", x + 70, y - 53, ARGB.opaque(ChatFormatting.AQUA.color!!))
+            }
+            OOBEState.COSMETIC_COLLECTION -> {
+                graphics.text(Minecraft.getInstance().font, "Navigate to", x + 10, y - 53, ARGB.opaque(0xFFFFFF))
+                graphics.text(Minecraft.getInstance().font, "Style Perks...", x + 70, y - 53, ARGB.opaque(ChatFormatting.AQUA.color!!))
+            }
+            OOBEState.STYLE_PERKS -> {
+                graphics.text(Minecraft.getInstance().font, "Everything is now set up!", x + 10, y - 53, ARGB.opaque(0xFFFFFF))
+                graphics.text(Minecraft.getInstance().font, "You're good to go!", x + 10, y - 43, ARGB.opaque(ChatFormatting.AQUA.color!!))
             }
             else -> {}
         }
@@ -209,6 +251,33 @@ object OOBE : CoreFeature {
                     0f, 0f, 32, 32, 32, 32
                 )
             }
+            OOBEState.POCKET_MENU_STYLE_PERKS -> {
+                if (slot.item.itemName.string != "My Profile") return
+                graphics.blit(
+                    RenderPipelines.GUI_TEXTURED,
+                    Identifier.fromNamespaceAndPath("mcc", "textures/island_interface/generic/select.png"),
+                    slot.x - 8, slot.y - 8,
+                    0f, 0f, 32, 32, 32, 32
+                )
+            }
+            OOBEState.PROFILE -> {
+                if (slot.item.itemName.string != "Cosmetic Collection") return
+                graphics.blit(
+                    RenderPipelines.GUI_TEXTURED,
+                    Identifier.fromNamespaceAndPath("mcc", "textures/island_interface/generic/select.png"),
+                    slot.x - 8, slot.y - 8,
+                    0f, 0f, 32, 32, 32, 32
+                )
+            }
+            OOBEState.COSMETIC_COLLECTION -> {
+                if (slot.item.itemName.string != "Style Perks") return
+                graphics.blit(
+                    RenderPipelines.GUI_TEXTURED,
+                    Identifier.fromNamespaceAndPath("mcc", "textures/island_interface/generic/select.png"),
+                    slot.x - 8, slot.y - 8,
+                    0f, 0f, 32, 32, 32, 32
+                )
+            }
             else -> {}
         }
     }
@@ -236,10 +305,24 @@ object OOBE : CoreFeature {
                 }
                 OOBEState.SET_API_KEY -> {
                     graphics.fill(10, 10, 340, 50, ARGB.color(0.5f, 0x000000))
-                    graphics.text(Minecraft.getInstance().font, "Lastly, set your API key by running", 20, 20, ARGB.opaque(0xFFFFFF))
+                    graphics.text(Minecraft.getInstance().font, "Next, set your API key by running", 20, 20, ARGB.opaque(0xFFFFFF))
                     graphics.text(
                         Minecraft.getInstance().font, "/galapagos api set <API_KEY>!", 20, 35, ARGB.opaque(
                             ChatFormatting.AQUA.color!!))
+                }
+                OOBEState.JOIN_STYLE_PERKS -> {
+                    graphics.fill(10, 10, 340, 50, ARGB.color(0.5f, 0x000000))
+                    graphics.text(Minecraft.getInstance().font, "Next, Galapagos needs to know your Style Perk levels!", 20, 20, ARGB.opaque(0xFFFFFF))
+                    graphics.text(Minecraft.getInstance().font, "Navigate to the ", 20, 35, ARGB.opaque(0xFFFFFF))
+                    graphics.text(Minecraft.getInstance().font, "Pocket Menu", 100, 35, ARGB.opaque(ChatFormatting.AQUA.color!!))
+                    graphics.text(Minecraft.getInstance().font, "in your hotbar.", 165, 35, ARGB.opaque(0xFFFFFF))
+
+                    graphics.blit(
+                        RenderPipelines.GUI_TEXTURED,
+                        Identifier.fromNamespaceAndPath("mcc", "textures/island_interface/generic/back.png"),
+                        graphics.guiWidth() / 2 + 93 + (sin(ticks / 3.0) * 5).toInt(), graphics.guiHeight() - 19,
+                        0f, 0f, 16, 16, 16, 16
+                    )
                 }
                 else -> {}
             }
