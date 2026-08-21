@@ -31,6 +31,15 @@ class XPInfoDialog(x: Int, y: Int) : Dialog(x, y), Themed by GalapagosTheme {
     val todayXP = XPInfo.XPSource.entries.associateWithTo(EnumMap(XPInfo.XPSource::class.java)) { 0 }
     val todayXPEntries = XPInfo.XPSource.entries.associateWithTo(EnumMap(XPInfo.XPSource::class.java)) { 0 }
 
+    fun shouldDisplay(displayType: Config.XPInfoDisplay): Boolean {
+        return when(displayType) {
+            Config.XPInfoDisplay.DISABLED -> false
+            Config.XPInfoDisplay.ENABLED -> true
+            Config.XPInfoDisplay.ENABLED_LOBBY -> XPInfo.inLobby
+            Config.XPInfoDisplay.ENABLED_GAMES -> !XPInfo.inLobby
+        }
+    }
+
     override fun layout() = linear(LinearLayout.Orientation.VERTICAL) {
         val font = Minecraft.getInstance().font
 
@@ -55,27 +64,31 @@ class XPInfoDialog(x: Int, y: Int) : Dialog(x, y), Themed by GalapagosTheme {
 
         val totalXPToday = todayXP.entries.sumOf { it.value }
 
-        +StringWidget(Component.literal("Today's XP: ${"%,d".format(totalXPToday)}"), font)
+        if (shouldDisplay(Config.values::xpInfoTodaysXP.get())) {
+            +StringWidget(Component.literal("Today's XP: ${"%,d".format(totalXPToday)}"), font)
+        }
 
-        if (!showBreakdown) {
-            XPInfo.currentGames.forEach {
-                +StringWidget(Component.empty()
-                    .append(mcciTextureComponent(it.sprite))
-                    .append(Component.literal(" ${it.label} XP: ${"%,d".format(todayXP[it])}")), font)
-            }
-        } else {
-            var component = Component.empty()
-            val games = todayXP.toList().sortedByDescending { it.second }.filter { it.second != 0 }
-            games.forEachIndexed { index, (game, xp) ->
-                component = component.append(
-                    Component.empty()
-                        .append(mcciTextureComponent(game.sprite))
-                        .append(Component.literal(" ${game.label} XP: ${"%,d".format(xp)} "))
-                        .append(Component.literal("(${(xp.toDouble() / totalXPToday.toDouble() * 100.0).toInt()}%)${if (index != games.size - 1) "\n" else ""}").withColor(ChatFormatting.GRAY.color!!))
-                )
-            }
+        if (shouldDisplay(Config.values::xpInfoGameXP.get())) {
+            if (!showBreakdown) {
+                XPInfo.currentGames.forEach {
+                    +StringWidget(Component.empty()
+                        .append(mcciTextureComponent(it.sprite))
+                        .append(Component.literal(" ${it.label} XP: ${"%,d".format(todayXP[it])}")), font)
+                }
+            } else {
+                var component = Component.empty()
+                val games = todayXP.toList().sortedByDescending { it.second }.filter { it.second != 0 }
+                games.forEachIndexed { index, (game, xp) ->
+                    component = component.append(
+                        Component.empty()
+                            .append(mcciTextureComponent(game.sprite))
+                            .append(Component.literal(" ${game.label} XP: ${"%,d".format(xp)} "))
+                            .append(Component.literal("(${(xp.toDouble() / totalXPToday.toDouble() * 100.0).toInt()}%)${if (index != games.size - 1) "\n" else ""}").withColor(ChatFormatting.GRAY.color!!))
+                    )
+                }
 
-            +TextWidgets.multiLine(component)
+                +TextWidgets.multiLine(component)
+            }
         }
 
         val meterProgress = XPInfo.dailyMeter.currentXP.toDouble() / XPInfo.dailyMeter.requiredXP.toDouble()
@@ -89,16 +102,19 @@ class XPInfoDialog(x: Int, y: Int) : Dialog(x, y), Themed by GalapagosTheme {
             else -> "island_interface/quest_log/daily/daily_meter_0"
         }
 
-        +TextWidgets.multiLine(mcciTextureComponent(meterSprite)
-            .append(Component.literal(" Daily Meter: ").withColor(ChatFormatting.GRAY.color!!))
-            .append(Component.literal("${XPInfo.dailyMeter.completed}").withColor(ChatFormatting.WHITE.color!!))
-            .append(Component.literal("/${XPInfo.dailyMeter.total}, ").withColor(ChatFormatting.DARK_GRAY.color!!))
-            .append(Component.literal("%,d".format(XPInfo.dailyMeter.currentXP)).withColor(ChatFormatting.WHITE.color!!))
-            .append(Component.literal("/" + "%,d".format(XPInfo.dailyMeter.requiredXP)).withColor(ChatFormatting.DARK_GRAY.color!!))
-            .append(Component.literal(" XP\n").withColor(ChatFormatting.GRAY.color!!))
-            .append(mcciProgressBar(meterProgress, 5))
-            .append(Component.literal(" ${((XPInfo.dailyMeter.currentXP.toDouble() / XPInfo.dailyMeter.requiredXP.toDouble() * 100.0).toInt())}%"))
-        )
+        if (shouldDisplay(Config.values::xpInfoDailyMeter.get()) && !(Config.values::xpInfoDisableDailyMeterIfMax.get() && meterSprite == "island_interface/quest_log/quest_complete")) {
+            +TextWidgets.multiLine(mcciTextureComponent(meterSprite)
+                .append(Component.literal(" Daily Meter: ").withColor(ChatFormatting.GRAY.color!!))
+                .append(Component.literal("${XPInfo.dailyMeter.completed}").withColor(ChatFormatting.WHITE.color!!))
+                .append(Component.literal("/${XPInfo.dailyMeter.total}, ").withColor(ChatFormatting.DARK_GRAY.color!!))
+                .append(Component.literal("%,d".format(XPInfo.dailyMeter.currentXP)).withColor(ChatFormatting.WHITE.color!!))
+                .append(Component.literal("/" + "%,d".format(XPInfo.dailyMeter.requiredXP)).withColor(ChatFormatting.DARK_GRAY.color!!))
+                .append(Component.literal(" XP\n").withColor(ChatFormatting.GRAY.color!!))
+                .append(mcciProgressBar(meterProgress, 5))
+                .append(Component.literal(" ${((XPInfo.dailyMeter.currentXP.toDouble() / XPInfo.dailyMeter.requiredXP.toDouble() * 100.0).toInt())}%"))
+            )
+        }
+
 
         val vaultSprite = when (XPInfo.weeklyVault.completed) {
             0 -> "island_interface/quest_log/meters/daily_vault_empty"
@@ -106,19 +122,26 @@ class XPInfoDialog(x: Int, y: Int) : Dialog(x, y), Themed by GalapagosTheme {
             else -> "island_interface/quest_log/meters/daily_vault_partly_full"
         }
 
-        +TextWidgets.multiLine(
-            mcciTextureComponent(vaultSprite)
-                .append(Component.literal(" Weekly Vault: ").withColor(ChatFormatting.GRAY.color!!))
-                .append(Component.literal("${XPInfo.weeklyVault.completed}").withColor(ChatFormatting.WHITE.color!!))
-                .append(Component.literal("/${XPInfo.weeklyVault.total}, ").withColor(ChatFormatting.DARK_GRAY.color!!))
-                .append(Component.literal("%,d".format(XPInfo.weeklyVault.currentXP)).withColor(ChatFormatting.WHITE.color!!))
-                .append(Component.literal("/" + "%,d".format(XPInfo.weeklyVault.requiredXP)).withColor(ChatFormatting.DARK_GRAY.color!!))
-                .append(Component.literal(" XP\n").withColor(ChatFormatting.GRAY.color!!))
-                .append(mcciProgressBar(XPInfo.weeklyVault.currentXP.toDouble() / XPInfo.weeklyVault.requiredXP.toDouble(), 5))
-                .append(Component.literal(" ${((XPInfo.weeklyVault.currentXP.toDouble() / XPInfo.weeklyVault.requiredXP.toDouble() * 100.0).toInt())}%"))
-        )
+        if (shouldDisplay(Config.values::xpInfoWeeklyVault.get()) && !(Config.values::xpInfoDisableWeeklyVaultIfMax.get() && vaultSprite == "island_interface/quest_log/meters/daily_vault_full")) {
+            +TextWidgets.multiLine(
+                mcciTextureComponent(vaultSprite)
+                    .append(Component.literal(" Weekly Vault: ").withColor(ChatFormatting.GRAY.color!!))
+                    .append(Component.literal("${XPInfo.weeklyVault.completed}").withColor(ChatFormatting.WHITE.color!!))
+                    .append(Component.literal("/${XPInfo.weeklyVault.total}, ").withColor(ChatFormatting.DARK_GRAY.color!!))
+                    .append(Component.literal("%,d".format(XPInfo.weeklyVault.currentXP)).withColor(ChatFormatting.WHITE.color!!))
+                    .append(Component.literal("/" + "%,d".format(XPInfo.weeklyVault.requiredXP)).withColor(ChatFormatting.DARK_GRAY.color!!))
+                    .append(Component.literal(" XP\n").withColor(ChatFormatting.GRAY.color!!))
+                    .append(mcciProgressBar(XPInfo.weeklyVault.currentXP.toDouble() / XPInfo.weeklyVault.requiredXP.toDouble(), 5))
+                    .append(Component.literal(" ${((XPInfo.weeklyVault.currentXP.toDouble() / XPInfo.weeklyVault.requiredXP.toDouble() * 100.0).toInt())}%"))
+            )
+        }
 
-        if (XPInfo.seaMonstersActive) {
+        if ((XPInfo.seaMonstersActive && shouldDisplay(Config.values::xpInfoSeaMonstersEnergyMeter.get()))
+            && !(
+                Config.values::xpInfoDisableSeaMonstersEnergyMeterIfMax.get()
+                && XPInfo.seaMonstersEnergyMeter.completed == XPInfo.seaMonstersEnergyMeter.total
+            )
+        ) {
             val energyMeterProgress = XPInfo.seaMonstersEnergyMeter.currentXP.toDouble() / XPInfo.seaMonstersEnergyMeter.requiredXP.toDouble()
 
             +TextWidgets.multiLine(Component.empty()
@@ -134,7 +157,7 @@ class XPInfoDialog(x: Int, y: Int) : Dialog(x, y), Themed by GalapagosTheme {
             )
         }
 
-        if (XPInfo.currentStarLevelGame != null) {
+        if (XPInfo.currentStarLevelGame != null && shouldDisplay(Config.values::xpInfoStarLevel.get())) {
             val starLevel = Galapagos.save.starLevelXP[XPInfo.currentStarLevelGame]!! / 3000
             val currentXP = Galapagos.save.starLevelXP[XPInfo.currentStarLevelGame]!! - (starLevel * 3000)
 
@@ -151,7 +174,7 @@ class XPInfoDialog(x: Int, y: Int) : Dialog(x, y), Themed by GalapagosTheme {
             )
         }
 
-        if (Galapagos.save.selectedFaction != null) {
+        if (Galapagos.save.selectedFaction != null && shouldDisplay(Config.values::xpInfoFaction.get())) {
             val factionData = getFactionLevelAndProgress(Galapagos.save.factionXP[Galapagos.save.selectedFaction] ?: 0)
             val factionLevel = factionData.first
             val factionProgress = factionData.second
@@ -169,7 +192,9 @@ class XPInfoDialog(x: Int, y: Int) : Dialog(x, y), Themed by GalapagosTheme {
                     .append(mcciProgressBar(factionProgress.toDouble() / factionRequiredXP.toDouble(), 5))
                     .append(Component.literal(" ${((factionProgress.toDouble() / factionRequiredXP.toDouble() * 100.0).toInt())}%"))
             )
+        }
 
+        if (shouldDisplay(Config.values::xpInfoGameXP.get())) {
             +ThemedButton(Component.literal("${if (showBreakdown) "Hide" else "View"} XP Breakdown"), theme=this@XPInfoDialog) {
                 showBreakdown = !showBreakdown
                 super.init()

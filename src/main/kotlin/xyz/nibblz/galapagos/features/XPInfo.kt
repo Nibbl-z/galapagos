@@ -39,8 +39,14 @@ import kotlin.time.Clock
 object XPInfo : Feature {
     override val id: String = "xp_info"
     override val name: String = "XP Info"
-    override val description: List<Component> = listOf()
-    override val image: Config.ConfigImage = Config.ConfigImage("weekly_vault_info.png", 470, 341)
+    override val description: List<Component> = listOf(
+        Component.literal("Displays a multitude of different statistics relating to Island XP, including:"),
+        Component.literal("- XP Info Window: Displays today's XP, XP of your current game (with the option to view a breakdown of all XP earned today), and progress towards Daily Meter, Weekly Vault, Star Level, Faction Level, and any event-related meters if relevant."),
+        Component.literal("- Navigator XP Stats: Displays today's XP, average XP per game from today's stats, and average XP per game from all-time stats under each game in the navigator."),
+        Component.literal("- Projected XP: Shows how much XP you'll earn while in-game."),
+        Component.literal("Note: Projected XP as of now only supports Battle Box, Battle Box Arena, Sky Battle Solo, Hole in the Wall, and Parkour Warrior Survivor. Other games will be added in a future update.").withStyle(Style.EMPTY.withItalic(true))
+    )
+    override val image: Config.ConfigImage = Config.ConfigImage("xp_info.png", 533, 908)
 
     @Serializable
     enum class XPSource(val serverTypes: List<String>, val lobbyServerType: String, val sprite: String, val label: String, val starLevelGame: StarLevelGame?, val stateHandler: Handler? = null) {
@@ -147,6 +153,7 @@ object XPInfo : Feature {
     var dialogLocation: Vector2 = Vector2(10, 10)
     var currentGames: MutableList<XPSource> = mutableListOf()
     var currentStarLevelGame: StarLevelGame? = null
+    var inLobby: Boolean = true
     var dailyMeter: Claimable = Claimable(0, 7, 0, 500)
     var weeklyVault: Claimable = Claimable(0, 20, 0, 500)
 
@@ -169,6 +176,11 @@ object XPInfo : Feature {
     }
 
     fun refreshDialog() {
+        if (Config.values::xpInfoWindow.get() == Config.XPInfoDisplay.DISABLED || !enabled) {
+            dialog?.close()
+            return
+        }
+
         dialogLocation = Vector2(dialog?.x ?: 10, dialog?.y ?: 10)
 
         if (dialog != null) {
@@ -243,6 +255,8 @@ object XPInfo : Feature {
         currentGames.clear()
         currentStarLevelGame = null
 
+        inLobby = packet.server == "lobby" || packet.server == "fishing"
+
         if (packet.server == "lobby") {
             XPSource.entries.forEach { if (packet.types.contains(it.lobbyServerType)) currentGames.add(it) }
             currentStarLevelGame = StarLevelGame.entries.find { packet.types.contains(it.name.lowercase()) }
@@ -256,6 +270,13 @@ object XPInfo : Feature {
             projectedXP = 0
         }
 
+        if (
+            ((packet.server == "lobby" || packet.server == "fishing") && Config.values::xpInfoWindow.get() == Config.XPInfoDisplay.ENABLED_GAMES)
+            || (packet.server == "game" && Config.values::xpInfoWindow.get() == Config.XPInfoDisplay.ENABLED_LOBBY)
+        ) {
+            dialog?.close()
+            return
+        }
         refreshDialog()
     }
 
@@ -326,8 +347,8 @@ object XPInfo : Feature {
             updateDailyMeter(dailyMeterItem)
             updateWeeklyVault(weeklyVaultItem)
 
-            val eventOrdersItem = packet.items[67] // 6767676767
-            seaMonstersActive = eventOrdersItem.itemName.string == "Event Orders"
+            val eventOrdersItem = packet.items.getOrNull(67) // 6767676767
+            seaMonstersActive = eventOrdersItem?.itemName?.string == "Event Orders"
         }
 
         if (screen.title.string.contains("EVENT ORDERS")) {
@@ -340,6 +361,8 @@ object XPInfo : Feature {
     }
 
     fun tooltipAdd(item: ItemStack, components: MutableList<Component>) {
+        if (!enabled) return
+
         val screen = Minecraft.getInstance().screen ?: return
         if (!screen.title.string.contains("NAVIGATOR")) return
 
@@ -347,14 +370,16 @@ object XPInfo : Feature {
         var index = components.indexOfFirst { it.string.contains("Click to") }
         if (index == -1) return
 
-        components.add(index,
-            Component.literal("Today's XP: ").withColor(ChatFormatting.AQUA.color!!)
-                .append(Component.literal("%,d".format(dialog?.todayXP[game])).withColor(0xFFFFFF))
-        )
-        index++
+        if (Config.values::xpInfoNavigatorTodayXP.get()) {
+            components.add(index,
+                Component.literal("Today's XP: ").withColor(ChatFormatting.AQUA.color!!)
+                    .append(Component.literal("%,d".format(dialog?.todayXP[game])).withColor(0xFFFFFF))
+            )
+            index++
+        }
 
         if (game != XPSource.PW_SOLO && game != XPSource.FISHING) { // doesn't make sense to have this line for these games
-            if (dialog?.todayXPEntries[game]!! != 0) {
+            if (dialog?.todayXPEntries[game]!! != 0 && Config.values::xpInfoNavigatorTodayAverageXP.get()) {
                 components.add(index,
                     Component.literal("Average XP/Game: ").withColor(ChatFormatting.AQUA.color!!)
                         .append(Component.literal("%,d".format(dialog?.todayXP[game]!! / dialog?.todayXPEntries[game]!!)).withColor(0xFFFFFF))
@@ -363,7 +388,7 @@ object XPInfo : Feature {
                 index++
             }
 
-            if (Galapagos.save.gamesPlayed[game]!! != 0) {
+            if (Galapagos.save.gamesPlayed[game]!! != 0 && Config.values::xpInfoNavigatorAlltimeAverageXP.get()) {
                 components.add(index,
                     Component.literal("Average XP/Game: ").withColor(ChatFormatting.AQUA.color!!)
                         .append(Component.literal("%,d".format(Galapagos.save.gameXP[game]!! / Galapagos.save.gamesPlayed[game]!!)).withColor(0xFFFFFF))
@@ -373,7 +398,10 @@ object XPInfo : Feature {
             }
         }
 
-        components.add(index, Component.empty())
+        //whatever bro
+        if (Config.values::xpInfoNavigatorAlltimeAverageXP.get() || Config.values::xpInfoNavigatorTodayXP.get() || Config.values::xpInfoNavigatorTodayAverageXP.get()) {
+            components.add(index, Component.empty())
+        }
 
         var endIndex = components.indexOfFirst { it.string.contains("minecraft:") } // if you have f3+h on :P
         if (endIndex == -1) { endIndex = components.size - 1 } // if you dont !
@@ -411,6 +439,7 @@ object XPInfo : Feature {
 
     fun hotbarXPInfoLayer(): HudElement {
         return element@{ graphics, _ ->
+            if (!enabled) return@element
             if (!onIsland()) return@element
             if (GameStateHandler.currentState == null) return@element
             val font = FontDescription.Resource(Identifier.fromNamespaceAndPath("mcc", "hud"))

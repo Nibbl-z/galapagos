@@ -132,6 +132,48 @@ class Config {
 
     // XP Info
 
+    enum class XPInfoDisplay(val label: String, val description: String) {
+        DISABLED("Disabled", "Will never show up."),
+        ENABLED("Enabled", "Will always show up."),
+        ENABLED_LOBBY("Enabled in Lobbies", "Will only show up in lobbies or fishing."),
+        ENABLED_GAMES("Enabled in Games", "Will only show up while in-game.");
+
+        fun descriptionComponent(): MutableComponent {
+            return Component.empty()
+                .append(Component.literal(label).withStyle(Style.EMPTY.withBold(true)))
+                .append(Component.literal(" - $description"))
+        }
+    }
+
+    @SerialEntry
+    var xpInfoWindow: XPInfoDisplay = XPInfoDisplay.ENABLED
+    @SerialEntry
+    var xpInfoDailyMeter: XPInfoDisplay = XPInfoDisplay.ENABLED
+    @SerialEntry
+    var xpInfoDisableDailyMeterIfMax: Boolean = true
+    @SerialEntry
+    var xpInfoWeeklyVault: XPInfoDisplay = XPInfoDisplay.ENABLED
+    @SerialEntry
+    var xpInfoDisableWeeklyVaultIfMax: Boolean = true
+    @SerialEntry
+    var xpInfoStarLevel: XPInfoDisplay = XPInfoDisplay.ENABLED
+    @SerialEntry
+    var xpInfoFaction: XPInfoDisplay = XPInfoDisplay.ENABLED
+    @SerialEntry
+    var xpInfoTodaysXP: XPInfoDisplay = XPInfoDisplay.ENABLED
+    @SerialEntry
+    var xpInfoGameXP: XPInfoDisplay = XPInfoDisplay.ENABLED
+    @SerialEntry
+    var xpInfoSeaMonstersEnergyMeter: XPInfoDisplay = XPInfoDisplay.ENABLED
+    @SerialEntry
+    var xpInfoDisableSeaMonstersEnergyMeterIfMax: Boolean = true // best config key ever?
+    @SerialEntry
+    var xpInfoNavigatorTodayXP: Boolean = true
+    @SerialEntry
+    var xpInfoNavigatorTodayAverageXP: Boolean = true
+    @SerialEntry
+    var xpInfoNavigatorAlltimeAverageXP: Boolean = true
+
     // Misc
     @SerialEntry
     var twentyFourHourTime: Boolean = false
@@ -595,6 +637,186 @@ class Config {
                         ))
                         controller(slider(0..60))
                         binding(values::averageIncomeVaultClaims, 60)
+                    }
+                }
+
+                groups.register("xp_info") {
+                    name(Component.literal("XP Info"))
+
+                    options.register("xp_info_window") {
+                        name(Component.literal("XP Info Window"))
+                        description(OptionDescription.of(
+                            Component.literal("Controls when the XP Info window should be open."),
+                            XPInfoDisplay.DISABLED.descriptionComponent(),
+                            XPInfoDisplay.ENABLED.descriptionComponent(),
+                            XPInfoDisplay.ENABLED_GAMES.descriptionComponent(),
+                            XPInfoDisplay.ENABLED_LOBBY.descriptionComponent(),
+                        ))
+                        controller(enumSwitch<XPInfoDisplay> {
+                            Component.literal(it.label)
+                        })
+                        binding(values::xpInfoWindow, XPInfoDisplay.ENABLED)
+                    }
+
+                    options.register("xp_info_daily_meter") {
+                        name(Component.literal("Daily Meter Display"))
+                        description(OptionDescription.of(
+                            Component.literal("Controls when the Daily Meter progress bar should be visible on the XP window."),
+                            XPInfoDisplay.DISABLED.descriptionComponent(),
+                            XPInfoDisplay.ENABLED.descriptionComponent(),
+                            XPInfoDisplay.ENABLED_GAMES.descriptionComponent(),
+                            XPInfoDisplay.ENABLED_LOBBY.descriptionComponent(),
+                        ))
+                        controller(enumSwitch<XPInfoDisplay> {
+                            Component.literal(it.label)
+                        })
+                        binding(values::xpInfoDailyMeter, XPInfoDisplay.ENABLED)
+                    }
+
+                    options.register("xp_info_disable_daily_meter_if_max") {
+                        name(Component.literal("Disable Daily Meter if Max"))
+                        description(OptionDescription.of(
+                            Component.literal("If your Daily Meter is at max claims, it will be hidden from the XP window.")
+                        ))
+                        controller(tickBox())
+                        binding(values::xpInfoDisableDailyMeterIfMax, true)
+                    }
+
+                    options.register("xp_info_weekly_vault") {
+                        name(Component.literal("Weekly Vault Display"))
+                        description(OptionDescription.of(
+                            Component.literal("Controls when the Weekly Vault progress bar should be visible on the XP window."),
+                            XPInfoDisplay.DISABLED.descriptionComponent(),
+                            XPInfoDisplay.ENABLED.descriptionComponent(),
+                            XPInfoDisplay.ENABLED_GAMES.descriptionComponent(),
+                            XPInfoDisplay.ENABLED_LOBBY.descriptionComponent(),
+                        ))
+                        controller(enumSwitch<XPInfoDisplay> {
+                            Component.literal(it.label)
+                        })
+                        binding(values::xpInfoWeeklyVault, XPInfoDisplay.ENABLED)
+                    }
+
+                    options.register("xp_info_disable_weekly_vault_if_max") {
+                        name(Component.literal("Disable Weekly Vault if Max"))
+                        description(OptionDescription.of(
+                            Component.literal("If your Weekly Vault is at max claims, it will be hidden from the XP window.")
+                        ))
+                        controller(tickBox())
+                        binding(values::xpInfoDisableWeeklyVaultIfMax, true)
+                    }
+
+                    options.register("xp_info_star_level") {
+                        name(Component.literal("Star Level Display"))
+                        description(OptionDescription.of(
+                            Component.literal("Controls when the Star Level progress bar should be visible on the XP window."),
+                            XPInfoDisplay.DISABLED.descriptionComponent(),
+                            XPInfoDisplay.ENABLED.descriptionComponent(),
+                            XPInfoDisplay.ENABLED_GAMES.descriptionComponent(),
+                            XPInfoDisplay.ENABLED_LOBBY.descriptionComponent(),
+                        ))
+                        controller(enumSwitch<XPInfoDisplay> {
+                            Component.literal(it.label)
+                        })
+                        binding(values::xpInfoStarLevel, XPInfoDisplay.ENABLED)
+                    }
+
+                    options.register("xp_info_faction") {
+                        name(Component.literal("Faction Display"))
+                        description(OptionDescription.of(
+                            Component.literal("Controls when the Faction progress bar should be visible on the XP window."),
+                            XPInfoDisplay.DISABLED.descriptionComponent(),
+                            XPInfoDisplay.ENABLED.descriptionComponent(),
+                            XPInfoDisplay.ENABLED_GAMES.descriptionComponent(),
+                            XPInfoDisplay.ENABLED_LOBBY.descriptionComponent(),
+                        ))
+                        controller(enumSwitch<XPInfoDisplay> {
+                            Component.literal(it.label)
+                        })
+                        binding(values::xpInfoFaction, XPInfoDisplay.ENABLED)
+                    }
+
+                    options.register("xp_info_today_xp") {
+                        name(Component.literal("Today's XP Display"))
+                        description(OptionDescription.of(
+                            Component.literal("Controls when the Today's XP label should be visible on the XP window."),
+                            XPInfoDisplay.DISABLED.descriptionComponent(),
+                            XPInfoDisplay.ENABLED.descriptionComponent(),
+                            XPInfoDisplay.ENABLED_GAMES.descriptionComponent(),
+                            XPInfoDisplay.ENABLED_LOBBY.descriptionComponent(),
+                        ))
+                        controller(enumSwitch<XPInfoDisplay> {
+                            Component.literal(it.label)
+                        })
+                        binding(values::xpInfoTodaysXP, XPInfoDisplay.ENABLED)
+                    }
+
+                    options.register("xp_info_game_xp") {
+                        name(Component.literal("Game XP Display"))
+                        description(OptionDescription.of(
+                            Component.literal("Controls when the Game XP label and the XP Breakdown button should be visible on the XP window."),
+                            XPInfoDisplay.DISABLED.descriptionComponent(),
+                            XPInfoDisplay.ENABLED.descriptionComponent(),
+                            XPInfoDisplay.ENABLED_GAMES.descriptionComponent(),
+                            XPInfoDisplay.ENABLED_LOBBY.descriptionComponent(),
+                        ))
+                        controller(enumSwitch<XPInfoDisplay> {
+                            Component.literal(it.label)
+                        })
+                        binding(values::xpInfoGameXP, XPInfoDisplay.ENABLED)
+                    }
+
+                    options.register("xp_info_navigator_today_xp") {
+                        name(Component.literal("Navigator Today's XP Display"))
+                        description(OptionDescription.of(
+                            Component.literal("Controls whether or not your total XP per game is shown on the tooltip of games in the navigator.")
+                        ))
+                        controller(tickBox())
+                        binding(values::xpInfoNavigatorTodayXP, true)
+                    }
+
+                    options.register("xp_info_navigator_today_avg_xp") {
+                        name(Component.literal("Navigator Average XP/Game Today Display"))
+                        description(OptionDescription.of(
+                            Component.literal("Controls whether or not your average XP per game from today's stats is shown on the tooltip of games in the navigator.")
+                        ))
+                        controller(tickBox())
+                        binding(values::xpInfoNavigatorTodayAverageXP, true)
+                    }
+
+                    options.register("xp_info_navigator_alltime_avg_xp") {
+                        name(Component.literal("Navigator Average XP/Game All-Time Display"))
+                        description(OptionDescription.of(
+                            Component.literal("Controls whether or not your average XP per game from all-time stats is shown on the tooltip of games in the navigator.")
+                        ))
+                        controller(tickBox())
+                        binding(values::xpInfoNavigatorAlltimeAverageXP, true)
+                    }
+
+                    options.register("xp_info_sea_monsters_energy_meter") {
+                        name(Component.literal("[Sea Monsters] Energy Meter Display"))
+                        description(OptionDescription.of(
+                            Component.literal("Controls when the Energy Meter progress bar should be visible on the XP window."),
+                            Component.literal("Note: This feature is only relevant if a Sea Monsters event is currently active."),
+                            XPInfoDisplay.DISABLED.descriptionComponent(),
+                            XPInfoDisplay.ENABLED.descriptionComponent(),
+                            XPInfoDisplay.ENABLED_GAMES.descriptionComponent(),
+                            XPInfoDisplay.ENABLED_LOBBY.descriptionComponent(),
+                        ))
+                        controller(enumSwitch<XPInfoDisplay> {
+                            Component.literal(it.label)
+                        })
+                        binding(values::xpInfoSeaMonstersEnergyMeter, XPInfoDisplay.ENABLED)
+                    }
+
+                    options.register("xp_info_sea_monsters_disable_energy_meter_if_max") {
+                        name(Component.literal("[Sea Monsters] Disable Energy Meter if Max"))
+                        description(OptionDescription.of(
+                            Component.literal("If your Energy Meter is at max claims, it will be hidden from the XP window."),
+                                    Component.literal("Note: This feature is only relevant if a Sea Monsters event is currently active."),
+                        ))
+                        controller(tickBox())
+                        binding(values::xpInfoDisableSeaMonstersEnergyMeterIfMax, true)
                     }
                 }
 
