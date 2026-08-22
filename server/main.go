@@ -84,39 +84,70 @@ func main() {
 		query fetchPlayerData {
 			player(uuid: \"%s\") {
 				collections {
-					cosmetics {
-						cosmetic {
-							trophies
-							name
-							collection
-							type
-						}
-						chromaPacks
-						owned
-						donationsMade
-					}	
-				}
-				infinibag {
-					amount
-					asset {
-						name
-						... on CosmeticToken {
-							__typename
-						}
-					}
-				}
-				infinivault {
-					amount
-					asset {
-						name
-						... on CosmeticToken {
-							__typename
-						}
-					}
-				}
+                  cosmetics {
+                    cosmetic {
+                      trophies
+                      name
+                      collection
+                      type
+                      isBonusTrophies
+                    }
+                    chromaPacks
+                    owned
+                    donationsMade
+                  }
+                }
+                infinibag {
+                  amount
+                  asset {
+                    name
+                    ... on CosmeticToken {
+                      __typename
+                    }
+                  }
+                }
+                infinivault {
+                  amount
+                  asset {
+                    name
+                    ... on CosmeticToken {
+                      __typename
+                    }
+                  }
+                }
+                statistics {
+                  battle_box_xp_earned: rotationValue(statisticKey: \"battle_box_xp_earned\")
+                  battle_box_quads_xp_earned: rotationValue(statisticKey: \"battle_box_quads_xp_earned\")
+                  battle_box_arena_xp_earned: rotationValue(statisticKey: \"battle_box_arena_xp_earned\")
+                  dynaball_xp_earned: rotationValue(statisticKey: \"dynaball_xp_earned\")
+                  hole_in_the_wall_xp_earned: rotationValue(statisticKey: \"hole_in_the_wall_xp_earned\")
+                  pw_xp_earned: rotationValue(statisticKey: \"pw_xp_earned\")
+                  pw_survival_xp_earned: rotationValue(statisticKey: \"pw_survival_xp_earned\")
+                  pw_solo_xp_earned: rotationValue(statisticKey: \"pw_solo_xp_earned\")
+                  rocket_spleef_xp_earned: rotationValue(statisticKey: \"rocket_spleef_xp_earned\")
+                  sky_battle_xp_earned: rotationValue(statisticKey: \"sky_battle_xp_earned\")
+                  sky_battle_quads_xp_earned: rotationValue(statisticKey: \"sky_battle_quads_xp_earned\")
+                  sky_battle_solos_xp_earned: rotationValue(statisticKey: \"sky_battle_solos_xp_earned\")
+                  tgttos_xp_earned: rotationValue(statisticKey: \"tgttos_xp_earned\")
+
+                  battle_box_quads_games_played: rotationValue(statisticKey: \"battle_box_quads_games_played\")
+                  battle_box_arena_games_played: rotationValue(statisticKey: \"battle_box_arena_games_played\")
+                  dynaball_games_played: rotationValue(statisticKey: \"dynaball_games_played\")
+                  hole_in_the_wall_games_played: rotationValue(statisticKey: \"hole_in_the_wall_games_played\")
+                  pw_survival_games_played: rotationValue(statisticKey: \"pw_survival_games_played\")
+                  rocket_spleef_games_played: rotationValue(statisticKey: \"rocket_spleef_games_played\")
+                  sky_battle_quads_games_played: rotationValue(statisticKey: \"sky_battle_quads_games_played\")
+                  sky_battle_solos_games_played: rotationValue(statisticKey: \"sky_battle_solos_games_played\")
+                  tgttos_games_played: rotationValue(statisticKey: \"tgttos_games_played\")
+                }
+                factions {
+                  selected
+                  totalExperience
+                  name
+                }
                 ranks
-			}
-		}
+              }
+            }
 		`, "\n", "\\n "), "\t", ""), id)
 
 		request, err := http.NewRequest("POST", "https://api.mccisland.net/graphql", bytes.NewBuffer([]byte(fmt.Sprintf(`{"query" : "%s"}`, graphQLQuery))))
