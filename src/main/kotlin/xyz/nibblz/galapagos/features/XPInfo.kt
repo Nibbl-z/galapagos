@@ -403,26 +403,26 @@ object XPInfo : Feature {
             components.add(index, Component.empty())
         }
 
-        var endIndex = components.indexOfFirst { it.string.contains("minecraft:") } // if you have f3+h on :P
-        if (endIndex == -1) { endIndex = components.size - 1 } // if you dont !
-
-        if (game.stateHandler != null) {
-            components.add(
-                endIndex, Component.empty()
-                    .append(Glyphs.getGlyphComponent("_fonts/icon/click_action_shift.png"))
-                    .append(Component.literal("+").withColor(0xecd584))
-                    .append(Glyphs.getGlyphComponent("_fonts/icon/click_action_right.png"))
-                    .append(Component.literal(" > ").withColor(ChatFormatting.DARK_GRAY.color!!))
-                    .append(Component.literal("Shift-Right-Click to ").withColor(0xecd584))
-                    .append(Component.literal("View Past Games").withColor(0xfee761))
-            )
-        } else if (game != XPSource.PW_SOLO && game != XPSource.FISHING) {
-            components.add(
-                endIndex, Component.empty()
-                    .append(Glyphs.getGlyphComponent("_fonts/icon/warning_blue.png"))
-                    .append(Component.literal(" History for this game is coming Soon™!").withColor(ChatFormatting.AQUA.color!!))
-            )
-        }
+//        var endIndex = components.indexOfFirst { it.string.contains("minecraft:") } // if you have f3+h on :P
+//        if (endIndex == -1) { endIndex = components.size - 1 } // if you dont !
+//
+//        if (game.stateHandler != null) {
+//            components.add(
+//                endIndex, Component.empty()
+//                    .append(Glyphs.getGlyphComponent("_fonts/icon/click_action_shift.png"))
+//                    .append(Component.literal("+").withColor(0xecd584))
+//                    .append(Glyphs.getGlyphComponent("_fonts/icon/click_action_right.png"))
+//                    .append(Component.literal(" > ").withColor(ChatFormatting.DARK_GRAY.color!!))
+//                    .append(Component.literal("Shift-Right-Click to ").withColor(0xecd584))
+//                    .append(Component.literal("View Past Games").withColor(0xfee761))
+//            )
+//        } else if (game != XPSource.PW_SOLO && game != XPSource.FISHING) {
+//            components.add(
+//                endIndex, Component.empty()
+//                    .append(Glyphs.getGlyphComponent("_fonts/icon/warning_blue.png"))
+//                    .append(Component.literal(" History for this game is coming Soon™!").withColor(ChatFormatting.AQUA.color!!))
+//            )
+//        }
 
     }
 
