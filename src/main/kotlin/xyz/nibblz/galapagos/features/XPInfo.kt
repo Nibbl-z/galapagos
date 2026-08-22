@@ -44,7 +44,7 @@ object XPInfo : Feature {
         Component.literal("- XP Info Window: Displays today's XP, XP of your current game (with the option to view a breakdown of all XP earned today), and progress towards Daily Meter, Weekly Vault, Star Level, Faction Level, and any event-related meters if relevant."),
         Component.literal("- Navigator XP Stats: Displays today's XP, average XP per game from today's stats, and average XP per game from all-time stats under each game in the navigator."),
         Component.literal("- Projected XP: Shows how much XP you'll earn while in-game."),
-        Component.literal("Note: Projected XP as of now only supports Battle Box, Battle Box Arena, Sky Battle Solo, Hole in the Wall, and Parkour Warrior Survivor. Other games will be added in a future update.").withStyle(Style.EMPTY.withItalic(true))
+        Component.literal("Note: Projected XP as of now only supports Battle Box, Battle Box Arena, Sky Battle Solo and Hole in the Wall. Other games will be added in a future update.").withStyle(Style.EMPTY.withItalic(true))
     )
     override val image: Config.ConfigImage = Config.ConfigImage("xp_info.png", 533, 908)
 
@@ -442,6 +442,7 @@ object XPInfo : Feature {
             if (!enabled) return@element
             if (!onIsland()) return@element
             if (GameStateHandler.currentState == null) return@element
+            if (GameStateHandler.currentState is GameStateHandler.GameState.ParkourWarriorSurvivor) return@element // temporary hardcoding bc the xp tracking here is broken and ill fix this stuff later
             val font = FontDescription.Resource(Identifier.fromNamespaceAndPath("mcc", "hud"))
 
             graphics.text(
