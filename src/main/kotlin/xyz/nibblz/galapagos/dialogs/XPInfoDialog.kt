@@ -44,7 +44,7 @@ class XPInfoDialog(x: Int, y: Int) : Dialog(x, y), Themed by GalapagosTheme {
         val font = Minecraft.getInstance().font
 
         val today = if (Config.values::startDayAtQuestRefresh.get())
-            Instant.fromEpochSeconds(Clock.System.now().epochSeconds + (60 * 60 * 10)).toLocalDateTime(TimeZone.UTC)
+            Instant.fromEpochSeconds(Clock.System.now().epochSeconds - (60 * 60 * 10)).toLocalDateTime(TimeZone.UTC)
         else Instant.fromEpochSeconds(Clock.System.now().epochSeconds).toLocalDateTime(TimeZone.currentSystemDefault())
 
         Galapagos.logger.info("${today.day}")
@@ -53,7 +53,7 @@ class XPInfoDialog(x: Int, y: Int) : Dialog(x, y), Themed by GalapagosTheme {
 
         Galapagos.save.xpGains.forEach {
             val date = if (Config.values::startDayAtQuestRefresh.get())
-                Instant.fromEpochSeconds(it.timestamp + (60 * 60 * 10)).toLocalDateTime(TimeZone.UTC)
+                Instant.fromEpochSeconds(it.timestamp - (60 * 60 * 10)).toLocalDateTime(TimeZone.UTC)
             else Instant.fromEpochSeconds(it.timestamp).toLocalDateTime(TimeZone.currentSystemDefault())
 
             if (date.day != today.day || date.month != today.month || date.year != today.year) return@forEach
