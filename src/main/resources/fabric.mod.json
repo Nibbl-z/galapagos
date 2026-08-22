@@ -8,7 +8,8 @@
 		"Nibbl_z"
 	],
 	"contributors": [
-		"DevCmb"
+		"DevCmb",
+		"derNiklaas"
 	],
 	"contact": {
 		"sources": "https://github.com/Nibbl-z/galapagos",
@@ -35,6 +36,13 @@
 	"mixins": [
 		"galapagos.mixins.json"
 	],
+	"custom": {
+		"modmenu": {
+			"links": {
+				"modmenu.discord": "https://discord.gg/4gju6rWB6b"
+			}
+		}
+	},
 	"depends": {
 		"fabricloader": ">=0.19.3",
 		"minecraft": "~26.1.2",
