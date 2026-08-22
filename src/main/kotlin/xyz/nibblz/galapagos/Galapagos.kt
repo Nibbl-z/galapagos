@@ -32,7 +32,8 @@ object Galapagos : ModInitializer {
 		CraftingInstructions,
 		BlueprintAssemblerInfo,
 		WeeklyVaultInfo,
-		XPInfo
+		XPInfo,
+		EventFeatures
 	)
 
 	val coreFeatures: List<CoreFeature> = listOf(
