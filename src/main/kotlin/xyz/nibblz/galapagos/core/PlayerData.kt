@@ -225,6 +225,14 @@ object PlayerData : CoreFeature {
             return false
         }
 
+        if (jsonElement["data"]?.jsonObject["player"]?.jsonObject["statistics"] == null) {
+            sendGalapagosChatMessage(
+                Component.literal("You have Statistics disabled in your API settings! Please navigate to Pocket Menu -> Settings -> API Settings, and enable Statistics. This may take a few minute to update!")
+                    .withColor(ChatFormatting.RED.color!!)
+            )
+            return false
+        }
+
         val apiCosmeticsString = jsonElement["data"]?.jsonObject["player"]?.jsonObject["collections"]?.jsonObject["cosmetics"]?.jsonArray.toString()
         val apiCosmetics: List<APICosmetic> = Json.Default.decodeFromString(apiCosmeticsString)
 

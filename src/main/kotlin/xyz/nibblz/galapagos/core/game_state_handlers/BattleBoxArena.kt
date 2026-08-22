@@ -103,7 +103,7 @@ object BattleBoxArena : Handler {
                 val playerName = usernameRegex.find(tabList[usernameIndex].tabListDisplayName?.string ?: "")
                     ?.groups?.get("username")?.value ?: return@forEach
 
-                val statsMatch = Regex("(?<kills>\\d+).+?(?<deaths>\\d+).+?(?<assists>\\d+).+?(?<score>\\d+)").find(tabList[statsIndex].tabListDisplayName?.string ?: "")
+                val statsMatch = Regex("(?<kills>\\d+).+?(?<deaths>\\d+).+?(?<assists>\\d+).+?(?<score>\\d+)").find(tabList.getOrNull(statsIndex)?.tabListDisplayName?.string ?: "")
                     ?.groups ?: return@forEach
 
                 val kills = statsMatch["kills"]?.value?.toIntOrNull() ?: return@forEach

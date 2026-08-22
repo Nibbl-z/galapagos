@@ -64,23 +64,27 @@ object OOBE : CoreFeature {
     var ticks = 0
     var collectionEnabled = false
     var infinibagEnabled = false
+    var statisticsEnabled = false
     var finishedApiSettings = false
     var hasAPIKey = false
 
     fun updateAPIToggleState() {
         if (!active) return
 
+        val statisticsSlot = Minecraft.getInstance().player?.containerMenu?.getSlot(22) ?: return
         val collectionSlot = Minecraft.getInstance().player?.containerMenu?.getSlot(17) ?: return
         val infinibagSlot = Minecraft.getInstance().player?.containerMenu?.getSlot(35) ?: return
 
         if (state == OOBEState.API_SETTINGS) {
+            val statisticsToggle = statisticsSlot.item.get(DataComponents.ITEM_MODEL)
             val collectionToggle = collectionSlot.item.get(DataComponents.ITEM_MODEL)
             val infinibagToggle = infinibagSlot.item.get(DataComponents.ITEM_MODEL)
 
+            statisticsEnabled = statisticsToggle?.path?.contains("toggle_on") == true
             collectionEnabled = collectionToggle?.path?.contains("toggle_on") == true
             infinibagEnabled = infinibagToggle?.path?.contains("toggle_on") == true
 
-            state = if (collectionEnabled && infinibagEnabled) OOBEState.API_SETTINGS_GOOD else OOBEState.API_SETTINGS
+            state = if (collectionEnabled && infinibagEnabled && statisticsEnabled) OOBEState.API_SETTINGS_GOOD else OOBEState.API_SETTINGS
         }
     }
 
@@ -170,29 +174,71 @@ object OOBE : CoreFeature {
             }
             OOBEState.API_SETTINGS, OOBEState.API_SETTINGS_GOOD -> {
                 when {
-                    collectionEnabled && infinibagEnabled -> {
-                        graphics.text(Minecraft.getInstance().font, "Collections and Infinibag are", x + 10, y - 53, ARGB.opaque(0xFFFFFF))
+                    // YYY
+                    collectionEnabled && infinibagEnabled && statisticsEnabled -> {
+                        graphics.text(Minecraft.getInstance().font, "Good! Everything is", x + 10, y - 53, ARGB.opaque(0xFFFFFF))
                         graphics.text(Minecraft.getInstance().font, "enabled! Now, close this menu...", x + 10, y - 43, ARGB.opaque(0xFFFFFF))
                     }
-                    collectionEnabled && !infinibagEnabled -> {
+
+                    // YNN
+                    collectionEnabled && !infinibagEnabled && !statisticsEnabled -> {
                         graphics.text(Minecraft.getInstance().font, "Enable ", x + 10, y - 53, ARGB.opaque(0xFFFFFF))
                         graphics.text(
-                            Minecraft.getInstance().font, "Infinibag...", x + 47, y - 53, ARGB.opaque(
+                            Minecraft.getInstance().font, "Infinibag and Statistics...", x + 47, y - 53, ARGB.opaque(
                                 ChatFormatting.AQUA.color!!))
                     }
-                    !collectionEnabled && infinibagEnabled -> {
+
+                    //NYN
+                    !collectionEnabled && infinibagEnabled && !statisticsEnabled -> {
                         graphics.text(Minecraft.getInstance().font, "Enable ", x + 10, y - 53, ARGB.opaque(0xFFFFFF))
                         graphics.text(
-                            Minecraft.getInstance().font, "Collections...", x + 47, y - 53, ARGB.opaque(
+                            Minecraft.getInstance().font, "Collections and ", x + 47, y - 53, ARGB.opaque(
+                                ChatFormatting.AQUA.color!!))
+                        graphics.text(
+                            Minecraft.getInstance().font, "Statistics...", x + 10, y - 43, ARGB.opaque(
                                 ChatFormatting.AQUA.color!!))
                     }
-                    else -> {
+
+                    //NNY
+                    !collectionEnabled && !infinibagEnabled && statisticsEnabled -> {
                         graphics.text(Minecraft.getInstance().font, "Enable ", x + 10, y - 53, ARGB.opaque(0xFFFFFF))
                         graphics.text(
                             Minecraft.getInstance().font, "Collections and", x + 47, y - 53, ARGB.opaque(
                                 ChatFormatting.AQUA.color!!))
                         graphics.text(
                             Minecraft.getInstance().font, "Infinibag...", x + 10, y - 43, ARGB.opaque(
+                                ChatFormatting.AQUA.color!!))
+                    }
+
+                    //YNY
+                    collectionEnabled && !infinibagEnabled && statisticsEnabled -> {
+                        graphics.text(Minecraft.getInstance().font, "Enable ", x + 10, y - 53, ARGB.opaque(0xFFFFFF))
+                        graphics.text(
+                            Minecraft.getInstance().font, "Infinibag...", x + 47, y - 53, ARGB.opaque(
+                                ChatFormatting.AQUA.color!!))
+                    }
+                    //NYY
+                    !collectionEnabled && infinibagEnabled && statisticsEnabled -> {
+                        graphics.text(Minecraft.getInstance().font, "Enable ", x + 10, y - 53, ARGB.opaque(0xFFFFFF))
+                        graphics.text(
+                            Minecraft.getInstance().font, "Collections...", x + 47, y - 53, ARGB.opaque(
+                                ChatFormatting.AQUA.color!!))
+                    }
+                    //YYN
+                    collectionEnabled && infinibagEnabled && !statisticsEnabled -> {
+                        graphics.text(Minecraft.getInstance().font, "Enable ", x + 10, y - 53, ARGB.opaque(0xFFFFFF))
+                        graphics.text(
+                            Minecraft.getInstance().font, "Statistics...", x + 47, y - 53, ARGB.opaque(
+                                ChatFormatting.AQUA.color!!))
+                    }
+
+                    else -> {
+                        graphics.text(Minecraft.getInstance().font, "Enable ", x + 10, y - 53, ARGB.opaque(0xFFFFFF))
+                        graphics.text(
+                            Minecraft.getInstance().font, "Collections,", x + 47, y - 53, ARGB.opaque(
+                                ChatFormatting.AQUA.color!!))
+                        graphics.text(
+                            Minecraft.getInstance().font, "Infinibag, and Statistics...", x + 10, y - 43, ARGB.opaque(
                                 ChatFormatting.AQUA.color!!))
                     }
                 }
@@ -240,9 +286,10 @@ object OOBE : CoreFeature {
                 )
             }
             OOBEState.API_SETTINGS -> {
-                if (slot.index != 14 && slot.index != 32) return
+                if (slot.index != 14 && slot.index != 32 && slot.index != 19) return
                 if (slot.index == 14 && collectionEnabled) return
                 if (slot.index == 32 && infinibagEnabled) return
+                if (slot.index == 19 && statisticsEnabled) return
 
                 graphics.blit(
                     RenderPipelines.GUI_TEXTURED,

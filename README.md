@@ -8,6 +8,7 @@ You'll need...
 - [YetAnotherConfigLib](https://modrinth.com/mod/yacl)
 - [Fabric Language Kotlin](https://modrinth.com/mod/fabric-language-kotlin)
 - [owo-lib](https://modrinth.com/mod/owo-lib)
+- [Noxesium 3.1.0 or later](https://modrinth.com/mod/noxesium)
 
 ## Features
 
@@ -45,15 +46,25 @@ Shows an average of how many coins you'll earn on average from daily quests, wee
 In the Crate Emporium and Cosmetic Machine, the following info is shown:
 - New cosmetic chance
 - New royal reputation chance
-- Total style trophies gained 
+- Total style trophies gained
 - Total royal reputation gained
 - Average mythic cores
 - Average arcane cores
-per crate or per cosmetic machine pull
+  per crate or per cosmetic machine pull
 
 The highest cosmetic/rep chance for both standard and exclusive crates are also highlighted in the Crate Emporium menu! Crates with all cosmetics earned/all royal reputation earned also have an icon in the corner of the crate to signify that!
 
 Also, in the Cosmetic Machine, the exact chances for exclusive or arcane pulls are listed!
+
+### XP Info
+![XP Info Example](https://cdn.modrinth.com/data/cached_images/2633951c44dd17f32172992bda1b295468d7e466.png)
+
+Displays a highly-configurable window that shows you today's XP overall or by game as well as progress bars for Daily Meter, Weekly Vault, Star Level, Faction Level, or any event-related meters!
+
+This feature also displays statistics per-game in the navigator, including today's XP from that game, your average XP per game from today's stats, as well as your average XP per game from all-time stats!
+
+And, this feature also includes a small line of text to the right of your hotbar while in game showing you the projected XP you'll earn from that game!
+_(This feature is WIP, and currently only supports Battle Box, Battle Box Arena, Sky Battle Solo, and Hole in the Wall! Other games will be added soon!)_
 
 ### Reward Chances
 ![Reward Chances Example](https://cdn.modrinth.com/data/cached_images/5d6c3be66876be20e63702414ca7d0736d4c28c3.png)

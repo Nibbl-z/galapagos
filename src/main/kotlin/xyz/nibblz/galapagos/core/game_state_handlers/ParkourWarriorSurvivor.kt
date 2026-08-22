@@ -63,10 +63,10 @@ object ParkourWarriorSurvivor : Handler {
         val players: MutableList<GameStateHandler.BasicPlayerState> = mutableListOf()
 
         tabListPlayerIndexes.forEach { (usernameIndex, scoreIndex) ->
-            val playerName = usernameRegex.find(tabList[usernameIndex].tabListDisplayName?.string ?: "")
+            val playerName = usernameRegex.find(tabList.getOrNull(usernameIndex)?.tabListDisplayName?.string ?: "")
                 ?.groups?.get("username")?.value ?: return@forEach
 
-            val score = playerRegex.find(tabList[scoreIndex].tabListDisplayName?.string ?: "")
+            val score = playerRegex.find(tabList.getOrNull(scoreIndex)?.tabListDisplayName?.string ?: "")
                 ?.groups?.get("score")?.value?.toIntOrNull() ?: 1
 
             players.add(GameStateHandler.BasicPlayerState(playerName, score))

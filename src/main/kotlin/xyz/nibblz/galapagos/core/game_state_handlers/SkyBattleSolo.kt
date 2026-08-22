@@ -66,10 +66,10 @@ object SkyBattleSolo : Handler {
         var alivePlayers = 0
 
         tabListPlayerIndexes.forEach { (usernameIndex, statsIndex) ->
-            val playerName = usernameRegex.find(tabList[usernameIndex].tabListDisplayName?.string ?: "")
+            val playerName = usernameRegex.find(tabList.getOrNull(usernameIndex)?.tabListDisplayName?.string ?: "")
                 ?.groups?.get("username")?.value ?: return@forEach
 
-            val statMatch = playerRegex.find(tabList[statsIndex].tabListDisplayName?.string ?: "")?.groups ?: return@forEach
+            val statMatch = playerRegex.find(tabList.getOrNull(statsIndex)?.tabListDisplayName?.string ?: "")?.groups ?: return@forEach
             val placement = statMatch["placement"]?.value?.toIntOrNull() ?: -1
             if (placement == -1) alivePlayers++
             val kills = statMatch["kills"]?.value?.toIntOrNull() ?: 0
