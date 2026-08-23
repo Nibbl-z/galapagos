@@ -223,7 +223,7 @@ object XPInfo : Feature {
 
         dailyMeter.currentXP = (dailyMeter.currentXP + amount).coerceIn(0..dailyMeter.requiredXP)
         weeklyVault.currentXP = (weeklyVault.currentXP + amount)
-        if (weeklyVault.currentXP >= weeklyVault.requiredXP) {
+        if (weeklyVault.currentXP >= weeklyVault.requiredXP && weeklyVault.completed < weeklyVault.total) {
             weeklyVault.completed++
             if (weeklyVault.completed != weeklyVault.total) {
                 weeklyVault.currentXP -= weeklyVault.requiredXP
