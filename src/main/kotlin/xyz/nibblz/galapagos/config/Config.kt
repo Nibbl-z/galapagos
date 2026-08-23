@@ -203,31 +203,34 @@ class Config {
                 handler.save()
             }
 
-            categories.register("settings") {
-                name(Component.literal("Settings"))
+            categories.register("global") {
+                name(Component.literal("Global"))
 
                 groups.register("api") {
                     name(Component.literal("API"))
 
                     options.register("api_use_key") {
                         name(Component.literal("Use Own API Key"))
-                        description(OptionDescription.of(
-                            Component.literal("The MCC Island API is utilized in this mod to fetch cosmetic ownership, infinibag, and infinivault state."),
-                            Component.empty(),
-                            Component.literal("Therefore, please ensure that the Infinibag and Collections APIs are enabled in Pocket Menu->Settings->API Settings for the mod to function!"),
-                            Component.empty(),
-                            Component.literal("If enabled, API features will require the use of your own API key by running the command /galapagos api set <API_KEY>."),
-                            Component.literal("If you do not have an API key, you can generate one at ").append(
-                                Component.literal("https://gateway.noxcrew.com/.").setStyle(Style.EMPTY
-                                    .withUnderlined(true)
-                                    .withColor(ChatFormatting.AQUA.color!!)
-                                )
-                            ),
-                            Component.empty(),
-                            Component.literal("Using your own API key is preferred, as you can make requests much more often."),
-                            Component.empty(),
-                            Component.literal("If you are unable to supply your own API key, a different endpoint will be used, making API calls with the developer's own API key. This means you can make less requests per minute, and uptime of this backend is not guaranteed.")
-                        ))
+                        description(
+                            OptionDescription.of(
+                                Component.literal("The MCC Island API is utilized in this mod to fetch cosmetic ownership, infinibag, and infinivault state."),
+                                Component.empty(),
+                                Component.literal("Therefore, please ensure that the Infinibag and Collections APIs are enabled in Pocket Menu->Settings->API Settings for the mod to function!"),
+                                Component.empty(),
+                                Component.literal("If enabled, API features will require the use of your own API key by running the command /galapagos api set <API_KEY>."),
+                                Component.literal("If you do not have an API key, you can generate one at ").append(
+                                    Component.literal("https://gateway.noxcrew.com/.").setStyle(
+                                        Style.EMPTY
+                                            .withUnderlined(true)
+                                            .withColor(ChatFormatting.AQUA.color!!)
+                                    )
+                                ),
+                                Component.empty(),
+                                Component.literal("Using your own API key is preferred, as you can make requests much more often."),
+                                Component.empty(),
+                                Component.literal("If you are unable to supply your own API key, a different endpoint will be used, making API calls with the developer's own API key. This means you can make less requests per minute, and uptime of this backend is not guaranteed.")
+                            )
+                        )
                         controller(tickBox())
                         binding(values::usePersonalApiKey, false)
                     }
@@ -240,583 +243,20 @@ class Config {
                     Galapagos.features.forEach { feature ->
                         options.register(feature.id) {
                             name(Component.literal(feature.name))
-                            description(OptionDescription.createBuilder()
-                                .text(feature.description)
-                                .image(Identifier.fromNamespaceAndPath("galapagos", "textures/config/${feature.image.path}"), feature.image.w, feature.image.h)
-                                .build()
+                            description(
+                                OptionDescription.createBuilder()
+                                    .text(feature.description)
+                                    .image(
+                                        Identifier.fromNamespaceAndPath(
+                                            "galapagos",
+                                            "textures/config/${feature.image.path}"
+                                        ), feature.image.w, feature.image.h
+                                    )
+                                    .build()
                             )
                             controller(tickBox())
                             binding(true, { feature.enabled }, { value -> feature.enabled = value })
                         }
-                    }
-                }
-
-                groups.register("crate_chances") {
-                    name(Component.literal("Crate Chances"))
-
-                    options.register("crate_chances_highlight_rep") {
-                        name(Component.literal("Highlight Best Rep Chance"))
-                        description(OptionDescription.of(
-                            Component.literal("Highlights the standard and exclusive crates with the highest chance for new royal reputation.")
-                        ))
-                        controller(tickBox())
-                        binding(values::highlightBestRepChance, true)
-                    }
-
-                    options.register("crate_chances_highlight_cosmetic") {
-                        name(Component.literal("Highlight Best Cosmetic Chance"))
-                        description(OptionDescription.of(
-                            Component.literal("Highlights the standard and exclusive crates with the highest chance for a new cosmetic.")
-                        ))
-                        controller(tickBox())
-                        binding(values::highlightBestCosmeticChance, true)
-                    }
-
-                    options.register("crate_chances_show_cosmetic_chance") {
-                        name(Component.literal("Show New Cosmetic Chance"))
-                        description(OptionDescription.of(
-                            Component.literal("Shows the percent chance that the crate will give a new cosmetic.")
-                        ))
-                        controller(tickBox())
-                        binding(values::showNewCosmeticChance, true)
-                    }
-
-                    options.register("crate_chances_show_rep_chance") {
-                        name(Component.literal("Show New Royal Reputation Chance"))
-                        description(OptionDescription.of(
-                            Component.literal("Shows the percent chance that the crate will give new royal reputation.")
-                        ))
-                        controller(tickBox())
-                        binding(values::showNewRepChance, true)
-                    }
-
-                    options.register("crate_chances_show_trophies_per_roll") {
-                        name(Component.literal("Show Trophies per Roll"))
-                        description(OptionDescription.of(
-                            Component.literal("Shows the average amount of trophies you will earn from opening a crate, including the trophies from new cosmetics and royal reputation.")
-                        ))
-                        controller(tickBox())
-                        binding(values::showTrophiesPerRoll, true)
-                    }
-
-                    options.register("crate_chances_show_mythic_cores_per_roll") {
-                        name(Component.literal("Show Mythic Cores per Roll"))
-                        description(OptionDescription.of(
-                            Component.literal("Shows the average amount of mythic cores you will earn from opening a crate. If the crate is exclusive, this is the mythic cores you will earn from scavenging any earned arcane cores.")
-                        ))
-                        controller(tickBox())
-                        binding(values::showMythicCoresPerRoll, true)
-                    }
-
-                    options.register("crate_chances_show_arcane_cores_per_roll") {
-                        name(Component.literal("Show Arcane Cores per Roll"))
-                        description(OptionDescription.of(
-                            Component.literal("Shows the average amount of arcane cores you will earn from opening a crate. If the crate is standard, this is the arcane cores you will earn from upcrafting any earned mythic cores.")
-                        ))
-                        controller(tickBox())
-                        binding(values::showArcaneCoresPerRoll, true)
-                    }
-
-                    options.register("crate_chances_show_max_cosmetic_crates") {
-                        name(Component.literal("Maxed Cosmetic Crate Icon"))
-                        description(OptionDescription.of(
-                            Component.literal("Shows a style trophy icon in the corner of crates with all cosmetics earned.")
-                        ))
-                        controller(tickBox())
-                        binding(values::showMaxCosmeticCrates, true)
-                    }
-
-                    options.register("crate_chances_show_max_rep_crates") {
-                        name(Component.literal("Maxed Royal Reputation Crate Icon"))
-                        description(OptionDescription.of(
-                            Component.literal("Shows a royal reputation icon in the corner of crates with all royal reputation earned.")
-                        ))
-                        controller(tickBox())
-                        binding(values::showMaxRepCrates, true)
-                    }
-                }
-
-                groups.register("cosmetic_machine") {
-                    name(Component.literal("Cosmetic Machine"))
-
-                    options.register("cosmetic_machine_detailed_chances") {
-                        name(Component.literal("Detailed Chances"))
-                        description(OptionDescription.createBuilder()
-                            .text(Component.literal("Shows the specific chance for non-exclusive, exclusive, and arcane pulls per rarity in the tooltips of the pull buttons."))
-                            .image(Identifier.fromNamespaceAndPath("galapagos", "textures/config/detailed_cosmetic_machine.png"), 400, 427)
-                            .build()
-                        )
-                        controller(tickBox())
-                        binding(values::detailedCosmeticMachineChances, true)
-                    }
-
-                    options.register("cosmetic_machine_show_cosmetic_chance") {
-                        name(Component.literal("Show New Cosmetic Chance"))
-                        description(OptionDescription.of(
-                            Component.literal("Shows the percent chance that the pull will give a new cosmetic.")
-                        ))
-                        controller(tickBox())
-                        binding(values::showNewCosmeticChancePerPull, true)
-                    }
-
-                    options.register("cosmetic_machine_show_rep_chance") {
-                        name(Component.literal("Show New Royal Reputation Chance"))
-                        description(OptionDescription.of(
-                            Component.literal("Shows the percent chance that the pull will give new royal reputation.")
-                        ))
-                        controller(tickBox())
-                        binding(values::showNewRepChancePerPull, true)
-                    }
-
-                    options.register("cosmetic_machine_show_trophies_per_roll") {
-                        name(Component.literal("Show Trophies per Pull"))
-                        description(OptionDescription.of(
-                            Component.literal("Shows the average amount of trophies you will earn from pulling a key, including the trophies from new cosmetics and royal reputation.")
-                        ))
-                        controller(tickBox())
-                        binding(values::showTrophiesPerPull, true)
-                    }
-
-                    options.register("cosmetic_machine_show_mythic_cores_per_roll") {
-                        name(Component.literal("Show Mythic Cores per Pull"))
-                        description(OptionDescription.of(
-                            Component.literal("Shows the average amount of mythic cores you will earn from pulling a key. This includes mythic cores you will earn from scavenging any earned arcane cores.")
-                        ))
-                        controller(tickBox())
-                        binding(values::showMythicCoresPerPull, true)
-                    }
-
-                    options.register("cosmetic_machine_show_arcane_cores_per_roll") {
-                        name(Component.literal("Show Arcane Cores per Pull"))
-                        description(OptionDescription.of(
-                            Component.literal("Shows the average amount of arcane cores you will earn from pulling a key. This includesarcane cores you will earn from upcrafting any earned mythic cores.")
-                        ))
-                        controller(tickBox())
-                        binding(values::showArcaneCoresPerPull, true)
-                    }
-                }
-
-                groups.register("island_exchange") {
-                    name(Component.literal("Island Exchange"))
-
-                    options.register("island_exchange_unit_price") {
-                        name(Component.literal("Show Listing Unit Price"))
-                        description(OptionDescription.of(
-                            Component.literal("If a listing on Island Exchange contains multiple of one item, the price per unit will show in the tooltip.")
-                        ))
-                        controller(tickBox())
-                        binding(values::exchangeShowUnitPrice, true)
-                    }
-
-                    options.register("island_exchange_soul_equivalent") {
-                        name(Component.literal("Show Style Soul Equivalent"))
-                        description(OptionDescription.of(
-                            Component.literal("Shows the equivalent of a cosmetic listing on Island Exchange in style souls if scavenged.")
-                        ))
-                        controller(tickBox())
-                        binding(values::exchangeShowSoulEquivalent, true)
-                    }
-
-                    options.register("island_exchange_wisp_equivalent") {
-                        name(Component.literal("Show Weapon Wisp Equivalent"))
-                        description(OptionDescription.of(
-                            Component.literal("Shows the equivalent of a weapon skin listing on Island Exchange in weapon wisps if scavenged.")
-                        ))
-                        controller(tickBox())
-                        binding(values::exchangeShowWispEquivalent, true)
-                    }
-                }
-
-                groups.register("crafting_instructions") {
-                    name(Component.literal("Crafting Instructions"))
-
-                    options.register("crafting_instructions_show_time") {
-                        name(Component.literal("Show Crafting Time"))
-                        description(OptionDescription.of(
-                            Component.literal("Shows crafting time for items that need to be crafted, as well as total craft time, in the list of instructions.")
-                        ))
-                        controller(tickBox())
-                        binding(values::craftingInstructionsShowCraftTime, true)
-                    }
-
-                    options.register("crafting_instructions_show_gloop") {
-                        name(Component.literal("Show Material Gloop"))
-                        description(OptionDescription.of(
-                            Component.literal("Shows material gloop cost for items that need to be purchased from the material market, as well as total gloop cost, in the list of instructions.")
-                        ))
-                        controller(tickBox())
-                        binding(values::craftingInstructionsShowGloop, true)
-                    }
-                }
-
-                groups.register("assembler_info") {
-                    name(Component.literal("Blueprint Assembler Info"))
-
-                    options.register("assembler_show_new_trophies") {
-                        name(Component.literal("Show New Trophies"))
-                        description(OptionDescription.of(
-                            Component.literal("Shows the total style trophies earnable from new cosmetic blueprints.")
-                        ))
-                        controller(tickBox())
-                        binding(values::assemblerInfoShowNewTrophies, true)
-                    }
-
-                    options.register("assembler_show_new_rep") {
-                        name(Component.literal("Show New Royal Reputation"))
-                        description(OptionDescription.of(
-                            Component.literal("Shows the total royal reputation earnable from blueprints.")
-                        ))
-                        controller(tickBox())
-                        binding(values::assemblerInfoShowNewRep, true)
-                    }
-
-                    options.register("assembler_show_standard_cores") {
-                        name(Component.literal("Standard Core Display"))
-                        description(OptionDescription.of(
-                            Component.literal("Controls how the info for Standard Cores obtained from blueprints is displayed."),
-                            Component.empty(),
-                            AssemblerCoreInfoType.DISABLED.descriptionComponent(),
-                            AssemblerCoreInfoType.ENABLED.descriptionComponent(),
-                            AssemblerCoreInfoType.CONVERSION.descriptionComponent()
-                        ))
-                        binding(values::assemblerInfoStandardCores, AssemblerCoreInfoType.CONVERSION)
-                        controller(enumSwitch<AssemblerCoreInfoType> {
-                            Component.literal(it.label)
-                        })
-                    }
-
-                    options.register("assembler_show_exclusive_cores") {
-                        name(Component.literal("Exclusive Core Display"))
-                        description(OptionDescription.of(
-                            Component.literal("Controls how the info for Exclusive Cores obtained from blueprints is displayed."),
-                            Component.empty(),
-                            AssemblerCoreInfoType.DISABLED.descriptionComponent(),
-                            AssemblerCoreInfoType.ENABLED.descriptionComponent(),
-                            AssemblerCoreInfoType.CONVERSION.descriptionComponent()
-                        ))
-                        binding(values::assemblerInfoExclusiveCores, AssemblerCoreInfoType.CONVERSION)
-                        controller(enumSwitch<AssemblerCoreInfoType> {
-                            Component.literal(it.label)
-                        })
-                    }
-
-                    options.register("assembler_show_mythic_cores") {
-                        name(Component.literal("Mythic Core Display"))
-                        description(OptionDescription.of(
-                            Component.literal("Controls how the info for Mythic Cores obtained from blueprints is displayed."),
-                            Component.empty(),
-                            AssemblerCoreInfoType.DISABLED.descriptionComponent(),
-                            AssemblerCoreInfoType.ENABLED.descriptionComponent(),
-                            AssemblerCoreInfoType.CONVERSION.descriptionComponent()
-                        ))
-                        binding(values::assemblerInfoMythicCores, AssemblerCoreInfoType.CONVERSION)
-                        controller(enumSwitch<AssemblerCoreInfoType> {
-                            Component.literal(it.label)
-                        })
-                    }
-
-                    options.register("assembler_show_arcane_cores") {
-                        name(Component.literal("Arcane Core Display"))
-                        description(OptionDescription.of(
-                            Component.literal("Controls how the info for Arcane Cores obtained from blueprints is displayed."),
-                            Component.empty(),
-                            AssemblerCoreInfoType.DISABLED.descriptionComponent(),
-                            AssemblerCoreInfoType.ENABLED.descriptionComponent(),
-                            AssemblerCoreInfoType.CONVERSION.descriptionComponent()
-                        ))
-                        binding(values::assemblerInfoArcaneCores, AssemblerCoreInfoType.CONVERSION)
-                        controller(enumSwitch<AssemblerCoreInfoType> {
-                            Component.literal(it.label)
-                        })
-                    }
-                }
-
-                groups.register("weekly_vault_info") {
-                    name(Component.literal("Weekly Vault Info"))
-
-                    options.register("weekly_vault_info_show_total_progress") {
-                        name(Component.literal("Show Total Progress"))
-                        description(OptionDescription.of(
-                            Component.literal("Shows the total XP you've earned towards reaching max claims on your weekly vault.")
-                        ))
-                        controller(tickBox())
-                        binding(values::weeklyVaultInfoShowTotalProgress, true)
-                    }
-
-                    options.register("weekly_vault_info_show_needed_xp_per_day") {
-                        name(Component.literal("Show Needed XP Per Day"))
-                        description(OptionDescription.of(
-                            Component.literal("Shows an average amount of XP to earn each day in order to reach max claims on your weekly vault.")
-                        ))
-                        controller(tickBox())
-                        binding(values::weeklyVaultInfoShowNeededXPPerDay, true)
-                    }
-                }
-
-                groups.register("trophy_tracking") {
-                    name(Component.literal("Trophy Tracking"))
-
-                    options.register("trophy_tracking_show_type_breakdown") {
-                        name(Component.literal("Show Trophy Type Breakdown"))
-                        description(OptionDescription.of(
-                            Component.literal("For each day listed, shows a breakdown of how many of each type of trophy is obtained, including Skill, Style, and Angler.")
-                        ))
-                        controller(tickBox())
-                        binding(values::trophyTrackingShowTypeBreakdown, true)
-                    }
-
-                    options.register("trophy_tracking_show_category_breakdown") {
-                        name(Component.literal("Show Trophy Source Breakdown"))
-                        description(OptionDescription.of(
-                            Component.literal("For each day listed, shows a breakdown of how many of each trophy gain source is obtained, including:"),
-                            Component.literal("- Claiming badges"),
-                            Component.literal("- Claiming cosmetics"),
-                            Component.literal("- Royal reputation"),
-                            Component.literal("- Obtaining max chromas on a cosmetic"),
-                            Component.literal("- Collection bonuses"),
-                            Component.literal("- Discovering new fish"),
-                            Component.literal("- Claiming fishing research"),
-                            Component.literal("- Purchasing fishing upgrades"),
-                        ))
-                        controller(tickBox())
-                        binding(values::trophyTrackingShowCategoryBreakdown, true)
-                    }
-                }
-
-                groups.register("average_income") {
-                    name(Component.literal("Average Income"))
-
-                    options.register("average_income_include_scrolls") {
-                        name(Component.literal("Include Quest Scrolls alongside Dailies"))
-                        description(OptionDescription.of(
-                            Component.literal("Adds another line under any average income including daily quests, making the assumption that you will complete whatever your current highest rarity of quest scroll is alongside the daily quest.")
-                        ))
-                        controller(tickBox())
-                        binding(values::averageIncomeIncludeQuestScrolls, true)
-                    }
-
-                    options.register("average_income_dailies") {
-                        name(Component.literal("Average Daily Quests/Day"))
-                        description(OptionDescription.of(
-                            Component.literal("Set here how many daily quests you think you will complete on average every day."),
-                            Component.empty(),
-                            Component.literal("This value will be clamped to whatever your actual max daily quest count is.")
-                        ))
-                        controller(slider(0..10))
-                        binding(values::averageIncomeDailies, 10)
-                    }
-
-                    options.register("average_income_weeklies") {
-                        name(Component.literal("Average Weekly Quests/Week"))
-                        description(OptionDescription.of(
-                            Component.literal("Set here how many weekly quests you think you will complete on average every week."),
-                            Component.empty(),
-                            Component.literal("This value will be clamped to whatever your actual max weekly quest count is.")
-                        ))
-                        controller(slider(0..10))
-                        binding(values::averageIncomeWeeklies, 10)
-                    }
-
-                    options.register("average_income_meters") {
-                        name(Component.literal("Average Daily Meter Claims/Day"))
-                        description(OptionDescription.of(
-                            Component.literal("Set here how many daily meter claims you think you will complete on average every day."),
-                            Component.empty(),
-                            Component.literal("This value will be clamped to whatever your actual max daily meter claims are.")
-                        ))
-                        controller(slider(0..15))
-                        binding(values::averageIncomeMeters, 15)
-                    }
-
-                    options.register("average_income_vault_claims") {
-                        name(Component.literal("Average Weekly Vault Claims/Week"))
-                        description(OptionDescription.of(
-                            Component.literal("Set here how many weekly vault claim you think you will complete on average every week."),
-                            Component.empty(),
-                            Component.literal("This value will be clamped to whatever your actual max weekly vault claims are.")
-                        ))
-                        controller(slider(0..60))
-                        binding(values::averageIncomeVaultClaims, 60)
-                    }
-                }
-
-                groups.register("xp_info") {
-                    name(Component.literal("XP Info"))
-
-                    options.register("xp_info_window") {
-                        name(Component.literal("XP Info Window"))
-                        description(OptionDescription.of(
-                            Component.literal("Controls when the XP Info window should be open."),
-                            XPInfoDisplay.DISABLED.descriptionComponent(),
-                            XPInfoDisplay.ENABLED.descriptionComponent(),
-                            XPInfoDisplay.ENABLED_GAMES.descriptionComponent(),
-                            XPInfoDisplay.ENABLED_LOBBY.descriptionComponent(),
-                        ))
-                        controller(enumSwitch<XPInfoDisplay> {
-                            Component.literal(it.label)
-                        })
-                        binding(values::xpInfoWindow, XPInfoDisplay.ENABLED)
-                    }
-
-                    options.register("xp_info_daily_meter") {
-                        name(Component.literal("Daily Meter Display"))
-                        description(OptionDescription.of(
-                            Component.literal("Controls when the Daily Meter progress bar should be visible on the XP window."),
-                            XPInfoDisplay.DISABLED.descriptionComponent(),
-                            XPInfoDisplay.ENABLED.descriptionComponent(),
-                            XPInfoDisplay.ENABLED_GAMES.descriptionComponent(),
-                            XPInfoDisplay.ENABLED_LOBBY.descriptionComponent(),
-                        ))
-                        controller(enumSwitch<XPInfoDisplay> {
-                            Component.literal(it.label)
-                        })
-                        binding(values::xpInfoDailyMeter, XPInfoDisplay.ENABLED)
-                    }
-
-                    options.register("xp_info_disable_daily_meter_if_max") {
-                        name(Component.literal("Disable Daily Meter if Max"))
-                        description(OptionDescription.of(
-                            Component.literal("If your Daily Meter is at max claims, it will be hidden from the XP window.")
-                        ))
-                        controller(tickBox())
-                        binding(values::xpInfoDisableDailyMeterIfMax, true)
-                    }
-
-                    options.register("xp_info_weekly_vault") {
-                        name(Component.literal("Weekly Vault Display"))
-                        description(OptionDescription.of(
-                            Component.literal("Controls when the Weekly Vault progress bar should be visible on the XP window."),
-                            XPInfoDisplay.DISABLED.descriptionComponent(),
-                            XPInfoDisplay.ENABLED.descriptionComponent(),
-                            XPInfoDisplay.ENABLED_GAMES.descriptionComponent(),
-                            XPInfoDisplay.ENABLED_LOBBY.descriptionComponent(),
-                        ))
-                        controller(enumSwitch<XPInfoDisplay> {
-                            Component.literal(it.label)
-                        })
-                        binding(values::xpInfoWeeklyVault, XPInfoDisplay.ENABLED)
-                    }
-
-                    options.register("xp_info_disable_weekly_vault_if_max") {
-                        name(Component.literal("Disable Weekly Vault if Max"))
-                        description(OptionDescription.of(
-                            Component.literal("If your Weekly Vault is at max claims, it will be hidden from the XP window.")
-                        ))
-                        controller(tickBox())
-                        binding(values::xpInfoDisableWeeklyVaultIfMax, true)
-                    }
-
-                    options.register("xp_info_star_level") {
-                        name(Component.literal("Star Level Display"))
-                        description(OptionDescription.of(
-                            Component.literal("Controls when the Star Level progress bar should be visible on the XP window."),
-                            XPInfoDisplay.DISABLED.descriptionComponent(),
-                            XPInfoDisplay.ENABLED.descriptionComponent(),
-                            XPInfoDisplay.ENABLED_GAMES.descriptionComponent(),
-                            XPInfoDisplay.ENABLED_LOBBY.descriptionComponent(),
-                        ))
-                        controller(enumSwitch<XPInfoDisplay> {
-                            Component.literal(it.label)
-                        })
-                        binding(values::xpInfoStarLevel, XPInfoDisplay.ENABLED)
-                    }
-
-                    options.register("xp_info_faction") {
-                        name(Component.literal("Faction Display"))
-                        description(OptionDescription.of(
-                            Component.literal("Controls when the Faction progress bar should be visible on the XP window."),
-                            XPInfoDisplay.DISABLED.descriptionComponent(),
-                            XPInfoDisplay.ENABLED.descriptionComponent(),
-                            XPInfoDisplay.ENABLED_GAMES.descriptionComponent(),
-                            XPInfoDisplay.ENABLED_LOBBY.descriptionComponent(),
-                        ))
-                        controller(enumSwitch<XPInfoDisplay> {
-                            Component.literal(it.label)
-                        })
-                        binding(values::xpInfoFaction, XPInfoDisplay.ENABLED)
-                    }
-
-                    options.register("xp_info_today_xp") {
-                        name(Component.literal("Today's XP Display"))
-                        description(OptionDescription.of(
-                            Component.literal("Controls when the Today's XP label should be visible on the XP window."),
-                            XPInfoDisplay.DISABLED.descriptionComponent(),
-                            XPInfoDisplay.ENABLED.descriptionComponent(),
-                            XPInfoDisplay.ENABLED_GAMES.descriptionComponent(),
-                            XPInfoDisplay.ENABLED_LOBBY.descriptionComponent(),
-                        ))
-                        controller(enumSwitch<XPInfoDisplay> {
-                            Component.literal(it.label)
-                        })
-                        binding(values::xpInfoTodaysXP, XPInfoDisplay.ENABLED)
-                    }
-
-                    options.register("xp_info_game_xp") {
-                        name(Component.literal("Game XP Display"))
-                        description(OptionDescription.of(
-                            Component.literal("Controls when the Game XP label and the XP Breakdown button should be visible on the XP window."),
-                            XPInfoDisplay.DISABLED.descriptionComponent(),
-                            XPInfoDisplay.ENABLED.descriptionComponent(),
-                            XPInfoDisplay.ENABLED_GAMES.descriptionComponent(),
-                            XPInfoDisplay.ENABLED_LOBBY.descriptionComponent(),
-                        ))
-                        controller(enumSwitch<XPInfoDisplay> {
-                            Component.literal(it.label)
-                        })
-                        binding(values::xpInfoGameXP, XPInfoDisplay.ENABLED)
-                    }
-
-                    options.register("xp_info_navigator_today_xp") {
-                        name(Component.literal("Navigator Today's XP Display"))
-                        description(OptionDescription.of(
-                            Component.literal("Controls whether or not your total XP per game is shown on the tooltip of games in the navigator.")
-                        ))
-                        controller(tickBox())
-                        binding(values::xpInfoNavigatorTodayXP, true)
-                    }
-
-                    options.register("xp_info_navigator_today_avg_xp") {
-                        name(Component.literal("Navigator Average XP/Game Today Display"))
-                        description(OptionDescription.of(
-                            Component.literal("Controls whether or not your average XP per game from today's stats is shown on the tooltip of games in the navigator.")
-                        ))
-                        controller(tickBox())
-                        binding(values::xpInfoNavigatorTodayAverageXP, true)
-                    }
-
-                    options.register("xp_info_navigator_alltime_avg_xp") {
-                        name(Component.literal("Navigator Average XP/Game All-Time Display"))
-                        description(OptionDescription.of(
-                            Component.literal("Controls whether or not your average XP per game from all-time stats is shown on the tooltip of games in the navigator.")
-                        ))
-                        controller(tickBox())
-                        binding(values::xpInfoNavigatorAlltimeAverageXP, true)
-                    }
-
-                    options.register("xp_info_sea_monsters_energy_meter") {
-                        name(Component.literal("[Sea Monsters] Energy Meter Display"))
-                        description(OptionDescription.of(
-                            Component.literal("Controls when the Energy Meter progress bar should be visible on the XP window."),
-                            Component.literal("Note: This feature is only relevant if a Sea Monsters event is currently active."),
-                            XPInfoDisplay.DISABLED.descriptionComponent(),
-                            XPInfoDisplay.ENABLED.descriptionComponent(),
-                            XPInfoDisplay.ENABLED_GAMES.descriptionComponent(),
-                            XPInfoDisplay.ENABLED_LOBBY.descriptionComponent(),
-                        ))
-                        controller(enumSwitch<XPInfoDisplay> {
-                            Component.literal(it.label)
-                        })
-                        binding(values::xpInfoSeaMonstersEnergyMeter, XPInfoDisplay.ENABLED)
-                    }
-
-                    options.register("xp_info_sea_monsters_disable_energy_meter_if_max") {
-                        name(Component.literal("[Sea Monsters] Disable Energy Meter if Max"))
-                        description(OptionDescription.of(
-                            Component.literal("If your Energy Meter is at max claims, it will be hidden from the XP window."),
-                                    Component.literal("Note: This feature is only relevant if a Sea Monsters event is currently active."),
-                        ))
-                        controller(tickBox())
-                        binding(values::xpInfoDisableSeaMonstersEnergyMeterIfMax, true)
                     }
                 }
 
@@ -852,6 +292,575 @@ class Config {
                         }
                         binding(values::decimalPoints, 3)
                     }
+                }
+            }
+
+            categories.register("crate_chances") {
+                name(Component.literal("Crate Chances"))
+
+                rootOptions.register("crate_chances_highlight_rep") {
+                    name(Component.literal("Highlight Best Rep Chance"))
+                    description(OptionDescription.of(
+                        Component.literal("Highlights the standard and exclusive crates with the highest chance for new royal reputation.")
+                    ))
+                    controller(tickBox())
+                    binding(values::highlightBestRepChance, true)
+                }
+
+                rootOptions.register("crate_chances_highlight_cosmetic") {
+                    name(Component.literal("Highlight Best Cosmetic Chance"))
+                    description(OptionDescription.of(
+                        Component.literal("Highlights the standard and exclusive crates with the highest chance for a new cosmetic.")
+                    ))
+                    controller(tickBox())
+                    binding(values::highlightBestCosmeticChance, true)
+                }
+
+                rootOptions.register("crate_chances_show_cosmetic_chance") {
+                    name(Component.literal("Show New Cosmetic Chance"))
+                    description(OptionDescription.of(
+                        Component.literal("Shows the percent chance that the crate will give a new cosmetic.")
+                    ))
+                    controller(tickBox())
+                    binding(values::showNewCosmeticChance, true)
+                }
+
+                rootOptions.register("crate_chances_show_rep_chance") {
+                    name(Component.literal("Show New Royal Reputation Chance"))
+                    description(OptionDescription.of(
+                        Component.literal("Shows the percent chance that the crate will give new royal reputation.")
+                    ))
+                    controller(tickBox())
+                    binding(values::showNewRepChance, true)
+                }
+
+                rootOptions.register("crate_chances_show_trophies_per_roll") {
+                    name(Component.literal("Show Trophies per Roll"))
+                    description(OptionDescription.of(
+                        Component.literal("Shows the average amount of trophies you will earn from opening a crate, including the trophies from new cosmetics and royal reputation.")
+                    ))
+                    controller(tickBox())
+                    binding(values::showTrophiesPerRoll, true)
+                }
+
+                rootOptions.register("crate_chances_show_mythic_cores_per_roll") {
+                    name(Component.literal("Show Mythic Cores per Roll"))
+                    description(OptionDescription.of(
+                        Component.literal("Shows the average amount of mythic cores you will earn from opening a crate. If the crate is exclusive, this is the mythic cores you will earn from scavenging any earned arcane cores.")
+                    ))
+                    controller(tickBox())
+                    binding(values::showMythicCoresPerRoll, true)
+                }
+
+                rootOptions.register("crate_chances_show_arcane_cores_per_roll") {
+                    name(Component.literal("Show Arcane Cores per Roll"))
+                    description(OptionDescription.of(
+                        Component.literal("Shows the average amount of arcane cores you will earn from opening a crate. If the crate is standard, this is the arcane cores you will earn from upcrafting any earned mythic cores.")
+                    ))
+                    controller(tickBox())
+                    binding(values::showArcaneCoresPerRoll, true)
+                }
+
+                rootOptions.register("crate_chances_show_max_cosmetic_crates") {
+                    name(Component.literal("Maxed Cosmetic Crate Icon"))
+                    description(OptionDescription.of(
+                        Component.literal("Shows a style trophy icon in the corner of crates with all cosmetics earned.")
+                    ))
+                    controller(tickBox())
+                    binding(values::showMaxCosmeticCrates, true)
+                }
+
+                rootOptions.register("crate_chances_show_max_rep_crates") {
+                    name(Component.literal("Maxed Royal Reputation Crate Icon"))
+                    description(OptionDescription.of(
+                        Component.literal("Shows a royal reputation icon in the corner of crates with all royal reputation earned.")
+                    ))
+                    controller(tickBox())
+                    binding(values::showMaxRepCrates, true)
+                }
+            }
+
+            categories.register("cosmetic_machine") {
+                name(Component.literal("Cosmetic Machine"))
+
+                rootOptions.register("cosmetic_machine_detailed_chances") {
+                    name(Component.literal("Detailed Chances"))
+                    description(OptionDescription.createBuilder()
+                        .text(Component.literal("Shows the specific chance for non-exclusive, exclusive, and arcane pulls per rarity in the tooltips of the pull buttons."))
+                        .image(Identifier.fromNamespaceAndPath("galapagos", "textures/config/detailed_cosmetic_machine.png"), 400, 427)
+                        .build()
+                    )
+                    controller(tickBox())
+                    binding(values::detailedCosmeticMachineChances, true)
+                }
+
+                rootOptions.register("cosmetic_machine_show_cosmetic_chance") {
+                    name(Component.literal("Show New Cosmetic Chance"))
+                    description(OptionDescription.of(
+                        Component.literal("Shows the percent chance that the pull will give a new cosmetic.")
+                    ))
+                    controller(tickBox())
+                    binding(values::showNewCosmeticChancePerPull, true)
+                }
+
+                rootOptions.register("cosmetic_machine_show_rep_chance") {
+                    name(Component.literal("Show New Royal Reputation Chance"))
+                    description(OptionDescription.of(
+                        Component.literal("Shows the percent chance that the pull will give new royal reputation.")
+                    ))
+                    controller(tickBox())
+                    binding(values::showNewRepChancePerPull, true)
+                }
+
+                rootOptions.register("cosmetic_machine_show_trophies_per_roll") {
+                    name(Component.literal("Show Trophies per Pull"))
+                    description(OptionDescription.of(
+                        Component.literal("Shows the average amount of trophies you will earn from pulling a key, including the trophies from new cosmetics and royal reputation.")
+                    ))
+                    controller(tickBox())
+                    binding(values::showTrophiesPerPull, true)
+                }
+
+                rootOptions.register("cosmetic_machine_show_mythic_cores_per_roll") {
+                    name(Component.literal("Show Mythic Cores per Pull"))
+                    description(OptionDescription.of(
+                        Component.literal("Shows the average amount of mythic cores you will earn from pulling a key. This includes mythic cores you will earn from scavenging any earned arcane cores.")
+                    ))
+                    controller(tickBox())
+                    binding(values::showMythicCoresPerPull, true)
+                }
+
+                rootOptions.register("cosmetic_machine_show_arcane_cores_per_roll") {
+                    name(Component.literal("Show Arcane Cores per Pull"))
+                    description(OptionDescription.of(
+                        Component.literal("Shows the average amount of arcane cores you will earn from pulling a key. This includesarcane cores you will earn from upcrafting any earned mythic cores.")
+                    ))
+                    controller(tickBox())
+                    binding(values::showArcaneCoresPerPull, true)
+                }
+            }
+
+            categories.register("island_exchange") {
+                name(Component.literal("Island Exchange"))
+
+                rootOptions.register("island_exchange_unit_price") {
+                    name(Component.literal("Show Listing Unit Price"))
+                    description(OptionDescription.of(
+                        Component.literal("If a listing on Island Exchange contains multiple of one item, the price per unit will show in the tooltip.")
+                    ))
+                    controller(tickBox())
+                    binding(values::exchangeShowUnitPrice, true)
+                }
+
+                rootOptions.register("island_exchange_soul_equivalent") {
+                    name(Component.literal("Show Style Soul Equivalent"))
+                    description(OptionDescription.of(
+                        Component.literal("Shows the equivalent of a cosmetic listing on Island Exchange in style souls if scavenged.")
+                    ))
+                    controller(tickBox())
+                    binding(values::exchangeShowSoulEquivalent, true)
+                }
+
+                rootOptions.register("island_exchange_wisp_equivalent") {
+                    name(Component.literal("Show Weapon Wisp Equivalent"))
+                    description(OptionDescription.of(
+                        Component.literal("Shows the equivalent of a weapon skin listing on Island Exchange in weapon wisps if scavenged.")
+                    ))
+                    controller(tickBox())
+                    binding(values::exchangeShowWispEquivalent, true)
+                }
+            }
+
+            categories.register("crafting_instructions") {
+                name(Component.literal("Crafting Instructions"))
+
+                rootOptions.register("crafting_instructions_show_time") {
+                    name(Component.literal("Show Crafting Time"))
+                    description(OptionDescription.of(
+                        Component.literal("Shows crafting time for items that need to be crafted, as well as total craft time, in the list of instructions.")
+                    ))
+                    controller(tickBox())
+                    binding(values::craftingInstructionsShowCraftTime, true)
+                }
+
+                rootOptions.register("crafting_instructions_show_gloop") {
+                    name(Component.literal("Show Material Gloop"))
+                    description(OptionDescription.of(
+                        Component.literal("Shows material gloop cost for items that need to be purchased from the material market, as well as total gloop cost, in the list of instructions.")
+                    ))
+                    controller(tickBox())
+                    binding(values::craftingInstructionsShowGloop, true)
+                }
+            }
+
+            categories.register("assembler_info") {
+                name(Component.literal("Blueprint Assembler Info"))
+
+                rootOptions.register("assembler_show_new_trophies") {
+                    name(Component.literal("Show New Trophies"))
+                    description(OptionDescription.of(
+                        Component.literal("Shows the total style trophies earnable from new cosmetic blueprints.")
+                    ))
+                    controller(tickBox())
+                    binding(values::assemblerInfoShowNewTrophies, true)
+                }
+
+                rootOptions.register("assembler_show_new_rep") {
+                    name(Component.literal("Show New Royal Reputation"))
+                    description(OptionDescription.of(
+                        Component.literal("Shows the total royal reputation earnable from blueprints.")
+                    ))
+                    controller(tickBox())
+                    binding(values::assemblerInfoShowNewRep, true)
+                }
+
+                rootOptions.register("assembler_show_standard_cores") {
+                    name(Component.literal("Standard Core Display"))
+                    description(OptionDescription.of(
+                        Component.literal("Controls how the info for Standard Cores obtained from blueprints is displayed."),
+                        Component.empty(),
+                        AssemblerCoreInfoType.DISABLED.descriptionComponent(),
+                        AssemblerCoreInfoType.ENABLED.descriptionComponent(),
+                        AssemblerCoreInfoType.CONVERSION.descriptionComponent()
+                    ))
+                    binding(values::assemblerInfoStandardCores, AssemblerCoreInfoType.CONVERSION)
+                    controller(enumSwitch<AssemblerCoreInfoType> {
+                        Component.literal(it.label)
+                    })
+                }
+
+                rootOptions.register("assembler_show_exclusive_cores") {
+                    name(Component.literal("Exclusive Core Display"))
+                    description(OptionDescription.of(
+                        Component.literal("Controls how the info for Exclusive Cores obtained from blueprints is displayed."),
+                        Component.empty(),
+                        AssemblerCoreInfoType.DISABLED.descriptionComponent(),
+                        AssemblerCoreInfoType.ENABLED.descriptionComponent(),
+                        AssemblerCoreInfoType.CONVERSION.descriptionComponent()
+                    ))
+                    binding(values::assemblerInfoExclusiveCores, AssemblerCoreInfoType.CONVERSION)
+                    controller(enumSwitch<AssemblerCoreInfoType> {
+                        Component.literal(it.label)
+                    })
+                }
+
+                rootOptions.register("assembler_show_mythic_cores") {
+                    name(Component.literal("Mythic Core Display"))
+                    description(OptionDescription.of(
+                        Component.literal("Controls how the info for Mythic Cores obtained from blueprints is displayed."),
+                        Component.empty(),
+                        AssemblerCoreInfoType.DISABLED.descriptionComponent(),
+                        AssemblerCoreInfoType.ENABLED.descriptionComponent(),
+                        AssemblerCoreInfoType.CONVERSION.descriptionComponent()
+                    ))
+                    binding(values::assemblerInfoMythicCores, AssemblerCoreInfoType.CONVERSION)
+                    controller(enumSwitch<AssemblerCoreInfoType> {
+                        Component.literal(it.label)
+                    })
+                }
+
+                rootOptions.register("assembler_show_arcane_cores") {
+                    name(Component.literal("Arcane Core Display"))
+                    description(OptionDescription.of(
+                        Component.literal("Controls how the info for Arcane Cores obtained from blueprints is displayed."),
+                        Component.empty(),
+                        AssemblerCoreInfoType.DISABLED.descriptionComponent(),
+                        AssemblerCoreInfoType.ENABLED.descriptionComponent(),
+                        AssemblerCoreInfoType.CONVERSION.descriptionComponent()
+                    ))
+                    binding(values::assemblerInfoArcaneCores, AssemblerCoreInfoType.CONVERSION)
+                    controller(enumSwitch<AssemblerCoreInfoType> {
+                        Component.literal(it.label)
+                    })
+                }
+            }
+
+            categories.register("weekly_vault_info") {
+                name(Component.literal("Weekly Vault Info"))
+
+                rootOptions.register("weekly_vault_info_show_total_progress") {
+                    name(Component.literal("Show Total Progress"))
+                    description(OptionDescription.of(
+                        Component.literal("Shows the total XP you've earned towards reaching max claims on your weekly vault.")
+                    ))
+                    controller(tickBox())
+                    binding(values::weeklyVaultInfoShowTotalProgress, true)
+                }
+
+                rootOptions.register("weekly_vault_info_show_needed_xp_per_day") {
+                    name(Component.literal("Show Needed XP Per Day"))
+                    description(OptionDescription.of(
+                        Component.literal("Shows an average amount of XP to earn each day in order to reach max claims on your weekly vault.")
+                    ))
+                    controller(tickBox())
+                    binding(values::weeklyVaultInfoShowNeededXPPerDay, true)
+                }
+            }
+
+            categories.register("trophy_tracking") {
+                name(Component.literal("Trophy Tracking"))
+
+                rootOptions.register("trophy_tracking_show_type_breakdown") {
+                    name(Component.literal("Show Trophy Type Breakdown"))
+                    description(OptionDescription.of(
+                        Component.literal("For each day listed, shows a breakdown of how many of each type of trophy is obtained, including Skill, Style, and Angler.")
+                    ))
+                    controller(tickBox())
+                    binding(values::trophyTrackingShowTypeBreakdown, true)
+                }
+
+                rootOptions.register("trophy_tracking_show_category_breakdown") {
+                    name(Component.literal("Show Trophy Source Breakdown"))
+                    description(OptionDescription.of(
+                        Component.literal("For each day listed, shows a breakdown of how many of each trophy gain source is obtained, including:"),
+                        Component.literal("- Claiming badges"),
+                        Component.literal("- Claiming cosmetics"),
+                        Component.literal("- Royal reputation"),
+                        Component.literal("- Obtaining max chromas on a cosmetic"),
+                        Component.literal("- Collection bonuses"),
+                        Component.literal("- Discovering new fish"),
+                        Component.literal("- Claiming fishing research"),
+                        Component.literal("- Purchasing fishing upgrades"),
+                    ))
+                    controller(tickBox())
+                    binding(values::trophyTrackingShowCategoryBreakdown, true)
+                }
+            }
+
+            categories.register("average_income") {
+                name(Component.literal("Average Income"))
+
+                rootOptions.register("average_income_include_scrolls") {
+                    name(Component.literal("Include Quest Scrolls alongside Dailies"))
+                    description(OptionDescription.of(
+                        Component.literal("Adds another line under any average income including daily quests, making the assumption that you will complete whatever your current highest rarity of quest scroll is alongside the daily quest.")
+                    ))
+                    controller(tickBox())
+                    binding(values::averageIncomeIncludeQuestScrolls, true)
+                }
+
+                rootOptions.register("average_income_dailies") {
+                    name(Component.literal("Average Daily Quests/Day"))
+                    description(OptionDescription.of(
+                        Component.literal("Set here how many daily quests you think you will complete on average every day."),
+                        Component.empty(),
+                        Component.literal("This value will be clamped to whatever your actual max daily quest count is.")
+                    ))
+                    controller(slider(0..10))
+                    binding(values::averageIncomeDailies, 10)
+                }
+
+                rootOptions.register("average_income_weeklies") {
+                    name(Component.literal("Average Weekly Quests/Week"))
+                    description(OptionDescription.of(
+                        Component.literal("Set here how many weekly quests you think you will complete on average every week."),
+                        Component.empty(),
+                        Component.literal("This value will be clamped to whatever your actual max weekly quest count is.")
+                    ))
+                    controller(slider(0..10))
+                    binding(values::averageIncomeWeeklies, 10)
+                }
+
+                rootOptions.register("average_income_meters") {
+                    name(Component.literal("Average Daily Meter Claims/Day"))
+                    description(OptionDescription.of(
+                        Component.literal("Set here how many daily meter claims you think you will complete on average every day."),
+                        Component.empty(),
+                        Component.literal("This value will be clamped to whatever your actual max daily meter claims are.")
+                    ))
+                    controller(slider(0..15))
+                    binding(values::averageIncomeMeters, 15)
+                }
+
+                rootOptions.register("average_income_vault_claims") {
+                    name(Component.literal("Average Weekly Vault Claims/Week"))
+                    description(OptionDescription.of(
+                        Component.literal("Set here how many weekly vault claim you think you will complete on average every week."),
+                        Component.empty(),
+                        Component.literal("This value will be clamped to whatever your actual max weekly vault claims are.")
+                    ))
+                    controller(slider(0..60))
+                    binding(values::averageIncomeVaultClaims, 60)
+                }
+            }
+
+            categories.register("xp_info") {
+                name(Component.literal("XP Info"))
+
+                rootOptions.register("xp_info_window") {
+                    name(Component.literal("XP Info Window"))
+                    description(OptionDescription.of(
+                        Component.literal("Controls when the XP Info window should be open."),
+                        XPInfoDisplay.DISABLED.descriptionComponent(),
+                        XPInfoDisplay.ENABLED.descriptionComponent(),
+                        XPInfoDisplay.ENABLED_GAMES.descriptionComponent(),
+                        XPInfoDisplay.ENABLED_LOBBY.descriptionComponent(),
+                    ))
+                    controller(enumSwitch<XPInfoDisplay> {
+                        Component.literal(it.label)
+                    })
+                    binding(values::xpInfoWindow, XPInfoDisplay.ENABLED)
+                }
+
+                rootOptions.register("xp_info_daily_meter") {
+                    name(Component.literal("Daily Meter Display"))
+                    description(OptionDescription.of(
+                        Component.literal("Controls when the Daily Meter progress bar should be visible on the XP window."),
+                        XPInfoDisplay.DISABLED.descriptionComponent(),
+                        XPInfoDisplay.ENABLED.descriptionComponent(),
+                        XPInfoDisplay.ENABLED_GAMES.descriptionComponent(),
+                        XPInfoDisplay.ENABLED_LOBBY.descriptionComponent(),
+                    ))
+                    controller(enumSwitch<XPInfoDisplay> {
+                        Component.literal(it.label)
+                    })
+                    binding(values::xpInfoDailyMeter, XPInfoDisplay.ENABLED)
+                }
+
+                rootOptions.register("xp_info_disable_daily_meter_if_max") {
+                    name(Component.literal("Disable Daily Meter if Max"))
+                    description(OptionDescription.of(
+                        Component.literal("If your Daily Meter is at max claims, it will be hidden from the XP window.")
+                    ))
+                    controller(tickBox())
+                    binding(values::xpInfoDisableDailyMeterIfMax, true)
+                }
+
+                rootOptions.register("xp_info_weekly_vault") {
+                    name(Component.literal("Weekly Vault Display"))
+                    description(OptionDescription.of(
+                        Component.literal("Controls when the Weekly Vault progress bar should be visible on the XP window."),
+                        XPInfoDisplay.DISABLED.descriptionComponent(),
+                        XPInfoDisplay.ENABLED.descriptionComponent(),
+                        XPInfoDisplay.ENABLED_GAMES.descriptionComponent(),
+                        XPInfoDisplay.ENABLED_LOBBY.descriptionComponent(),
+                    ))
+                    controller(enumSwitch<XPInfoDisplay> {
+                        Component.literal(it.label)
+                    })
+                    binding(values::xpInfoWeeklyVault, XPInfoDisplay.ENABLED)
+                }
+
+                rootOptions.register("xp_info_disable_weekly_vault_if_max") {
+                    name(Component.literal("Disable Weekly Vault if Max"))
+                    description(OptionDescription.of(
+                        Component.literal("If your Weekly Vault is at max claims, it will be hidden from the XP window.")
+                    ))
+                    controller(tickBox())
+                    binding(values::xpInfoDisableWeeklyVaultIfMax, true)
+                }
+
+                rootOptions.register("xp_info_star_level") {
+                    name(Component.literal("Star Level Display"))
+                    description(OptionDescription.of(
+                        Component.literal("Controls when the Star Level progress bar should be visible on the XP window."),
+                        XPInfoDisplay.DISABLED.descriptionComponent(),
+                        XPInfoDisplay.ENABLED.descriptionComponent(),
+                        XPInfoDisplay.ENABLED_GAMES.descriptionComponent(),
+                        XPInfoDisplay.ENABLED_LOBBY.descriptionComponent(),
+                    ))
+                    controller(enumSwitch<XPInfoDisplay> {
+                        Component.literal(it.label)
+                    })
+                    binding(values::xpInfoStarLevel, XPInfoDisplay.ENABLED)
+                }
+
+                rootOptions.register("xp_info_faction") {
+                    name(Component.literal("Faction Display"))
+                    description(OptionDescription.of(
+                        Component.literal("Controls when the Faction progress bar should be visible on the XP window."),
+                        XPInfoDisplay.DISABLED.descriptionComponent(),
+                        XPInfoDisplay.ENABLED.descriptionComponent(),
+                        XPInfoDisplay.ENABLED_GAMES.descriptionComponent(),
+                        XPInfoDisplay.ENABLED_LOBBY.descriptionComponent(),
+                    ))
+                    controller(enumSwitch<XPInfoDisplay> {
+                        Component.literal(it.label)
+                    })
+                    binding(values::xpInfoFaction, XPInfoDisplay.ENABLED)
+                }
+
+                rootOptions.register("xp_info_today_xp") {
+                    name(Component.literal("Today's XP Display"))
+                    description(OptionDescription.of(
+                        Component.literal("Controls when the Today's XP label should be visible on the XP window."),
+                        XPInfoDisplay.DISABLED.descriptionComponent(),
+                        XPInfoDisplay.ENABLED.descriptionComponent(),
+                        XPInfoDisplay.ENABLED_GAMES.descriptionComponent(),
+                        XPInfoDisplay.ENABLED_LOBBY.descriptionComponent(),
+                    ))
+                    controller(enumSwitch<XPInfoDisplay> {
+                        Component.literal(it.label)
+                    })
+                    binding(values::xpInfoTodaysXP, XPInfoDisplay.ENABLED)
+                }
+
+                rootOptions.register("xp_info_game_xp") {
+                    name(Component.literal("Game XP Display"))
+                    description(OptionDescription.of(
+                        Component.literal("Controls when the Game XP label and the XP Breakdown button should be visible on the XP window."),
+                        XPInfoDisplay.DISABLED.descriptionComponent(),
+                        XPInfoDisplay.ENABLED.descriptionComponent(),
+                        XPInfoDisplay.ENABLED_GAMES.descriptionComponent(),
+                        XPInfoDisplay.ENABLED_LOBBY.descriptionComponent(),
+                    ))
+                    controller(enumSwitch<XPInfoDisplay> {
+                        Component.literal(it.label)
+                    })
+                    binding(values::xpInfoGameXP, XPInfoDisplay.ENABLED)
+                }
+
+                rootOptions.register("xp_info_navigator_today_xp") {
+                    name(Component.literal("Navigator Today's XP Display"))
+                    description(OptionDescription.of(
+                        Component.literal("Controls whether or not your total XP per game is shown on the tooltip of games in the navigator.")
+                    ))
+                    controller(tickBox())
+                    binding(values::xpInfoNavigatorTodayXP, true)
+                }
+
+                rootOptions.register("xp_info_navigator_today_avg_xp") {
+                    name(Component.literal("Navigator Average XP/Game Today Display"))
+                    description(OptionDescription.of(
+                        Component.literal("Controls whether or not your average XP per game from today's stats is shown on the tooltip of games in the navigator.")
+                    ))
+                    controller(tickBox())
+                    binding(values::xpInfoNavigatorTodayAverageXP, true)
+                }
+
+                rootOptions.register("xp_info_navigator_alltime_avg_xp") {
+                    name(Component.literal("Navigator Average XP/Game All-Time Display"))
+                    description(OptionDescription.of(
+                        Component.literal("Controls whether or not your average XP per game from all-time stats is shown on the tooltip of games in the navigator.")
+                    ))
+                    controller(tickBox())
+                    binding(values::xpInfoNavigatorAlltimeAverageXP, true)
+                }
+
+                rootOptions.register("xp_info_sea_monsters_energy_meter") {
+                    name(Component.literal("[Sea Monsters] Energy Meter Display"))
+                    description(OptionDescription.of(
+                        Component.literal("Controls when the Energy Meter progress bar should be visible on the XP window."),
+                        Component.literal("Note: This feature is only relevant if a Sea Monsters event is currently active."),
+                        XPInfoDisplay.DISABLED.descriptionComponent(),
+                        XPInfoDisplay.ENABLED.descriptionComponent(),
+                        XPInfoDisplay.ENABLED_GAMES.descriptionComponent(),
+                        XPInfoDisplay.ENABLED_LOBBY.descriptionComponent(),
+                    ))
+                    controller(enumSwitch<XPInfoDisplay> {
+                        Component.literal(it.label)
+                    })
+                    binding(values::xpInfoSeaMonstersEnergyMeter, XPInfoDisplay.ENABLED)
+                }
+
+                rootOptions.register("xp_info_sea_monsters_disable_energy_meter_if_max") {
+                    name(Component.literal("[Sea Monsters] Disable Energy Meter if Max"))
+                    description(OptionDescription.of(
+                        Component.literal("If your Energy Meter is at max claims, it will be hidden from the XP window."),
+                                Component.literal("Note: This feature is only relevant if a Sea Monsters event is currently active."),
+                    ))
+                    controller(tickBox())
+                    binding(values::xpInfoDisableSeaMonstersEnergyMeterIfMax, true)
                 }
             }
         }.generateScreen(parent)
