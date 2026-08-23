@@ -175,8 +175,17 @@ object XPInfo : Feature {
         handleProjectedXPStatistics(packet)
     }
 
+    fun shouldDisplay(displayType: Config.XPInfoDisplay): Boolean {
+        return when(displayType) {
+            Config.XPInfoDisplay.DISABLED -> false
+            Config.XPInfoDisplay.ENABLED -> true
+            Config.XPInfoDisplay.ENABLED_LOBBY -> inLobby
+            Config.XPInfoDisplay.ENABLED_GAMES -> !inLobby
+        }
+    }
+
     fun refreshDialog() {
-        if (Config.values::xpInfoWindow.get() == Config.XPInfoDisplay.DISABLED || !enabled) {
+        if (!shouldDisplay(Config.values::xpInfoWindow.get()) || !enabled) {
             dialog?.close()
             return
         }
