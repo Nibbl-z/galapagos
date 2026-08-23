@@ -181,7 +181,7 @@ object PlayerData : CoreFeature {
 
         Galapagos.logger.info(jsonElement.toString())
 
-        if (jsonElement["message"]?.jsonPrimitive?.content == "Unauthorized") {
+        if (jsonElement["message"]?.jsonPrimitive?.content == "Unauthorized" || jsonElement["message"]?.jsonPrimitive?.content?.contains("No API key") == true) {
             if (!Config.values::usePersonalApiKey.get()) {
                 sendGalapagosChatMessage(
                     Component.literal("Something went wrong when fetching the custom endpoint. Please report this issue to the developers!")
