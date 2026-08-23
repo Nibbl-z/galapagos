@@ -179,6 +179,8 @@ object PlayerData : CoreFeature {
             return false
         }
 
+        Galapagos.logger.info(jsonElement.toString())
+
         if (jsonElement["message"]?.jsonPrimitive?.content == "Unauthorized") {
             if (!Config.values::usePersonalApiKey.get()) {
                 sendGalapagosChatMessage(
@@ -275,7 +277,7 @@ object PlayerData : CoreFeature {
             }
         }
 
-        Galapagos.logger.info(jsonElement.toString())
+
 
         val ranks: List<String> = Json.Default.decodeFromString(
             jsonElement["data"]?.jsonObject["player"]?.jsonObject["ranks"]?.jsonArray.toString()

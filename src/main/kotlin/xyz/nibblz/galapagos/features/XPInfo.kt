@@ -397,7 +397,7 @@ object XPInfo : Feature {
                 index++
             }
 
-            if (Galapagos.save.gamesPlayed[game]!! != 0 && Config.values::xpInfoNavigatorAlltimeAverageXP.get()) {
+            if (Galapagos.save.gamesPlayed.getOrDefault(game, 0) != 0 && Config.values::xpInfoNavigatorAlltimeAverageXP.get()) {
                 components.add(index,
                     Component.literal("Average XP/Game: ").withColor(ChatFormatting.AQUA.color!!)
                         .append(Component.literal("%,d".format(Galapagos.save.gameXP[game]!! / Galapagos.save.gamesPlayed[game]!!)).withColor(0xFFFFFF))
