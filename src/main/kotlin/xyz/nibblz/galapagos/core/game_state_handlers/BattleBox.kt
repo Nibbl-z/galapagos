@@ -59,7 +59,7 @@ object BattleBox : Handler {
             46 to hashMapOf(47 to 67, 48 to 68, 49 to 69, 50 to 70)
         )
 
-        val tabList = (Minecraft.getInstance().gui.tabList as PlayerTabOverlayAccessor).`galapagos$getPlayerInfos`()
+        val tabList = (Minecraft.getInstance().gui.tabList as PlayerTabOverlayAccessor).`galapagos$getPlayerInfos`() ?: return
 
         val players: MutableList<BattleBoxPlayerState> = mutableListOf()
 

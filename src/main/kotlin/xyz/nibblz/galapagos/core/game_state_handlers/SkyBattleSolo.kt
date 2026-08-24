@@ -61,7 +61,7 @@ object SkyBattleSolo : Handler {
             44 to 64
         )
 
-        val tabList = (Minecraft.getInstance().gui.tabList as PlayerTabOverlayAccessor).`galapagos$getPlayerInfos`()
+        val tabList = (Minecraft.getInstance().gui.tabList as PlayerTabOverlayAccessor).`galapagos$getPlayerInfos`() ?: return
         val players: MutableList<GameStateHandler.SkyBattleSoloPlayerState> = mutableListOf()
         var alivePlayers = 0
 

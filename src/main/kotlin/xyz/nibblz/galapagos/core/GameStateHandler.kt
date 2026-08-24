@@ -238,7 +238,11 @@ object GameStateHandler : CoreFeature {
                 updateDelay = 5
                 updateState = false
 
-                currentGame?.stateHandler?.update()
+                try {
+                    currentGame?.stateHandler?.update()
+                } catch (e: Exception) {
+                    Galapagos.logger.warn("Encountered exception in ${currentGame?.name} generic update handling: ${e.message} ${e.cause}")
+                }
             }
         }
     }
@@ -284,17 +288,29 @@ object GameStateHandler : CoreFeature {
     }
 
     fun mccGameState(packet: ClientboundMccGameStatePacket) {
-        currentGame?.stateHandler?.handleGameStatePacket(packet)
+        try {
+            currentGame?.stateHandler?.handleGameStatePacket(packet)
+        } catch (e: Exception) {
+            Galapagos.logger.warn("Encountered exception in ${currentGame?.name} MccGameState handling: ${e.message} ${e.cause}")
+        }
         updateState = true
     }
 
     fun mccStatistic(packet: ClientboundMccStatisticPacket) {
-        currentGame?.stateHandler?.handleStatisticPacket(packet)
+        try {
+            currentGame?.stateHandler?.handleStatisticPacket(packet)
+        } catch (e: Exception) {
+            Galapagos.logger.warn("Encountered exception in ${currentGame?.name} MccStatistic handling: ${e.message} ${e.cause}")
+        }
         updateState = true
     }
 
     fun systemChat(packet: ClientboundSystemChatPacket) {
-        currentGame?.stateHandler?.handleSystemChatPacket(packet)
+        try {
+            currentGame?.stateHandler?.handleSystemChatPacket(packet)
+        } catch (e: Exception) {
+            Galapagos.logger.warn("Encountered exception in ${currentGame?.name} SystemChat handling: ${e.message} ${e.cause}")
+        }
         updateState = true
     }
 }

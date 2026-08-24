@@ -91,7 +91,7 @@ object BattleBoxArena : Handler {
             40 to hashMapOf(41 to 61, 42 to 62, 43 to 63, 44 to 64),
         )
 
-        val tabList = (Minecraft.getInstance().gui.tabList as PlayerTabOverlayAccessor).`galapagos$getPlayerInfos`()
+        val tabList = (Minecraft.getInstance().gui.tabList as PlayerTabOverlayAccessor).`galapagos$getPlayerInfos`() ?: return
 
         val players: MutableList<BattleBoxPlayerState> = mutableListOf()
 

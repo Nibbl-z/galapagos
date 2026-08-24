@@ -49,7 +49,7 @@ object HoleInTheWall : Handler {
         )
 
         // todo, this will prob be reused for other solo games with just score
-        val tabList = (Minecraft.getInstance().gui.tabList as PlayerTabOverlayAccessor).`galapagos$getPlayerInfos`()
+        val tabList = (Minecraft.getInstance().gui.tabList as PlayerTabOverlayAccessor).`galapagos$getPlayerInfos`() ?: return
         val players: MutableList<GameStateHandler.BasicPlayerState> = mutableListOf()
 
         tabListPlayerIndexes.forEach { (usernameIndex, scoreIndex) ->

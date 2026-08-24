@@ -59,7 +59,7 @@ object ParkourWarriorSurvivor : Handler {
             47 to 67,
         )
 
-        val tabList = (Minecraft.getInstance().gui.tabList as PlayerTabOverlayAccessor).`galapagos$getPlayerInfos`()
+        val tabList = (Minecraft.getInstance().gui.tabList as PlayerTabOverlayAccessor).`galapagos$getPlayerInfos`() ?: return
         val players: MutableList<GameStateHandler.BasicPlayerState> = mutableListOf()
 
         tabListPlayerIndexes.forEach { (usernameIndex, scoreIndex) ->
@@ -74,7 +74,7 @@ object ParkourWarriorSurvivor : Handler {
 
         state.players = players
 
-        val tabListFooter = (Minecraft.getInstance().gui.tabList as PlayerTabOverlayAccessor).`galapagos$getFooter`().string
+        val tabListFooter = (Minecraft.getInstance().gui.tabList as PlayerTabOverlayAccessor).`galapagos$getFooter`()?.string ?: return
         val leapPlacementMatches = leapPlacementRegex.findAll(tabListFooter)
 
         val placements: MutableList<Int> = mutableListOf()
