@@ -20,6 +20,7 @@ import net.minecraft.resources.Identifier
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
 import xyz.nibblz.galapagos.core.GameStateHandler
+import xyz.nibblz.galapagos.data.game.BattleBoxKit
 import xyz.nibblz.galapagos.util.Glyphs
 import xyz.nibblz.galapagos.util.mcciTextureComponent
 import kotlin.time.Instant
@@ -47,20 +48,37 @@ class GameHistory : BaseOwoScreen<FlowLayout>() {
             ).positioning(Positioning.absolute(10, 10))
         )
 
-        rootComponent.child(
-            UIContainers.verticalFlow(Sizing.fill(75), Sizing.fixed(80))
-                .surface { context: OwoUIGraphics?, component: ParentUIComponent? ->
-                    NinePatchTexture.draw(Identifier.fromNamespaceAndPath("galapagos", "mcci_panel"), context, component)
-                }
-                .positioning(Positioning.absolute(192, 10))
-        )
+        val overview = UIContainers.verticalFlow(Sizing.fill(75), Sizing.fixed(80))
 
         val historyContainer = UIContainers.verticalFlow(Sizing.content(), Sizing.content())
         historyContainer.padding(Insets.of(5))
         historyContainer.gap(3)
 
+        data class DataPoint (
+            val teamPlacement: Int,
+            val indivPlacement: Int,
+            var eliminations: Int,
+            var deaths: Int
+        )
+
+        val mapData: HashMap<String, MutableList<DataPoint>> = hashMapOf()
+        val kitData: HashMap<BattleBoxKit, MutableList<DataPoint>> = hashMapOf()
+
         Galapagos.save.battleBoxHistory.forEach {
-            Galapagos.logger.info("this is ${it.map}")
+            val dataPoint = DataPoint(
+                GameStateHandler.GameState.BattleBox.teamPlacement(it),
+                it.getPlacement(true),
+                (it.getPlayer()?.kills ?: 0) + (it.getPlayer()?.assists ?: 0),
+                it.getPlayer()?.deaths ?: 0
+            )
+
+            mapData.putIfAbsent(it.map, mutableListOf())
+            mapData[it.map]?.add(dataPoint)
+            if (it.kit != null) {
+                kitData.putIfAbsent(it.kit!!, mutableListOf())
+                kitData[it.kit]?.add(dataPoint)
+            }
+
             val container = UIContainers.horizontalFlow(Sizing.fill(100), Sizing.content())
             container.gap(5)
             container.verticalAlignment(VerticalAlignment.CENTER)
@@ -194,6 +212,80 @@ class GameHistory : BaseOwoScreen<FlowLayout>() {
             historyContainer.child(container)
         }
 
+        val mapsByWinRate = mapData.keys.sortedBy {
+            val data = mapData[it]!!
+            val wins = data.sumOf { data -> if (data.teamPlacement == 1) 1 else 0 }
+            val losses = data.sumOf { data -> if (data.teamPlacement != 1) 1 else 0 }
+
+            wins.toDouble() / losses.toDouble()
+        }
+
+        val kitsByWinRate = kitData.keys.sortedBy {
+            val data = kitData[it]!!
+            val wins = data.sumOf { data -> if (data.teamPlacement == 1) 1 else 0 }
+            val losses = data.sumOf { data -> if (data.teamPlacement != 1) 1 else 0 }
+
+            wins.toDouble() / losses.toDouble()
+        }
+
+        val mapsByKDR = mapData.keys.sortedBy {
+            val data = mapData[it]!!
+            val kills = data.sumOf { data -> data.eliminations }
+            val deaths = data.sumOf { data -> data.deaths }
+
+            kills.toDouble() / deaths.toDouble()
+        }
+
+        val kitsByKDR = kitData.keys.sortedBy {
+            val data = kitData[it]!!
+            val kills = data.sumOf { data -> data.eliminations }
+            val deaths = data.sumOf { data -> data.deaths }
+
+            kills.toDouble() / deaths.toDouble()
+        }
+
+        if (!mapsByWinRate.isEmpty()) {
+            overview.child(
+                UIComponents.label(Component.literal("Best Map (By WLR): ${mapsByWinRate.last()}"))
+            )
+
+            overview.child(
+                UIComponents.label(Component.literal("Best Map (By KDR): ${mapsByKDR.last()}"))
+            )
+        }
+
+        if (!kitsByWinRate.isEmpty()) {
+            overview.child(
+                UIComponents.label(
+                    Component.literal("Best Kit (By WLR): ")
+                        .append(mcciTextureComponent(kitsByWinRate.last().bbSprite()))
+                        .append(Component.literal(" ${kitsByWinRate.last().label}")
+                            .withStyle(Style.EMPTY.withBold(true).withColor(kitsByWinRate.last().bbColor))
+                        )
+                )
+            )
+
+            overview.child(
+                UIComponents.label(
+                    Component.literal("Best Kit (By KDR): ")
+                        .append(mcciTextureComponent(kitsByKDR.last().bbSprite()))
+                        .append(Component.literal(" ${kitsByKDR.last().label}")
+                            .withStyle(Style.EMPTY.withBold(true).withColor(kitsByKDR.last().bbColor))
+                        )
+                )
+            )
+        }
+
+        overview
+            .surface { context: OwoUIGraphics?, component: ParentUIComponent? ->
+                NinePatchTexture.draw(Identifier.fromNamespaceAndPath("galapagos", "mcci_panel"), context, component)
+            }
+            .padding(Insets.of(10))
+            .positioning(Positioning.absolute(192, 10))
+
+
+        rootComponent.child(overview)
+
         rootComponent.child(
             UIContainers.verticalScroll(Sizing.fill(30), Sizing.fill(60),historyContainer)
             .scrollbarThiccness(4) // are we fr
@@ -201,7 +293,6 @@ class GameHistory : BaseOwoScreen<FlowLayout>() {
             .surface { context: OwoUIGraphics?, component: ParentUIComponent? ->
                 NinePatchTexture.draw(Identifier.fromNamespaceAndPath("galapagos", "mcci_panel"), context, component)
             }
-
         )
     }
 }
