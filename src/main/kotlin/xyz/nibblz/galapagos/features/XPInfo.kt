@@ -151,6 +151,7 @@ object XPInfo : Feature {
 
     var dialog: XPInfoDialog? = null
     var dialogLocation: Vector2 = Vector2(10, 10)
+    var dialogShowBreakdown = false
     var currentGames: MutableList<XPSource> = mutableListOf()
     var currentStarLevelGame: StarLevelGame? = null
     var inLobby: Boolean = true
