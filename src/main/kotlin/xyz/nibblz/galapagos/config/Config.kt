@@ -148,6 +148,8 @@ class Config {
     @SerialEntry
     var xpInfoWindow: XPInfoDisplay = XPInfoDisplay.ENABLED
     @SerialEntry
+    var xpInfoWindowCompact: Boolean = false
+    @SerialEntry
     var xpInfoDailyMeter: XPInfoDisplay = XPInfoDisplay.ENABLED
     @SerialEntry
     var xpInfoDisableDailyMeterIfMax: Boolean = true
@@ -686,6 +688,19 @@ class Config {
 
             categories.register("xp_info") {
                 name(Component.literal("XP Info"))
+
+                rootOptions.register("xp_info_window_compact") {
+                    name(Component.literal("Compact XP Info Window"))
+                    description(OptionDescription.of(
+                        Component.literal("Removes/shortens some unnecessary things from the XP Info window's info, including:"),
+                        Component.literal("- Meter names"),
+                        Component.literal("- Current and total claims"),
+                        Component.literal("- Smaller progress bars"),
+                        Component.literal("- Truncated XP requirements")
+                    ))
+                    controller(tickBox())
+                    binding(values::xpInfoWindowCompact, false)
+                }
 
                 rootOptions.register("xp_info_window") {
                     name(Component.literal("XP Info Window"))

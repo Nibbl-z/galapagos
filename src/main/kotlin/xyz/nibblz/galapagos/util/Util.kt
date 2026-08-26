@@ -1,6 +1,7 @@
 package xyz.nibblz.galapagos.util
 
 import net.minecraft.client.Minecraft
+import java.math.BigDecimal
 
 // stealing from devcmb stealing from pe3ep part 1
 // https://github.com/pe3ep/Trident/blob/master/src/main/kotlin/cc/pe3epwithyou/trident/state/MCCIState.kt
@@ -42,3 +43,8 @@ data class Vector2(
 //
 //    return number.toIntOrNull() ?: 0
 //}
+
+fun intToShortenedNumber(number: Int): String {
+    if (number < 1000) return number.toString()
+    return "${BigDecimal((number.toDouble() / 1000.0).toString()).stripTrailingZeros().toPlainString()}K"
+}

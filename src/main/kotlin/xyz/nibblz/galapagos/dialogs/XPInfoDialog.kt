@@ -20,6 +20,7 @@ import xyz.nibblz.galapagos.data.getFactionLevelAndProgress
 import xyz.nibblz.galapagos.data.getStarLevelEvolution
 import xyz.nibblz.galapagos.features.XPInfo
 import xyz.nibblz.galapagos.util.Glyphs
+import xyz.nibblz.galapagos.util.intToShortenedNumber
 import xyz.nibblz.galapagos.util.mcciProgressBar
 import xyz.nibblz.galapagos.util.mcciTextureComponent
 import java.util.*
@@ -37,6 +38,36 @@ class XPInfoDialog(x: Int, y: Int) : Dialog(x, y), Themed by GalapagosTheme {
             Config.XPInfoDisplay.ENABLED -> true
             Config.XPInfoDisplay.ENABLED_LOBBY -> XPInfo.inLobby
             Config.XPInfoDisplay.ENABLED_GAMES -> !XPInfo.inLobby
+        }
+    }
+
+    fun createMeterComponent(claimable: XPInfo.Claimable, name: String, sprite: String): Component {
+        return createMeterComponent(claimable.completed, claimable.total, claimable.currentXP, claimable.requiredXP, name, sprite)
+    }
+
+    fun createMeterComponent(completed: Int, total: Int, currentXP: Int, requiredXP: Int, name: String, sprite: String): Component {
+        return with(Component.empty()) {
+            append(mcciTextureComponent(sprite))
+            append(Component.literal(" "))
+            if (!Config.values::xpInfoWindowCompact.get()) {
+                append(Component.literal("$name: ").withColor(ChatFormatting.GRAY.color!!))
+            }
+
+            append(Component.literal("$completed").withColor(ChatFormatting.WHITE.color!!))
+            append(Component.literal("/$total, ").withColor(ChatFormatting.DARK_GRAY.color!!))
+
+            val requiredXPText = if (!Config.values::xpInfoWindowCompact.get()) "%,d".format(requiredXP) else intToShortenedNumber(requiredXP)
+            append(Component.literal("%,d".format(currentXP)).withColor(ChatFormatting.WHITE.color!!))
+            append(Component.literal("/${requiredXPText}").withColor(ChatFormatting.DARK_GRAY.color!!))
+
+            if (!Config.values::xpInfoWindowCompact.get()) {
+                append(Component.literal(" XP").withColor(ChatFormatting.GRAY.color!!))
+                append(Component.literal("\n"))
+            } else {
+                append(Component.literal(" "))
+            }
+            append(mcciProgressBar(currentXP.toDouble() / requiredXP.toDouble(), if (!Config.values::xpInfoWindowCompact.get()) 5 else 3))
+            append(Component.literal(" ${((currentXP.toDouble() / requiredXP.toDouble() * 100.0).toInt())}%"))
         }
     }
 
@@ -103,18 +134,8 @@ class XPInfoDialog(x: Int, y: Int) : Dialog(x, y), Themed by GalapagosTheme {
         }
 
         if (shouldDisplay(Config.values::xpInfoDailyMeter.get()) && !(Config.values::xpInfoDisableDailyMeterIfMax.get() && meterSprite == "island_interface/quest_log/quest_complete")) {
-            +TextWidgets.multiLine(mcciTextureComponent(meterSprite)
-                .append(Component.literal(" Daily Meter: ").withColor(ChatFormatting.GRAY.color!!))
-                .append(Component.literal("${XPInfo.dailyMeter.completed}").withColor(ChatFormatting.WHITE.color!!))
-                .append(Component.literal("/${XPInfo.dailyMeter.total}, ").withColor(ChatFormatting.DARK_GRAY.color!!))
-                .append(Component.literal("%,d".format(XPInfo.dailyMeter.currentXP)).withColor(ChatFormatting.WHITE.color!!))
-                .append(Component.literal("/" + "%,d".format(XPInfo.dailyMeter.requiredXP)).withColor(ChatFormatting.DARK_GRAY.color!!))
-                .append(Component.literal(" XP\n").withColor(ChatFormatting.GRAY.color!!))
-                .append(mcciProgressBar(meterProgress, 5))
-                .append(Component.literal(" ${((XPInfo.dailyMeter.currentXP.toDouble() / XPInfo.dailyMeter.requiredXP.toDouble() * 100.0).toInt())}%"))
-            )
+            +TextWidgets.multiLine(createMeterComponent(XPInfo.dailyMeter, "Daily Meter", meterSprite))
         }
-
 
         val vaultSprite = when (XPInfo.weeklyVault.completed) {
             0 -> "island_interface/quest_log/meters/daily_vault_empty"
@@ -123,17 +144,7 @@ class XPInfoDialog(x: Int, y: Int) : Dialog(x, y), Themed by GalapagosTheme {
         }
 
         if (shouldDisplay(Config.values::xpInfoWeeklyVault.get()) && !(Config.values::xpInfoDisableWeeklyVaultIfMax.get() && vaultSprite == "island_interface/quest_log/meters/daily_vault_full")) {
-            +TextWidgets.multiLine(
-                mcciTextureComponent(vaultSprite)
-                    .append(Component.literal(" Weekly Vault: ").withColor(ChatFormatting.GRAY.color!!))
-                    .append(Component.literal("${XPInfo.weeklyVault.completed}").withColor(ChatFormatting.WHITE.color!!))
-                    .append(Component.literal("/${XPInfo.weeklyVault.total}, ").withColor(ChatFormatting.DARK_GRAY.color!!))
-                    .append(Component.literal("%,d".format(XPInfo.weeklyVault.currentXP)).withColor(ChatFormatting.WHITE.color!!))
-                    .append(Component.literal("/" + "%,d".format(XPInfo.weeklyVault.requiredXP)).withColor(ChatFormatting.DARK_GRAY.color!!))
-                    .append(Component.literal(" XP\n").withColor(ChatFormatting.GRAY.color!!))
-                    .append(mcciProgressBar(XPInfo.weeklyVault.currentXP.toDouble() / XPInfo.weeklyVault.requiredXP.toDouble(), 5))
-                    .append(Component.literal(" ${((XPInfo.weeklyVault.currentXP.toDouble() / XPInfo.weeklyVault.requiredXP.toDouble() * 100.0).toInt())}%"))
-            )
+            +TextWidgets.multiLine(createMeterComponent(XPInfo.weeklyVault, "Weekly Vault", vaultSprite))
         }
 
         if ((XPInfo.seaMonstersActive && shouldDisplay(Config.values::xpInfoSeaMonstersEnergyMeter.get()))
@@ -142,36 +153,30 @@ class XPInfoDialog(x: Int, y: Int) : Dialog(x, y), Themed by GalapagosTheme {
                 && XPInfo.seaMonstersEnergyMeter.completed == XPInfo.seaMonstersEnergyMeter.total
             )
         ) {
-            val energyMeterProgress = XPInfo.seaMonstersEnergyMeter.currentXP.toDouble() / XPInfo.seaMonstersEnergyMeter.requiredXP.toDouble()
-
-            +TextWidgets.multiLine(Component.empty()
-                .append(mcciTextureComponent("island_interface/navigator/sea_monster_event"))
-                .append(Component.literal(" Energy Meter: ").withColor(ChatFormatting.GRAY.color!!))
-                .append(Component.literal("${XPInfo.seaMonstersEnergyMeter.completed}").withColor(ChatFormatting.WHITE.color!!))
-                .append(Component.literal("/${XPInfo.seaMonstersEnergyMeter.total}, ").withColor(ChatFormatting.DARK_GRAY.color!!))
-                .append(Component.literal("%,d".format(XPInfo.seaMonstersEnergyMeter.currentXP)).withColor(ChatFormatting.WHITE.color!!))
-                .append(Component.literal("/" + "%,d".format(XPInfo.seaMonstersEnergyMeter.requiredXP)).withColor(ChatFormatting.DARK_GRAY.color!!))
-                .append(Component.literal(" XP\n").withColor(ChatFormatting.GRAY.color!!))
-                .append(mcciProgressBar(energyMeterProgress, 5))
-                .append(Component.literal(" ${((XPInfo.seaMonstersEnergyMeter.currentXP.toDouble() / XPInfo.seaMonstersEnergyMeter.requiredXP.toDouble() * 100.0).toInt())}%"))
-            )
+            +TextWidgets.multiLine(createMeterComponent(XPInfo.seaMonstersEnergyMeter, "Energy Meter", "island_interface/navigator/sea_monster_event"))
         }
 
         if (XPInfo.currentStarLevelGame != null && shouldDisplay(Config.values::xpInfoStarLevel.get())) {
             val starLevel = Galapagos.save.starLevelXP[XPInfo.currentStarLevelGame]!! / 3000
             val currentXP = Galapagos.save.starLevelXP[XPInfo.currentStarLevelGame]!! - (starLevel * 3000)
 
-            +TextWidgets.multiLine(
-                mcciTextureComponent(XPInfo.currentStarLevelGame!!.sprite)
-                    .append(Component.literal(" ${XPInfo.currentStarLevelGame!!.label}: ").withColor(ChatFormatting.GRAY.color!!))
-                    .append(Glyphs.getGlyphComponent(getStarLevelEvolution(starLevel).getSprite() + ".png"))
-                    .append(Component.literal("${starLevel}, ").withColor(ChatFormatting.WHITE.color!!))
-                    .append(Component.literal("%,d".format(currentXP)).withColor(ChatFormatting.WHITE.color!!))
-                    .append(Component.literal("/" + "%,d".format(3000)).withColor(ChatFormatting.DARK_GRAY.color!!))
-                    .append(Component.literal(" XP\n").withColor(ChatFormatting.GRAY.color!!))
-                .append(mcciProgressBar(currentXP.toDouble() / 3000.0, 5))
-                .append(Component.literal(" ${((currentXP.toDouble() / 3000.0 * 100.0).toInt())}%"))
-            )
+            +TextWidgets.multiLine(with(Component.empty()) {
+                append(mcciTextureComponent(XPInfo.currentStarLevelGame!!.sprite))
+                append(Component.literal(" "))
+                if (!Config.values::xpInfoWindowCompact.get()) {
+                    append(Component.literal("${XPInfo.currentStarLevelGame!!.label}: "))
+                }
+                append(Glyphs.getGlyphComponent(getStarLevelEvolution(starLevel).getSprite() + ".png"))
+                append(Component.literal("${starLevel}, "))
+
+                val requiredXPText = if (!Config.values::xpInfoWindowCompact.get()) "%,d".format(3000) else intToShortenedNumber(3000)
+                append(Component.literal("%,d".format(currentXP)).withColor(ChatFormatting.WHITE.color!!))
+                append(Component.literal("/${requiredXPText}").withColor(ChatFormatting.DARK_GRAY.color!!))
+
+                append(Component.literal(if (!Config.values::xpInfoWindowCompact.get()) " XP\n" else " ").withColor(ChatFormatting.GRAY.color!!))
+                append(mcciProgressBar(currentXP.toDouble() / 3000.0, if (!Config.values::xpInfoWindowCompact.get()) 5 else 3))
+                append(Component.literal(" ${((currentXP.toDouble() / 3000.0 * 100.0).toInt())}%"))
+            })
         }
 
         if (Galapagos.save.selectedFaction != null && shouldDisplay(Config.values::xpInfoFaction.get())) {
@@ -181,17 +186,25 @@ class XPInfoDialog(x: Int, y: Int) : Dialog(x, y), Themed by GalapagosTheme {
             val factionRequiredXP = FACTION_XP_PER_LEVEL.entries.find { factionLevel in it.key }?.value
                 ?: throw IllegalStateException("Attempted to get XP at invalid level $factionLevel")
 
-            +TextWidgets.multiLine(
-                Component.empty()
-                    .append(Glyphs.getGlyphComponent(Galapagos.save.selectedFaction!!.getSprite(factionLevel)))
-                    .append(Component.literal(" ${Galapagos.save.selectedFaction!!.label}: Level ").withColor(ChatFormatting.GRAY.color!!))
-                    .append(Component.literal("${factionLevel}, ").withColor(ChatFormatting.WHITE.color!!))
-                    .append(Component.literal("%,d".format(factionProgress)).withColor(ChatFormatting.WHITE.color!!))
-                    .append(Component.literal("/" + "%,d".format(factionRequiredXP)).withColor(ChatFormatting.DARK_GRAY.color!!))
-                    .append(Component.literal(" XP\n").withColor(ChatFormatting.GRAY.color!!))
-                    .append(mcciProgressBar(factionProgress.toDouble() / factionRequiredXP.toDouble(), 5))
-                    .append(Component.literal(" ${((factionProgress.toDouble() / factionRequiredXP.toDouble() * 100.0).toInt())}%"))
-            )
+            +TextWidgets.multiLine(with(Component.empty()) {
+                append(Glyphs.getGlyphComponent(Galapagos.save.selectedFaction!!.getSprite(factionLevel)))
+                if (!Config.values::xpInfoWindowCompact.get()) {
+                    append(Component.literal(" ${Galapagos.save.selectedFaction!!.label}: Level").withColor(ChatFormatting.GRAY.color!!))
+                }
+                append(Component.literal(" ${factionLevel}, ").withColor(ChatFormatting.WHITE.color!!))
+
+                val requiredXPText = if (!Config.values::xpInfoWindowCompact.get()) "%,d".format(factionRequiredXP) else intToShortenedNumber(factionRequiredXP)
+
+                append(Component.literal("%,d".format(factionProgress)).withColor(ChatFormatting.WHITE.color!!))
+                append(Component.literal("/$requiredXPText ").withColor(ChatFormatting.DARK_GRAY.color!!))
+
+                if (!Config.values::xpInfoWindowCompact.get()) {
+                    append(Component.literal("XP\n").withColor(ChatFormatting.GRAY.color!!))
+                }
+
+                append(mcciProgressBar(factionProgress.toDouble() / factionRequiredXP.toDouble(), if (!Config.values::xpInfoWindowCompact.get()) 5 else 3))
+                append(Component.literal(" ${((factionProgress.toDouble() / factionRequiredXP.toDouble() * 100.0).toInt())}%"))
+            })
         }
 
         if (shouldDisplay(Config.values::xpInfoGameXP.get())) {
