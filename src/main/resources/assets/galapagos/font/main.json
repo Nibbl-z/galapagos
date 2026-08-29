@@ -71,6 +71,78 @@
       "chars": [
         "\uE006"
       ]
+    },
+    {
+      "type": "bitmap",
+      "file": "galapagos:font/timed_harming.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\uE007"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "galapagos:font/construction_block.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\uE008"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "galapagos:font/breaking.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\uE009"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "galapagos:font/water.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\uE00A"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "galapagos:font/spark_selfknockback.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\uE00B"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "galapagos:font/lava.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\uE00C"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "galapagos:font/sword.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\uE00D"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "galapagos:font/bow.png",
+      "ascent": 7,
+      "height": 8,
+      "chars": [
+        "\uE00E"
+      ]
     }
   ]
 }

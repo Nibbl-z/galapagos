@@ -1,6 +1,7 @@
 package xyz.nibblz.galapagos.util
 
 import net.minecraft.client.Minecraft
+import net.minecraft.util.ARGB
 import java.math.BigDecimal
 
 // stealing from devcmb stealing from pe3ep part 1
@@ -47,4 +48,12 @@ data class Vector2(
 fun intToShortenedNumber(number: Int): String {
     if (number < 1000) return number.toString()
     return "${BigDecimal((number.toDouble() / 1000.0).toString()).stripTrailingZeros().toPlainString()}K"
+}
+
+fun percentageToColor(percent: Double): Int {
+    return if (percent >= 0.5) {
+        ARGB.color((-255 * ((percent - 0.5) * 2.0)).toInt() + 255, 255, 0)
+    } else {
+        ARGB.color(255, (255 * ((percent - 0.5) * 2.0)).toInt() + 255, 0)
+    }
 }

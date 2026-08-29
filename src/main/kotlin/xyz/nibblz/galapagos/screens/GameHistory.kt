@@ -15,19 +15,88 @@ import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
 import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.HoverEvent
 import net.minecraft.network.chat.Style
 import net.minecraft.resources.Identifier
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
 import xyz.nibblz.galapagos.core.GameStateHandler
 import xyz.nibblz.galapagos.data.game.BattleBoxKit
+import xyz.nibblz.galapagos.data.game.DeathCause
 import xyz.nibblz.galapagos.util.Glyphs
 import xyz.nibblz.galapagos.util.mcciTextureComponent
+import xyz.nibblz.galapagos.util.percentageToColor
 import kotlin.time.Instant
 
 class GameHistory : BaseOwoScreen<FlowLayout>() {
     override fun createAdapter(): OwoUIAdapter<FlowLayout?> {
         return OwoUIAdapter.create(this, UIContainers::verticalFlow)
+    }
+
+    val graphColors: List<Int> = listOf(
+        0x77ff6f,
+        0x6fef67,
+        0x67df5f,
+        0x5fcf57,
+        0x5bbf4f,
+        0x53af47,
+        0x4b9f3f,
+        0x439337,
+        0x3f832f,
+        0x37732b,
+        0x2f6323,
+        0x27531b,
+        0x1f4317,
+        0x17330f,
+        0x13230b,
+        0x0b1707
+    )
+
+    fun createCauseGraph(data: HashMap<DeathCause, Int>, label: String): FlowLayout {
+        val percents: HashMap<DeathCause, Double> = hashMapOf()
+        val sum = data.values.sumOf { it }
+
+        data.forEach { (cause, count) ->
+            percents[cause] = (count.toDouble() / sum.toDouble())
+        }
+
+        val sorted = percents.entries.sortedByDescending { it.value }
+
+        val mult = graphColors.size / sorted.size
+
+        val graph = UIContainers.horizontalFlow(Sizing.expand(), Sizing.fixed(10))
+        sorted.forEachIndexed { index, (_, percent) ->
+            graph.child(
+                UIComponents.box(Sizing.fill((percent * 100).toInt()), Sizing.fill())
+                    .fill(true)
+                    .color(Color.ofRgb(graphColors.getOrNull(index * mult) ?: 0xFFFFFF))
+            )
+        }
+
+        val breakdownComponent = with(Component.empty()) {
+            sorted.forEachIndexed { index, (cause, _) ->
+                if (cause.sprite.contains("_fonts")) append(Glyphs.getGlyphComponent("${cause.sprite}.png"))
+                else if (cause.sprite.contains("/")) append(mcciTextureComponent(cause.sprite))
+                else append(Component.literal(cause.sprite).withColor(0xffffff).withStyle(Style.EMPTY.withFont(Galapagos.font).withHoverEvent(
+                    HoverEvent.ShowText(Component.literal(cause.label))
+                )))
+                append(Component.literal(" ${data[cause]} ").withColor(graphColors.getOrNull(index * mult) ?: 0xFFFFFF).withStyle(Style.EMPTY.withHoverEvent(
+                    HoverEvent.ShowText(Component.literal(cause.label))
+                )))
+            }
+
+            append(Component.empty()) // goog
+        }
+
+        val root = UIContainers.verticalFlow(Sizing.fill(), Sizing.content())
+            .child(UIContainers.horizontalFlow(Sizing.fill(), Sizing.fixed(10))
+                .child(UIComponents.label(Component.literal(label)).shadow(true).horizontalSizing(Sizing.fill(15)))
+                .child(graph))
+            .child(UIComponents.label(breakdownComponent).shadow(true))
+            .gap(2)
+
+
+        return root
     }
 
     override fun build(rootComponent: FlowLayout) {
@@ -48,7 +117,7 @@ class GameHistory : BaseOwoScreen<FlowLayout>() {
             ).positioning(Positioning.absolute(10, 10))
         )
 
-        val overview = UIContainers.verticalFlow(Sizing.fill(75), Sizing.fixed(80))
+        val overview = UIContainers.verticalFlow(Sizing.fill(30), Sizing.fixed(110))
 
         val historyContainer = UIContainers.verticalFlow(Sizing.content(), Sizing.content())
         historyContainer.padding(Insets.of(5))
@@ -63,12 +132,14 @@ class GameHistory : BaseOwoScreen<FlowLayout>() {
 
         val mapData: HashMap<String, MutableList<DataPoint>> = hashMapOf()
         val kitData: HashMap<BattleBoxKit, MutableList<DataPoint>> = hashMapOf()
+        val kills: HashMap<DeathCause, Int> = hashMapOf()
+        val deaths: HashMap<DeathCause, Int> = hashMapOf()
 
-        Galapagos.save.battleBoxHistory.forEach {
+        Galapagos.save.battleBoxHistory.sortedByDescending { it.timestamp }.forEach {
             val dataPoint = DataPoint(
                 GameStateHandler.GameState.BattleBox.teamPlacement(it),
                 it.getPlacement(true),
-                (it.getPlayer()?.kills ?: 0) + (it.getPlayer()?.assists ?: 0),
+                it.getPlayer()?.kills ?: 0,
                 it.getPlayer()?.deaths ?: 0
             )
 
@@ -78,6 +149,9 @@ class GameHistory : BaseOwoScreen<FlowLayout>() {
                 kitData.putIfAbsent(it.kit!!, mutableListOf())
                 kitData[it.kit]?.add(dataPoint)
             }
+
+            it.killCauses.forEach { cause -> kills[cause] = (kills[cause] ?: 0) + 1 }
+            it.deathCauses.forEach { cause -> deaths[cause] = (deaths[cause] ?: 0) + 1 }
 
             val container = UIContainers.horizontalFlow(Sizing.fill(100), Sizing.content())
             container.gap(5)
@@ -162,7 +236,9 @@ class GameHistory : BaseOwoScreen<FlowLayout>() {
                 date.time.toString()
             }
 
-            leftContent.child(UIComponents.label(Component.literal(time)).margins(Insets.top(10)))
+            leftContent.child(UIComponents.label(Component.literal(
+                "${date.month.name.lowercase().replaceFirstChar { char -> char.uppercase() }} ${date.day}, ${date.year}, ${time}"
+            ).withColor(ChatFormatting.GRAY.color!!)).margins(Insets.top(10)))
 
             val rightContent = UIContainers.verticalFlow(Sizing.fill(50), Sizing.content())
             rightContent.padding(Insets.of(5))
@@ -212,45 +288,87 @@ class GameHistory : BaseOwoScreen<FlowLayout>() {
             historyContainer.child(container)
         }
 
+        val mapWinRates: HashMap<String, Double> = hashMapOf()
         val mapsByWinRate = mapData.keys.sortedBy {
             val data = mapData[it]!!
             val wins = data.sumOf { data -> if (data.teamPlacement == 1) 1 else 0 }
             val losses = data.sumOf { data -> if (data.teamPlacement != 1) 1 else 0 }
+            val winRate = wins.toDouble() / (wins + losses).toDouble()
+            if (winRate.isInfinite()) { return@sortedBy -1.0 }
 
-            wins.toDouble() / losses.toDouble()
+            mapWinRates[it] = winRate
+
+            winRate
         }
 
+        val kitWinRates: HashMap<BattleBoxKit, Double> = hashMapOf()
         val kitsByWinRate = kitData.keys.sortedBy {
             val data = kitData[it]!!
             val wins = data.sumOf { data -> if (data.teamPlacement == 1) 1 else 0 }
             val losses = data.sumOf { data -> if (data.teamPlacement != 1) 1 else 0 }
+            val winRate = wins.toDouble() / (wins + losses).toDouble()
+            if (winRate.isInfinite()) { return@sortedBy -1.0 }
 
-            wins.toDouble() / losses.toDouble()
+            kitWinRates[it] = winRate
+
+            winRate
         }
 
+        val mapKDR: HashMap<String, Double> = hashMapOf()
         val mapsByKDR = mapData.keys.sortedBy {
             val data = mapData[it]!!
             val kills = data.sumOf { data -> data.eliminations }
             val deaths = data.sumOf { data -> data.deaths }
+            val kdr = kills.toDouble() / deaths.toDouble()
+            if (kdr.isInfinite()) { return@sortedBy -1.0 }
 
-            kills.toDouble() / deaths.toDouble()
+            mapKDR[it] = kdr
+
+            kdr
         }
 
+        val kitKDR: HashMap<BattleBoxKit, Double> = hashMapOf()
         val kitsByKDR = kitData.keys.sortedBy {
             val data = kitData[it]!!
             val kills = data.sumOf { data -> data.eliminations }
             val deaths = data.sumOf { data -> data.deaths }
+            val kdr = kills.toDouble() / deaths.toDouble()
+            if (kdr.isInfinite()) { return@sortedBy -1.0 }
 
-            kills.toDouble() / deaths.toDouble()
+            kitKDR[it] = kdr
+
+            kdr
         }
+
+        overview.child(
+            UIComponents.label(Component.literal("- Statistics -").withStyle(Style.EMPTY.withBold(true)))
+                .shadow(true)
+                .horizontalTextAlignment(HorizontalAlignment.CENTER)
+                .horizontalSizing(Sizing.fill())
+                .margins(Insets.bottom(5))
+        )
 
         if (!mapsByWinRate.isEmpty()) {
             overview.child(
-                UIComponents.label(Component.literal("Best Map (By WLR): ${mapsByWinRate.last()}"))
+                UIComponents.label(
+                    Component.literal("Best Map (By WLR): ")
+                    .append(Component.literal(mapsByWinRate.last()).withStyle(Style.EMPTY.withBold(true)))
+                    .append(Component.literal(" - "))
+                    .append(Component.literal(
+                        "${Galapagos.decimalFormat.format(mapWinRates[mapsByWinRate.last()]!! * 100.0)}%")
+                        .withColor(percentageToColor(mapWinRates[mapsByWinRate.last()]!!))
+                    )
+                ).shadow(true)
             )
 
             overview.child(
-                UIComponents.label(Component.literal("Best Map (By KDR): ${mapsByKDR.last()}"))
+                //UIComponents.label(Component.literal("Best Map (By KDR): ${mapsByKDR.last()} - ${mapKDR[mapsByKDR.last()]}")).shadow(true)
+                UIComponents.label(
+                Component.literal("Best Map (By KDR): ")
+                    .append(Component.literal(mapsByKDR.last()).withStyle(Style.EMPTY.withBold(true)))
+                    .append(Component.literal(" - "))
+                    .append(Component.literal("${Galapagos.decimalFormat.format(mapKDR[mapsByKDR.last()]!!)}"))
+                ).shadow(true)
             )
         }
 
@@ -262,7 +380,12 @@ class GameHistory : BaseOwoScreen<FlowLayout>() {
                         .append(Component.literal(" ${kitsByWinRate.last().label}")
                             .withStyle(Style.EMPTY.withBold(true).withColor(kitsByWinRate.last().bbColor))
                         )
-                )
+                        .append(Component.literal(" - "))
+                        .append(Component.literal(
+                            "${Galapagos.decimalFormat.format(kitWinRates[kitsByWinRate.last()]!! * 100.0)}%")
+                            .withColor(percentageToColor(kitWinRates[kitsByWinRate.last()]!!))
+                        )
+                ).shadow(true)
             )
 
             overview.child(
@@ -272,16 +395,30 @@ class GameHistory : BaseOwoScreen<FlowLayout>() {
                         .append(Component.literal(" ${kitsByKDR.last().label}")
                             .withStyle(Style.EMPTY.withBold(true).withColor(kitsByKDR.last().bbColor))
                         )
-                )
+                        .append(Component.literal(" - "))
+                        .append(Component.literal("${Galapagos.decimalFormat.format(kitKDR[kitsByKDR.last()]!!)}"))
+                ).shadow(true)
+            )
+
+            overview.child(
+                createCauseGraph(kills, "Kills: ")
+                    .margins(Insets.top(5))
+            )
+
+            overview.child(
+                createCauseGraph(deaths, "Deaths: ")
+                    .margins(Insets.top(3))
             )
         }
+
+
 
         overview
             .surface { context: OwoUIGraphics?, component: ParentUIComponent? ->
                 NinePatchTexture.draw(Identifier.fromNamespaceAndPath("galapagos", "mcci_panel"), context, component)
             }
-            .padding(Insets.of(10))
-            .positioning(Positioning.absolute(192, 10))
+            .padding(Insets.of(5))
+            .margins(Insets.bottom(5))
 
 
         rootComponent.child(overview)
