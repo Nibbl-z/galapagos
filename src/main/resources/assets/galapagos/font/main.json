@@ -1,6 +1,12 @@
 {
   "providers": [
     {
+      "type": "space",
+      "advances": {
+        "\u200B": -6
+      }
+    },
+    {
       "type": "bitmap",
       "file": "galapagos:chat_icon.png",
       "ascent": 7,

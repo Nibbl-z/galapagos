@@ -24,7 +24,7 @@ object BattleBoxArena : Handler {
     val roundsRegex = Regex("ROUND \\[(?<rounds>\\d+)/")
     val roundStartRegex = Regex("Round (?<round>\\d+) started")
 
-    var chosenKit: Pair<BattleBoxKit, BattleBoxArenaCoreKits> = BattleBoxKit.SHARPSHOOTER to BattleBoxArenaCoreKits.NONE
+    var chosenKit: Pair<BattleBoxKit, BattleBoxArenaCoreKitType> = BattleBoxKit.SHARPSHOOTER to BattleBoxArenaCoreKitType.NONE
     var storeRoundStats = false
 
     override fun handleGameStatePacket(packet: ClientboundMccGameStatePacket) {
@@ -40,16 +40,18 @@ object BattleBoxArena : Handler {
         if (message.contains("You")) {
             val match = kitSelectRegexes.firstNotNullOfOrNull {
                 it.find(message)?.groups
-            } ?: return
+            }
 
-            val kitName = match["kit"]?.value
-            val kit = BattleBoxKit.entries.find { it.label == kitName } ?: return
+            if (match != null) {
+                val kitName = match["kit"]?.value
+                val kit = BattleBoxKit.entries.find { it.label == kitName } ?: return
 
 
-            val coreKitName = try { match["corekit"]?.value } catch(_: IllegalArgumentException) { "" }
-            val coreKit = BattleBoxArenaCoreKits.entries.find { it.label == coreKitName } ?: BattleBoxArenaCoreKits.NONE
+                val coreKitName = try { match["corekit"]?.value } catch(_: IllegalArgumentException) { "" }
+                val coreKit = BattleBoxArenaCoreKitType.entries.find { it.label == coreKitName } ?: BattleBoxArenaCoreKitType.NONE
 
-            chosenKit = kit to coreKit
+                chosenKit = kit to coreKit
+            }
         }
 
         if (message.contains("Rank Points")) {
@@ -119,24 +121,15 @@ object BattleBoxArena : Handler {
 
         if (storeRoundStats) {
             storeRoundStats = false
-            val previous = state.roundStats.getOrNull(state.roundStats.size - 1)
+            //val previous = state.roundStats.getOrNull(state.roundStats.size - 1)
             val stats = state.getPlayer()
 
-            if (previous == null) {
-                state.roundStats.add(GameStateHandler.BattleBoxRoundStats(
-                    kills = stats?.kills ?: 0,
-                    deaths = stats?.deaths ?: 0,
-                    assists = stats?.assists ?: 0,
-                    score = stats?.score ?: 0,
-                ))
-            } else {
-                state.roundStats.add(GameStateHandler.BattleBoxRoundStats(
-                    kills = (stats?.kills ?: 0) - previous.kills,
-                    deaths = (stats?.deaths ?: 0) - previous.deaths,
-                    assists = (stats?.assists ?: 0) - previous.assists,
-                    score = (stats?.score ?: 0) - previous.score,
-                ))
-            }
+            state.roundStats.add(GameStateHandler.BattleBoxRoundStats(
+                kills = stats?.kills ?: 0,
+                deaths = stats?.deaths ?: 0,
+                assists = stats?.assists ?: 0,
+                score = stats?.score ?: 0,
+            ))
         }
 
         val rounds: MutableList<BattleBoxRound> = mutableListOf()

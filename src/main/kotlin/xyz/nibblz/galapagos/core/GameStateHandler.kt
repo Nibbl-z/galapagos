@@ -90,6 +90,10 @@ object GameStateHandler : CoreFeature {
 
                 return (eliminations * 10 + roundsPlayed * 30 + roundsWon * 45)
             }
+
+            companion object {
+                fun getScores(game: BattleBoxArena): Pair<Int, Int> = game.rounds.count { it == BattleBoxRound.WIN } to game.rounds.count { it == BattleBoxRound.LOSS }
+            }
         }
 
         @Serializable

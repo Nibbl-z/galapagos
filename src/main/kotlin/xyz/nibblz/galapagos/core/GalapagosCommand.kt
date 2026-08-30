@@ -14,6 +14,8 @@ import xyz.nibblz.galapagos.data.Item
 import xyz.nibblz.galapagos.dialogs.XPInfoDialog
 import xyz.nibblz.galapagos.mixin.PlayerTabOverlayAccessor
 import xyz.nibblz.galapagos.screens.*
+import xyz.nibblz.galapagos.screens.history.BattleBoxArenaHistory
+import xyz.nibblz.galapagos.screens.history.BattleBoxHistory
 import xyz.nibblz.galapagos.util.Command
 import xyz.nibblz.galapagos.util.getBossbarLines
 import xyz.nibblz.galapagos.util.getScoreboardLines
@@ -141,10 +143,18 @@ object GalapagosCommand : CoreFeature {
                     }
                 }
 
-                literal("gamehistory") {
+                literal("bbhistory") {
                     executes {
                         Minecraft.getInstance().execute {
-                            Minecraft.getInstance().setScreen(GameHistory())
+                            Minecraft.getInstance().setScreen(BattleBoxHistory())
+                        }
+                    }
+                }
+
+                literal("bbahistory") {
+                    executes {
+                        Minecraft.getInstance().execute {
+                            Minecraft.getInstance().setScreen(BattleBoxArenaHistory())
                         }
                     }
                 }
