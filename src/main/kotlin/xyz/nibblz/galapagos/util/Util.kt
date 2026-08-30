@@ -50,6 +50,13 @@ fun intToShortenedNumber(number: Int): String {
     return "${BigDecimal((number.toDouble() / 1000.0).toString()).stripTrailingZeros().toPlainString()}K"
 }
 
+fun secondsToTimeString(seconds: Int): String {
+    val minutes = (seconds) / 60
+    val seconds = (seconds) - (minutes * 60)
+
+    return "${minutes}:${if (seconds >= 10) "" else "0"}${seconds}"
+}
+
 fun percentageToColor(percent: Double): Int {
     return if (percent >= 0.5) {
         ARGB.color((-255 * ((percent - 0.5) * 2.0)).toInt() + 255, 255, 0)

@@ -8,10 +8,7 @@ import io.wispforest.owo.ui.core.Sizing
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.HoverEvent
 import net.minecraft.network.chat.Style
-import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.data.game.DeathCause
-import xyz.nibblz.galapagos.util.Glyphs
-import xyz.nibblz.galapagos.util.mcciTextureComponent
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
@@ -58,11 +55,7 @@ fun createCauseGraph(data: HashMap<DeathCause, Int>, label: String): FlowLayout 
 
     val breakdownComponent = with(Component.empty()) {
         sorted.forEachIndexed { index, (cause, _) ->
-            if (cause.sprite.contains("_fonts")) append(Glyphs.getGlyphComponent("${cause.sprite}.png"))
-            else if (cause.sprite.contains("/")) append(mcciTextureComponent(cause.sprite))
-            else append(Component.literal(cause.sprite).withColor(0xffffff).withStyle(Style.EMPTY.withFont(Galapagos.font).withHoverEvent(
-                HoverEvent.ShowText(Component.literal(cause.label))
-            )))
+            append(cause.createIconComponent(true))
             append(Component.literal(" ${data[cause]} ").withColor(graphColors.getOrNull(index * mult) ?: 0xFFFFFF).withStyle(Style.EMPTY.withHoverEvent(
                 HoverEvent.ShowText(Component.literal(cause.label))
             )))
