@@ -61,10 +61,6 @@ object OOBE : CoreFeature {
     var openIntroScreen = false
     var openIntroScreenDelay = 5
     var state: OOBEState = OOBEState.JOIN
-        set(value) {
-            Galapagos.logger.info("Set OOBE STATE TO ${value}")
-            field = value
-        }
     var ticks = 0
     var collectionEnabled = false
     var infinibagEnabled = false

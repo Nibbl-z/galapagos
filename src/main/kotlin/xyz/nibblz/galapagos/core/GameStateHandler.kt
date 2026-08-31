@@ -274,8 +274,6 @@ object GameStateHandler : CoreFeature {
             }
         }
 
-        Galapagos.logger.info("$currentGame")
-
         if (currentGame == null) return
 
         currentState = when(currentGame) {

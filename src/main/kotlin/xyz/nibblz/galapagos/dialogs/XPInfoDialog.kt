@@ -77,7 +77,6 @@ class XPInfoDialog(x: Int, y: Int) : Dialog(x, y), Themed by GalapagosTheme {
             Instant.fromEpochSeconds(Clock.System.now().epochSeconds - (60 * 60 * 10)).toLocalDateTime(TimeZone.UTC)
         else Instant.fromEpochSeconds(Clock.System.now().epochSeconds).toLocalDateTime(TimeZone.currentSystemDefault())
 
-        Galapagos.logger.info("${today.day}")
         todayXP.replaceAll { _, _ -> 0 }
         todayXPEntries.replaceAll { _, _ -> 0 }
 

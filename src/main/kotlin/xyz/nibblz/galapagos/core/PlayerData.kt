@@ -179,7 +179,7 @@ object PlayerData : CoreFeature {
             return false
         }
 
-        Galapagos.logger.info(jsonElement.toString())
+        //Galapagos.logger.info(jsonElement.toString())
 
         if (jsonElement["message"]?.jsonPrimitive?.content == "Unauthorized" || jsonElement["message"]?.jsonPrimitive?.content?.contains("No API key") == true) {
             if (!Config.values::usePersonalApiKey.get()) {
@@ -287,7 +287,6 @@ object PlayerData : CoreFeature {
             val rank = Rank.entries.find { entry -> entry.name == it }
 
             if (rank == null) {
-                Galapagos.logger.warn("Unknown rank $it, ignoring it")
                 return@forEach
             }
 

@@ -377,8 +377,6 @@ object XPInfo : Feature {
             meterProgressCompleted,
             meterProgressTotal
         )
-
-        Galapagos.logger.info("$seaMonstersEnergyMeter")
     }
 
     fun containerOpen(packet: ClientboundContainerSetContentPacket) {

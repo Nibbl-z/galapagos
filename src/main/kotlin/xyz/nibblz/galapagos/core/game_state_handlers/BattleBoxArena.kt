@@ -142,8 +142,6 @@ object BattleBoxArena : Handler {
 
         val scoreboardPlayerComponent = getScoreboardLinesComponents().firstOrNull { it.string.contains(Minecraft.getInstance().user.name) } ?: return
         val teamColor = scoreboardPlayerComponent.toFlatList().find { it.string.contains(Minecraft.getInstance().user.name) }?.style?.color?.value ?: return
-        Galapagos.logger.info("your team color is $teamColor")
-        Galapagos.logger.info("ive played $roundsPlayed $drawGlyph $winLossGlyph")
 
         tabListFooter.toFlatList().forEach {
             Galapagos.logger.info("${it.string} - $drawGlyph / $winLossGlyph ${rounds.size}")
@@ -151,7 +149,6 @@ object BattleBoxArena : Handler {
             when {
                 drawGlyph.any { glyph -> it.string.contains(glyph) } -> rounds.add(BattleBoxRound.DRAW)
                 winLossGlyph.any { glyph -> it.string.contains(glyph) } -> {
-                    Galapagos.logger.info("this team color of this square is ${it.style.color?.value}")
                     val color = it.style.color?.value ?: return@forEach
                     rounds.add(if (color == teamColor) BattleBoxRound.WIN else BattleBoxRound.LOSS)
                 }
