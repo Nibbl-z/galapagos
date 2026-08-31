@@ -34,6 +34,15 @@ Logs all completed quests, daily meter claims, and weekly vaults, allowing you t
 
 Logs all trophy gains, including the type of trophies (Skill, Style, or Angler), what source the trophies were earned from, as well as how many trophies were earned! Trophies are split up by day, showing a summary of how many trophies of each type/category were earned!
 
+### Game History
+![Game History Example](https://cdn.modrinth.com/data/cached_images/d5b87d354aed5dadaf36ac57c4981f2508389f15.png)
+
+_Note: This feature is WIP!_
+
+Logs games of Battle Box, Battle Box Arena, and Sky Battle Solo, which can be viewed in their history menus, showing statistics such as kills, deaths, assists, score, placement, round wins and losses, time survived, etc!
+
+Games of Hole in the Wall and Parkour Warrior Survivor are also tracked, but no menu has been created for them as of now. Other games will be tracked and viewable in a future update!
+
 ### Average Income
 ![Average Income Example](https://cdn.modrinth.com/data/cached_images/fa7ef7e40e304eb8792c0969d93bb5f7fe5753a5.png)
 
@@ -46,11 +55,11 @@ Shows an average of how many coins you'll earn on average from daily quests, wee
 In the Crate Emporium and Cosmetic Machine, the following info is shown:
 - New cosmetic chance
 - New royal reputation chance
-- Total style trophies gained
+- Total style trophies gained 
 - Total royal reputation gained
 - Average mythic cores
 - Average arcane cores
-  per crate or per cosmetic machine pull
+per crate or per cosmetic machine pull
 
 The highest cosmetic/rep chance for both standard and exclusive crates are also highlighted in the Crate Emporium menu! Crates with all cosmetics earned/all royal reputation earned also have an icon in the corner of the crate to signify that!
 
@@ -87,6 +96,11 @@ On the tooltips of Island Exchange listings, unit price is shown if the listing 
 ![Weekly Vault Info Example](https://cdn.modrinth.com/data/cached_images/6b39e9b24ce3cd53c2933b30f74099ff38f1bc0e.png)
 
 On the tooltip of the Weekly Vault, another progress bar is shown to show overall progress towards a max vault, as well as the average XP you'll need per day to reach a max vault!
+
+### (Sea Monsters) Event Orders Menu
+![(Sea Monsters) Event Orders Menu Example](https://cdn.modrinth.com/data/cached_images/fb127157dbe92c6e1fb5f6d19308f0171b41e53f.png)
+
+Displays current progress towards active Sea Monsters Event Fish Orders, alongside each fish having the symbol of their waypoint next to them, making event fishing much more enjoyable!
 
 ---
 
