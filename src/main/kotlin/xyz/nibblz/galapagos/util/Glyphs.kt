@@ -5,6 +5,7 @@ import net.minecraft.network.chat.FontDescription
 import net.minecraft.network.chat.MutableComponent
 import net.minecraft.network.chat.Style
 import net.minecraft.resources.Identifier
+import java.util.Collections
 
 object Glyphs {
     data class GlyphData(
@@ -14,10 +15,12 @@ object Glyphs {
 
     val glyphs: HashMap<String, String> = hashMapOf()
     val allGlyphs: MutableList<GlyphData> = mutableListOf()
+    val syncGlyphs: MutableMap<String, String> = Collections.synchronizedMap(glyphs)
+    val syncAllGlyphs: MutableList<GlyphData> = Collections.synchronizedList(allGlyphs)
 
     fun addGlyph(path: String, glyph: String) {
-        glyphs[path] = glyph
-        allGlyphs.add(GlyphData(path, glyph))
+        syncGlyphs[path] = glyph
+        syncAllGlyphs.add(GlyphData(path, glyph))
     }
 
     fun getGlyphComponent(path: String): MutableComponent {
