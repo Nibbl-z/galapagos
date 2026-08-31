@@ -4,19 +4,26 @@ import com.noxcrew.noxesium.core.mcc.ClientboundMccServerPacket
 import com.noxcrew.noxesium.core.mcc.ClientboundMccStatisticPacket
 import com.noxcrew.sheeplib.DialogContainer
 import kotlinx.serialization.Serializable
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry
 import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
+import net.minecraft.client.gui.screens.Screen
+import net.minecraft.client.gui.screens.inventory.ContainerScreen
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.FontDescription
 import net.minecraft.network.chat.Style
 import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
+import net.minecraft.network.protocol.game.ServerboundContainerClosePacket
 import net.minecraft.resources.Identifier
 import net.minecraft.util.ARGB
+import net.minecraft.world.inventory.ContainerInput
+import net.minecraft.world.inventory.Slot
 import net.minecraft.world.item.ItemStack
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
 import xyz.nibblz.galapagos.core.GameStateHandler
@@ -28,12 +35,19 @@ import xyz.nibblz.galapagos.events.ContainerOpenEvent
 import xyz.nibblz.galapagos.events.ContainerSetSlotEvent
 import xyz.nibblz.galapagos.events.MCCServerEvent
 import xyz.nibblz.galapagos.events.MCCStatisticEvent
+import xyz.nibblz.galapagos.events.SlotClickEvent
 import xyz.nibblz.galapagos.mixin.GuiAccessor
+import xyz.nibblz.galapagos.screens.history.BattleBoxArenaHistory
+import xyz.nibblz.galapagos.screens.history.BattleBoxHistory
+import xyz.nibblz.galapagos.screens.history.SkyBattleSoloHistory
 import xyz.nibblz.galapagos.util.Glyphs
 import xyz.nibblz.galapagos.util.Vector2
 import xyz.nibblz.galapagos.util.findLore
 import xyz.nibblz.galapagos.util.onIsland
+import xyz.nibblz.galapagos.util.playMcciSound
 import kotlin.math.roundToInt
+import kotlin.reflect.KClass
+import kotlin.reflect.full.createInstance
 import kotlin.time.Clock
 
 object XPInfo : Feature {
@@ -49,14 +63,15 @@ object XPInfo : Feature {
     override val image: Config.ConfigImage = Config.ConfigImage("xp_info.png", 533, 908)
 
     @Serializable
-    enum class XPSource(val serverTypes: List<String>, val lobbyServerType: String, val sprite: String, val label: String, val starLevelGame: StarLevelGame?, val stateHandler: Handler? = null) {
+    enum class XPSource(val serverTypes: List<String>, val lobbyServerType: String, val sprite: String, val label: String, val starLevelGame: StarLevelGame?, val stateHandler: Handler? = null, val historyScreen: KClass<*>? = null) {
         BATTLE_BOX_QUADS(
             listOf("battle_box", "!arena"),
             "battle_box",
             "island_interface/game/battle_box/icon",
             "Battle Box",
             StarLevelGame.BATTLE_BOX,
-            BattleBox
+            BattleBox,
+            BattleBoxHistory::class
         ),
         BATTLE_BOX_ARENA(
             listOf("battle_box", "arena"),
@@ -64,7 +79,8 @@ object XPInfo : Feature {
             "island_interface/game/battle_box_arena/icon",
             "Battle Box Arena",
             StarLevelGame.BATTLE_BOX,
-            BattleBoxArena
+            BattleBoxArena,
+            BattleBoxArenaHistory::class
         )
         ,
         SKY_BATTLE_QUADS(listOf("sky_battle", "team"),
@@ -79,7 +95,8 @@ object XPInfo : Feature {
             "island_interface/game/sky_battle_solo/icon",
             "Sky Battle Solo",
             StarLevelGame.SKY_BATTLE,
-            SkyBattleSolo
+            SkyBattleSolo,
+            SkyBattleSoloHistory::class
         ),
         DYNABALL(
             listOf("dynaball"),
@@ -158,6 +175,8 @@ object XPInfo : Feature {
     var dailyMeter: Claimable = Claimable(0, 7, 0, 500)
     var weeklyVault: Claimable = Claimable(0, 20, 0, 500)
 
+    var openedGame: XPSource? = null
+
     // Event related
     var seaMonstersActive = false
     var seaMonstersEnergyMeter: Claimable = Claimable(0, 40, 0, 500)
@@ -168,8 +187,23 @@ object XPInfo : Feature {
         ContainerOpenEvent.EVENT.register { packet -> containerOpen(packet) }
         ItemTooltipCallback.EVENT.register { item, _, _, components -> tooltipAdd(item, components) }
         ContainerSetSlotEvent.EVENT.register { packet -> containerSetSlot(packet) }
+        SlotClickEvent.EVENT.register { slot, screen, input, info, i -> slotClick(slot, screen, input, info, i) }
         HudElementRegistry.addFirst(Identifier.fromNamespaceAndPath(Galapagos.MOD_ID, id), hotbarXPInfoLayer())
+        ClientTickEvents.END_CLIENT_TICK.register {
+            if (openedGame == null) return@register
+            if (openedGame!!.historyScreen == null) return@register
+
+            openScreenDelay--
+
+            if (openScreenDelay == 0) {
+                openScreenDelay = 3
+                Minecraft.getInstance().setScreen((openedGame!!.historyScreen as KClass<*>).createInstance() as Screen?) // idk brahhh
+                openedGame = null
+            }
+        }
     }
+
+    var openScreenDelay = 3
 
     fun mccStatistic(packet: ClientboundMccStatisticPacket) {
         handleXPStatistic(packet)
@@ -413,26 +447,38 @@ object XPInfo : Feature {
             components.add(index, Component.empty())
         }
 
-//        var endIndex = components.indexOfFirst { it.string.contains("minecraft:") } // if you have f3+h on :P
-//        if (endIndex == -1) { endIndex = components.size - 1 } // if you dont !
-//
-//        if (game.stateHandler != null) {
-//            components.add(
-//                endIndex, Component.empty()
-//                    .append(Glyphs.getGlyphComponent("_fonts/icon/click_action_shift.png"))
-//                    .append(Component.literal("+").withColor(0xecd584))
-//                    .append(Glyphs.getGlyphComponent("_fonts/icon/click_action_right.png"))
-//                    .append(Component.literal(" > ").withColor(ChatFormatting.DARK_GRAY.color!!))
-//                    .append(Component.literal("Shift-Right-Click to ").withColor(0xecd584))
-//                    .append(Component.literal("View Past Games").withColor(0xfee761))
-//            )
-//        } else if (game != XPSource.PW_SOLO && game != XPSource.FISHING) {
-//            components.add(
-//                endIndex, Component.empty()
-//                    .append(Glyphs.getGlyphComponent("_fonts/icon/warning_blue.png"))
-//                    .append(Component.literal(" History for this game is coming Soon™!").withColor(ChatFormatting.AQUA.color!!))
-//            )
-//        }
+        if (game == XPSource.PW_SOLO || game == XPSource.FISHING) return
+
+        var endIndex = components.indexOfFirst { it.string.contains("minecraft:") } // if you have f3+h on :P
+        if (endIndex == -1) { endIndex = components.size - 1 } // if you dont !
+
+        if (game.historyScreen != null) {
+            components.add(
+                endIndex, Component.empty()
+                    .append(Glyphs.getGlyphComponent("_fonts/icon/click_action_shift.png"))
+                    .append(Component.literal("+").withColor(0xecd584))
+                    .append(Glyphs.getGlyphComponent("_fonts/icon/click_action_left.png"))
+                    .append(Component.literal(" > ").withColor(ChatFormatting.DARK_GRAY.color!!))
+                    .append(Component.literal("Shift-Click to ").withColor(0xecd584))
+                    .append(Component.literal("View Past Games").withColor(0xfee761))
+            )
+        } else if (game.stateHandler != null) {
+            components.add(
+                endIndex, Component.empty()
+                    .append(Glyphs.getGlyphComponent("_fonts/icon/warning_blue.png"))
+                    .append(Component.literal(" History for this game is coming Soon™!").withColor(ChatFormatting.AQUA.color!!))
+            )
+
+            components.add(
+                endIndex + 1, Component.literal("However, games are currently being tracked!").withStyle(Style.EMPTY.withItalic(true))
+            )
+        } else {
+            components.add(
+                endIndex, Component.empty()
+                    .append(Glyphs.getGlyphComponent("_fonts/icon/warning_blue.png"))
+                    .append(Component.literal(" History for this game is coming Soon™!").withColor(ChatFormatting.AQUA.color!!))
+            )
+        }
 
     }
 
@@ -445,6 +491,23 @@ object XPInfo : Feature {
         if (packet.item.itemName.string == "Event Energy Meter" && screen.title.string.contains("EVENT ORDERS")) updateSeaMonstersEnergyMeter(packet.item)
 
         refreshDialog()
+    }
+
+    fun slotClick(slot: Slot, screen: ContainerScreen, input: ContainerInput, info: CallbackInfo, button: Int) {
+        if (!enabled) return
+        if (input != ContainerInput.QUICK_MOVE) return
+        if (button != 0) return
+        if (!screen.title.string.contains("NAVIGATOR")) return
+
+        val game = XPSource.entries.find { it.label == slot.item.itemName.string } ?: return
+        if (game.historyScreen == null) return
+
+        info.cancel()
+
+        openedGame = game
+        playMcciSound("ui.click_normal")
+        playMcciSound("ui.game_kiosk_open")
+        Minecraft.getInstance().connection!!.send(ServerboundContainerClosePacket(Minecraft.getInstance().player!!.containerMenu.containerId))
     }
 
     fun hotbarXPInfoLayer(): HudElement {
