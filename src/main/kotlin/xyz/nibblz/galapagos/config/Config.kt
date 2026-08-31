@@ -716,7 +716,6 @@ class Config {
                     description(OptionDescription.of(
                         Component.literal("Removes/shortens some unnecessary things from the XP Info window's info, including:"),
                         Component.literal("- Meter names"),
-                        Component.literal("- Current and total claims"),
                         Component.literal("- Smaller progress bars"),
                         Component.literal("- Truncated XP requirements")
                     ))

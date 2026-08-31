@@ -196,14 +196,14 @@ object XPInfo : Feature {
             openScreenDelay--
 
             if (openScreenDelay == 0) {
-                openScreenDelay = 3
+                openScreenDelay = 6
                 Minecraft.getInstance().setScreen((openedGame!!.historyScreen as KClass<*>).createInstance() as Screen?) // idk brahhh
                 openedGame = null
             }
         }
     }
 
-    var openScreenDelay = 3
+    var openScreenDelay = 6
 
     fun mccStatistic(packet: ClientboundMccStatisticPacket) {
         handleXPStatistic(packet)

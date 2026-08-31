@@ -188,26 +188,30 @@ class SkyBattleSoloHistory : BaseHistory() {
             kdr
         }
 
-        overview.child(
-            UIComponents.label(
-                Component.literal("Best Map (By WLR): ")
-                    .append(Component.literal(mapsByWinRate.last()).withStyle(Style.EMPTY.withBold(true)))
-                    .append(Component.literal(" - "))
-                    .append(Component.literal(
-                        "${Galapagos.decimalFormat.format(mapWinRates[mapsByWinRate.last()]!! * 100.0)}%")
-                        .withColor(percentageToColor(mapWinRates[mapsByWinRate.last()]!!))
-                    )
-            ).shadow(true)
-        )
+        if (!mapsByWinRate.isEmpty()) {
+            overview.child(
+                UIComponents.label(
+                    Component.literal("Best Map (By WLR): ")
+                        .append(Component.literal(mapsByWinRate.last()).withStyle(Style.EMPTY.withBold(true)))
+                        .append(Component.literal(" - "))
+                        .append(
+                            Component.literal(
+                                "${Galapagos.decimalFormat.format(mapWinRates[mapsByWinRate.last()]!! * 100.0)}%"
+                            )
+                                .withColor(percentageToColor(mapWinRates[mapsByWinRate.last()]!!))
+                        )
+                ).shadow(true)
+            )
 
-        overview.child(
-            UIComponents.label(
-                Component.literal("Best Map (By KDR): ")
-                    .append(Component.literal(mapsByKDR.last()).withStyle(Style.EMPTY.withBold(true)))
-                    .append(Component.literal(" - "))
-                    .append(Component.literal("${Galapagos.decimalFormat.format(mapKDR[mapsByKDR.last()]!!)}"))
-            ).shadow(true)
-        )
+            overview.child(
+                UIComponents.label(
+                    Component.literal("Best Map (By KDR): ")
+                        .append(Component.literal(mapsByKDR.last()).withStyle(Style.EMPTY.withBold(true)))
+                        .append(Component.literal(" - "))
+                        .append(Component.literal("${Galapagos.decimalFormat.format(mapKDR[mapsByKDR.last()]!!)}"))
+                ).shadow(true)
+            )
+        }
 
         overview.child(
             createCauseGraph(kills, "Kills: ")
