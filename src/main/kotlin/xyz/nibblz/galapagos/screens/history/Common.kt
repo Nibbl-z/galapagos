@@ -41,7 +41,6 @@ fun createCauseGraph(data: HashMap<DeathCause, Int>, label: String): FlowLayout 
     }
 
     val sorted = percents.entries.sortedByDescending { it.value }
-
     val mult = graphColors.size / sorted.size
 
     val graph = UIContainers.horizontalFlow(Sizing.expand(), Sizing.fixed(10))

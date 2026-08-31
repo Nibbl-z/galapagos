@@ -304,15 +304,19 @@ class BattleBoxHistory : BaseHistory() {
                 ).shadow(true)
             )
 
-            overview.child(
-                createCauseGraph(kills, "Kills: ")
-                    .margins(Insets.top(5))
-            )
+            if (!kills.isEmpty()) {
+                overview.child(
+                    createCauseGraph(kills, "Kills: ")
+                        .margins(Insets.top(5))
+                )
+            }
 
-            overview.child(
-                createCauseGraph(deaths, "Deaths: ")
-                    .margins(Insets.top(3))
-            )
+            if (!deaths.isEmpty()) {
+                overview.child(
+                    createCauseGraph(deaths, "Deaths: ")
+                        .margins(Insets.top(3))
+                )
+            }
         }
     }
 }
