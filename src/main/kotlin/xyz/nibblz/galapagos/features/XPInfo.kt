@@ -448,6 +448,7 @@ object XPInfo : Feature {
         }
 
         if (game == XPSource.PW_SOLO || game == XPSource.FISHING) return
+        if (!Config.values::xpInfoNavigatorViewHistoryEnabled.get()) return
 
         var endIndex = components.indexOfFirst { it.string.contains("minecraft:") } // if you have f3+h on :P
         if (endIndex == -1) { endIndex = components.size - 1 } // if you dont !
@@ -495,6 +496,7 @@ object XPInfo : Feature {
 
     fun slotClick(slot: Slot, screen: ContainerScreen, input: ContainerInput, info: CallbackInfo, button: Int) {
         if (!enabled) return
+        if (!Config.values::xpInfoNavigatorViewHistoryEnabled.get()) return
         if (input != ContainerInput.QUICK_MOVE) return
         if (button != 0) return
         if (!screen.title.string.contains("NAVIGATOR")) return

@@ -175,6 +175,8 @@ class Config {
     var xpInfoNavigatorTodayAverageXP: Boolean = true
     @SerialEntry
     var xpInfoNavigatorAlltimeAverageXP: Boolean = true
+    @SerialEntry
+    var xpInfoNavigatorViewHistoryEnabled: Boolean = true
 
     // Misc
     @SerialEntry
@@ -259,6 +261,26 @@ class Config {
                             controller(tickBox())
                             binding(true, { feature.enabled }, { value -> feature.enabled = value })
                         }
+                    }
+
+                    options.register("game_history_enabled") {
+                        name(Component.literal("Game History"))
+                        description(
+                            OptionDescription.createBuilder()
+                            .text(listOf(
+                                Component.literal("Allows you to view history and stats of past games, which currently only includes:"),
+                                Component.literal("- Battle Box"),
+                                Component.literal("- Battle Box Arena"),
+                                Component.literal("- Sky Battle Solos"),
+                            ))
+                            .image(Identifier.fromNamespaceAndPath(
+                                "galapagos",
+                                "textures/config/game_history.png"
+                            ), 616, 871)
+                            .build()
+                        )
+                        controller(tickBox())
+                        binding(values::xpInfoNavigatorViewHistoryEnabled, true)
                     }
                 }
 
