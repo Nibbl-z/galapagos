@@ -61,6 +61,10 @@ object OOBE : CoreFeature {
     var openIntroScreen = false
     var openIntroScreenDelay = 5
     var state: OOBEState = OOBEState.JOIN
+        set(value) {
+            Galapagos.logger.info("Set OOBE STATE TO ${value}")
+            field = value
+        }
     var ticks = 0
     var collectionEnabled = false
     var infinibagEnabled = false
@@ -91,6 +95,12 @@ object OOBE : CoreFeature {
     fun containerOpen() {
         if (!active) return
         val screen = Minecraft.getInstance().screen ?: return
+
+        if (state == OOBEState.STYLE_PERKS) {
+            state = OOBEState.NONE
+            active = false
+            Galapagos.save.finishedOOBE = true
+        }
 
         if (!finishedApiSettings) {
             state = when {
@@ -140,9 +150,10 @@ object OOBE : CoreFeature {
             return
         }
 
+        if (state == OOBEState.JOIN_STYLE_PERKS) return
         if (state == OOBEState.SET_API_KEY) return
 
-        state = if (state == OOBEState.API_SETTINGS_GOOD) OOBEState.SET_API_KEY else OOBEState.JOIN
+        state = if (state == OOBEState.API_SETTINGS_GOOD) OOBEState.SET_API_KEY else if (finishedApiSettings) OOBEState.JOIN_STYLE_PERKS else OOBEState.JOIN
     }
 
     fun containerRender(graphics: GuiGraphicsExtractor, x: Int, y: Int, w: Int) {

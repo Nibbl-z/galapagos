@@ -464,7 +464,7 @@ object PlayerData : CoreFeature {
         if (screen.title.string.contains("STYLE PERKS")) {
             StylePerk.entries.forEach {
                 val item = packet.items[it.slotID]
-                if (!item.itemName.string.contains(it.label)) throw IllegalStateException("Style perk ${it.name} has incorrect slot ID")
+                if (!item.itemName.string.contains(it.label)) return@forEach
 
                 val regex = Regex("${it.label} \\((?<upgrades>\\d+)")
                 var upgrades = regex.find(item.itemName.string)?.groups["upgrades"]?.value?.toIntOrNull() ?: 0
