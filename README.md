@@ -2,6 +2,12 @@
 
 A client mod to show more info, statistics, and chances related to [MCC Island's](https://mcchampionship.com/island/) progression and economy!
 
+# Download
+
+You can download a build of the mod from [Modrinth](https://modrinth.com/mod/galapagos) or [GitHub releases!](https://github.com/Nibbl-z/galapagos/releases)
+
+WIP builds can also be downloaded from the Actions tab, but beware, these can be buggy!
+
 ## Requirements
 You'll need...
 - Minecraft 26.1.2
