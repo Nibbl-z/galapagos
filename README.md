@@ -102,6 +102,12 @@ On the tooltip of the Weekly Vault, another progress bar is shown to show overal
 
 Displays current progress towards active Sea Monsters Event Fish Orders, alongside each fish having the symbol of their waypoint next to them, making event fishing much more enjoyable!
 
+## Credits
+- **Pe3ep** - I took a lot of code from his MCC Island mod, Trident, mainly for backend things (such as command builder, glyph loader, and more, they're labelled in the codebase!)
+- **DevCmb** - Made the compacted Exclusive sprite as seen in the Detailed cosmetic machine chances
+
+All other contributors can be seen in the contributors list on the repository's page!
+
 ---
 
 *This mod is not affiliated with or endorsed by Noxcrew!*
