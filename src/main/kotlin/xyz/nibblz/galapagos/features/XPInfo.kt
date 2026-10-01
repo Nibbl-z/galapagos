@@ -8,7 +8,6 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry
-import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.client.gui.screens.inventory.ContainerScreen
@@ -237,7 +236,7 @@ object XPInfo : Feature {
     }
 
     fun getXPBoost(): Double {
-        val actionBar = (Minecraft.getInstance().gui as HudAccessor).`galapagos$getOverlayMesssageString`() ?: Component.empty()
+        val actionBar = (Minecraft.getInstance().gui.hud as HudAccessor).`galapagos$getOverlayMesssageString`() ?: Component.empty()
 
         return when {
             actionBar.string.contains(Glyphs.getGlyph("_fonts/icon/xp_bonus_20.png")) -> 1.2
