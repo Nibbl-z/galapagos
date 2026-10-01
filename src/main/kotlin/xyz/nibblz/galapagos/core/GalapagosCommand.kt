@@ -5,9 +5,9 @@ import com.mojang.brigadier.arguments.IntegerArgumentType
 import com.noxcrew.sheeplib.DialogContainer
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
-import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
 import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.TextColor
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
 import xyz.nibblz.galapagos.data.Item
@@ -37,14 +37,14 @@ object GalapagosCommand : CoreFeature {
                             Galapagos.save.apiKey = key
 
                             sendGalapagosChatMessage(
-                                Component.literal("API key has been set!").withColor(ChatFormatting.AQUA.color!!)
+                                Component.literal("API key has been set!").withColor(TextColor.AQUA.value)
                             )
                             Config.values::usePersonalApiKey.set(true)
 
                             if (OOBE.state == OOBE.OOBEState.SET_API_KEY) {
                                 sendGalapagosChatMessage(
                                     Component.literal("If you just enabled your API settings, you may have to try again in a few minutes by running /galapagos api manualFetch!")
-                                        .withColor(ChatFormatting.BLUE.color!!)
+                                        .withColor(TextColor.BLUE.value)
                                 )
                                 OOBE.finishedApiSettings = true
                                 OOBE.state = OOBE.OOBEState.JOIN_STYLE_PERKS
@@ -53,7 +53,7 @@ object GalapagosCommand : CoreFeature {
                             val status = PlayerData.fetchAPI()
                             if (status) sendGalapagosChatMessage(
                                 Component.literal("Successfully updated player state from API!")
-                                    .withColor(ChatFormatting.AQUA.color!!)
+                                    .withColor(TextColor.AQUA.value)
                             )
                         }
                     }
@@ -66,7 +66,7 @@ object GalapagosCommand : CoreFeature {
 
                         sendGalapagosChatMessage(
                             Component.literal("API key has been removed! The custom API endpoint will now be used instead.")
-                                .withColor(ChatFormatting.AQUA.color!!)
+                                .withColor(TextColor.AQUA.value)
                         )
                     }
                 }
@@ -74,12 +74,12 @@ object GalapagosCommand : CoreFeature {
                 literal("manualFetch") {
                     executes {
                         sendGalapagosChatMessage(
-                            Component.literal("Fetching MCC Island API...").withColor(ChatFormatting.AQUA.color!!)
+                            Component.literal("Fetching MCC Island API...").withColor(TextColor.AQUA.value)
                         )
                         val status = PlayerData.fetchAPI()
                         if (status) sendGalapagosChatMessage(
                             Component.literal("Successfully updated player state from API!")
-                                .withColor(ChatFormatting.AQUA.color!!)
+                                .withColor(TextColor.AQUA.value)
                         )
                     }
                 }
@@ -88,13 +88,13 @@ object GalapagosCommand : CoreFeature {
             literal("debug") {
                 literal("dumpPlayers") {
                     executes {
-                        (Minecraft.getInstance().gui.tabList as PlayerTabOverlayAccessor).`galapagos$getPlayerInfos`().forEachIndexed { index, info ->
+                        (Minecraft.getInstance().gui.hud.tabList as PlayerTabOverlayAccessor).`galapagos$getPlayerInfos`().forEachIndexed { index, info ->
                             Galapagos.logger.info("#${index} - ${info.tabListDisplayName?.string} ${info.profile.name}")
                         }
 
-                        Galapagos.logger.info((Minecraft.getInstance().gui.tabList as PlayerTabOverlayAccessor).`galapagos$getFooter`().string)
-                        Galapagos.logger.info((Minecraft.getInstance().gui.tabList as PlayerTabOverlayAccessor).`galapagos$getFooter`().toString())
-                        (Minecraft.getInstance().gui.tabList as PlayerTabOverlayAccessor).`galapagos$getFooter`().toFlatList().forEach {
+                        Galapagos.logger.info((Minecraft.getInstance().gui.hud.tabList as PlayerTabOverlayAccessor).`galapagos$getFooter`().string)
+                        Galapagos.logger.info((Minecraft.getInstance().gui.hud.tabList as PlayerTabOverlayAccessor).`galapagos$getFooter`().toString())
+                        (Minecraft.getInstance().gui.hud.tabList as PlayerTabOverlayAccessor).`galapagos$getFooter`().toFlatList().forEach {
                             Galapagos.logger.info(it.toString())
                         }
                     }
@@ -122,7 +122,7 @@ object GalapagosCommand : CoreFeature {
 
                 literal("fusionforge") {
                     executes {
-                        Minecraft.getInstance().gui.chat.addClientSystemMessage(
+                        Minecraft.getInstance().gui.hud.chat.addClientSystemMessage(
                             Component.literal(Galapagos.save.fusionForge.toString())
                         )
                     }
@@ -130,7 +130,7 @@ object GalapagosCommand : CoreFeature {
 
                 literal("blueprintassembler") {
                     executes {
-                        Minecraft.getInstance().gui.chat.addClientSystemMessage(
+                        Minecraft.getInstance().gui.hud.chat.addClientSystemMessage(
                             Component.literal(Galapagos.save.blueprintAssembler.toString())
                         )
                     }
@@ -139,7 +139,7 @@ object GalapagosCommand : CoreFeature {
                 literal("coinhistory") {
                     executes {
                         Minecraft.getInstance().execute {
-                            Minecraft.getInstance().setScreen(CoinHistory())
+                            Minecraft.getInstance().gui.setScreen(CoinHistory())
                         }
                     }
                 }
@@ -147,7 +147,7 @@ object GalapagosCommand : CoreFeature {
                 literal("bbhistory") {
                     executes {
                         Minecraft.getInstance().execute {
-                            Minecraft.getInstance().setScreen(BattleBoxHistory())
+                            Minecraft.getInstance().gui.setScreen(BattleBoxHistory())
                         }
                     }
                 }
@@ -155,7 +155,7 @@ object GalapagosCommand : CoreFeature {
                 literal("bbahistory") {
                     executes {
                         Minecraft.getInstance().execute {
-                            Minecraft.getInstance().setScreen(BattleBoxArenaHistory())
+                            Minecraft.getInstance().gui.setScreen(BattleBoxArenaHistory())
                         }
                     }
                 }
@@ -163,7 +163,7 @@ object GalapagosCommand : CoreFeature {
                 literal("sbshistory") {
                     executes {
                         Minecraft.getInstance().execute {
-                            Minecraft.getInstance().setScreen(SkyBattleSoloHistory())
+                            Minecraft.getInstance().gui.setScreen(SkyBattleSoloHistory())
                         }
                     }
                 }
@@ -171,7 +171,7 @@ object GalapagosCommand : CoreFeature {
                 literal("vaulthistory") {
                     executes {
                         Minecraft.getInstance().execute {
-                            Minecraft.getInstance().setScreen(VaultHistory())
+                            Minecraft.getInstance().gui.setScreen(VaultHistory())
                         }
                     }
                 }
@@ -179,7 +179,7 @@ object GalapagosCommand : CoreFeature {
                 literal("trophyhistory") {
                     executes {
                         Minecraft.getInstance().execute {
-                            Minecraft.getInstance().setScreen(TrophyHistory())
+                            Minecraft.getInstance().gui.setScreen(TrophyHistory())
                         }
                     }
                 }
@@ -187,7 +187,7 @@ object GalapagosCommand : CoreFeature {
                 literal("intro_test") {
                     executes {
                         Minecraft.getInstance().execute {
-                            Minecraft.getInstance().setScreen(Intro())
+                            Minecraft.getInstance().gui.setScreen(Intro())
                         }
                     }
                 }
@@ -195,7 +195,7 @@ object GalapagosCommand : CoreFeature {
                 literal("questhistory") {
                     executes {
                         Minecraft.getInstance().execute {
-                            Minecraft.getInstance().setScreen(QuestHistory())
+                            Minecraft.getInstance().gui.setScreen(QuestHistory())
                         }
                     }
                 }
@@ -217,7 +217,7 @@ object GalapagosCommand : CoreFeature {
                             val nameArg = it.getArgument("name", String::class.java)
                             if (Galapagos.save.cosmetics[nameArg] == null) return@executes
 
-                            Minecraft.getInstance().gui.chat.addClientSystemMessage(
+                            Minecraft.getInstance().gui.hud.chat.addClientSystemMessage(
                                 Component.literal(Galapagos.save.cosmetics[nameArg]!!.toString())
                             )
                         }
@@ -235,7 +235,7 @@ object GalapagosCommand : CoreFeature {
                             val nameArg = it.getArgument("name", String::class.java)
                             if (Galapagos.save.infinibag[nameArg] == null) return@executes
 
-                            Minecraft.getInstance().gui.chat.addClientSystemMessage(
+                            Minecraft.getInstance().gui.hud.chat.addClientSystemMessage(
                                 Component.literal(Galapagos.save.infinibag[nameArg]!!.toString())
                             )
                         }
@@ -264,7 +264,7 @@ object GalapagosCommand : CoreFeature {
                                 }
 
 
-                                Minecraft.getInstance().gui.chat.addClientSystemMessage(
+                                Minecraft.getInstance().gui.hud.chat.addClientSystemMessage(
                                     Component.literal(Galapagos.save.infinibag[nameArg]!!.toString())
                                 )
                             }

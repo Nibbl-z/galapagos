@@ -7,6 +7,7 @@ import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.screens.inventory.ContainerScreen
 import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.TextColor
 import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
 import net.minecraft.world.inventory.ContainerInput
@@ -68,7 +69,7 @@ object CraftingInstructions : Feature {
                 if (Config.values::craftingInstructionsShowCraftTime.get()) {
                     component = component
                         .append(Component.literal(if (craftTime != 0) " [${formatTimeString((craftTime * efficientFusion).toInt())}]" else "")
-                        .withColor(ChatFormatting.GRAY.color!!))
+                        .withColor(TextColor.GRAY.value))
                 }
 
                 component
@@ -78,16 +79,16 @@ object CraftingInstructions : Feature {
 
                 var component = Component.literal("Buy ${count}x ")
                     .append(material.getStyledComponent())
-                    .append(Component.literal(" [${purchases}x purchase${if (purchases == 1) "" else "s"}").withColor(ChatFormatting.GRAY.color!!))
+                    .append(Component.literal(" [${purchases}x purchase${if (purchases == 1) "" else "s"}").withColor(TextColor.GRAY.value))
 
                 if (Config.values::craftingInstructionsShowGloop.get()) {
                     component = component
-                        .append(Component.literal(", ${gloopForRawMaterial(material, count)} ").withColor(ChatFormatting.GRAY.color!!))
+                        .append(Component.literal(", ${gloopForRawMaterial(material, count)} ").withColor(TextColor.GRAY.value))
                         .append(mcciTextureComponent("island_items/infinibag/material/gloop"))
                 }
 
                 component
-                    .append(Component.literal("]").withColor(ChatFormatting.GRAY.color!!))
+                    .append(Component.literal("]").withColor(TextColor.GRAY.value))
             }
             InstructionType.PURCHASE_IE -> Component.literal("Purchase ${count}x ")
                 .append(material.getStyledComponent())
@@ -122,7 +123,7 @@ object CraftingInstructions : Feature {
     }
 
     fun hasValidInstructions(item: ItemStack): Boolean {
-        val screen = Minecraft.getInstance().screen ?: return false
+        val screen = Minecraft.getInstance().gui.screen() ?: return false
         if (screen !is ContainerScreen) return false
 
         return hasValidInstructions(item.itemName.string, item.getTooltipLines(
@@ -133,7 +134,7 @@ object CraftingInstructions : Feature {
     }
 
     fun hasValidInstructions(item: ItemStack, lore: List<Component>): Boolean {
-        val screen = Minecraft.getInstance().screen ?: return false
+        val screen = Minecraft.getInstance().gui.screen() ?: return false
         if (screen !is ContainerScreen) return false
 
         return hasValidInstructions(item.itemName.string, lore, screen)
@@ -254,7 +255,7 @@ object CraftingInstructions : Feature {
             .append(Glyphs.getGlyphComponent("_fonts/icon/click_action_shift.png"))
             .append(Component.literal("+").withColor(0xecd584))
             .append(Glyphs.getGlyphComponent("_fonts/icon/click_action_right.png"))
-            .append(Component.literal(" > ").withColor(ChatFormatting.DARK_GRAY.color!!))
+            .append(Component.literal(" > ").withColor(TextColor.DARK_GRAY.value))
             .append(Component.literal("Shift-Right-Click to ").withColor(0xecd584))
             .append(Component.literal("${if (openBlueprints[stack.itemName.string] == null) "Open" else "Close"} Instructions").withColor(0xfee761)))
     }

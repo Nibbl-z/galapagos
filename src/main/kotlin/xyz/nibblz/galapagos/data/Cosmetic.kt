@@ -5,6 +5,7 @@ import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
 import net.minecraft.network.chat.Style
+import net.minecraft.network.chat.TextColor
 import xyz.nibblz.galapagos.Galapagos
 
 @Serializable
@@ -34,7 +35,7 @@ enum class CosmeticCore(val label: String, val color: Int, val glyph: String) {
     STANDARD("Standard Core", Rarity.UNCOMMON.color, "\uE005"),
     EXCLUSIVE("Exclusive Core", 0xfbff82, "\uE006"),
     MYTHIC("Mythic Core", Rarity.MYTHIC.color, "\uE003"),
-    ARCANE("Arcane Core", ChatFormatting.LIGHT_PURPLE.color!!, "\uE004");
+    ARCANE("Arcane Core", TextColor.LIGHT_PURPLE.value, "\uE004");
 
     fun getComponent(): MutableComponent {
         return Component.literal(this.glyph).withColor(0xffffff).withStyle(Style.EMPTY.withFont(Galapagos.font))

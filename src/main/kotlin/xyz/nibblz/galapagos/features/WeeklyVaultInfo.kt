@@ -4,6 +4,7 @@ import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback
 import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
 import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.TextColor
 import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
 import net.minecraft.world.item.ItemStack
 import xyz.nibblz.galapagos.Galapagos
@@ -90,7 +91,7 @@ object WeeklyVaultInfo : Feature {
     }
 
     fun containerOpen(packet: ClientboundContainerSetContentPacket) {
-        val screen = Minecraft.getInstance().screen ?: return
+        val screen = Minecraft.getInstance().gui.screen() ?: return
         if (!screen.title.string.contains("ISLAND REWARDS")) return
 
         val vault = packet.items[16]
@@ -109,7 +110,7 @@ object WeeklyVaultInfo : Feature {
 
     fun tooltipAdd(stack: ItemStack, components: MutableList<Component>) {
         if (!enabled) return
-        val screen = Minecraft.getInstance().screen ?: return
+        val screen = Minecraft.getInstance().gui.screen() ?: return
         if (!screen.title.string.contains("ISLAND REWARDS")) return
 
         if (stack.itemName.string != "Weekly Vault") return
@@ -128,10 +129,10 @@ object WeeklyVaultInfo : Feature {
             progressIndex++
 
             components.add(progressIndex,
-                Component.literal("Overall Progress: ").withColor(ChatFormatting.GRAY.color!!)
-                    .append(Component.literal("%,d".format(getTotalXP())).withColor(ChatFormatting.WHITE.color!!))
-                    .append(Component.literal("/" + "%,d".format(getMaxXPNeeded())).withColor(ChatFormatting.DARK_GRAY.color!!))
-                    .append(Component.literal(" XP").withColor(ChatFormatting.GRAY.color!!))
+                Component.literal("Overall Progress: ").withColor(TextColor.GRAY.value)
+                    .append(Component.literal("%,d".format(getTotalXP())).withColor(TextColor.WHITE.value))
+                    .append(Component.literal("/" + "%,d".format(getMaxXPNeeded())).withColor(TextColor.DARK_GRAY.value))
+                    .append(Component.literal(" XP").withColor(TextColor.GRAY.value))
             )
 
             progressIndex++
@@ -139,8 +140,8 @@ object WeeklyVaultInfo : Feature {
 
         if (Config.values::weeklyVaultInfoShowNeededXPPerDay.get()) {
             components.add(progressIndex,
-                Component.literal("~" + "%,d".format(getXpPerDay())).withColor(ChatFormatting.WHITE.color!!)
-                    .append(Component.literal(" XP needed per day").withColor(ChatFormatting.GRAY.color!!))
+                Component.literal("~" + "%,d".format(getXpPerDay())).withColor(TextColor.WHITE.value)
+                    .append(Component.literal(" XP needed per day").withColor(TextColor.GRAY.value))
             )
         }
     }

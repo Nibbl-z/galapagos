@@ -1,12 +1,12 @@
 package xyz.nibblz.galapagos.features
 
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback
-import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.screens.inventory.ContainerScreen
 import net.minecraft.core.component.DataComponents
 import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.TextColor
 import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
 import net.minecraft.util.ARGB
 import net.minecraft.world.inventory.Slot
@@ -241,7 +241,7 @@ object AverageIncome : Feature {
     }
 
     fun containerOpen(packet: ClientboundContainerSetContentPacket) {
-        val screen = Minecraft.getInstance().screen ?: return
+        val screen = Minecraft.getInstance().gui.screen() ?: return
         if (!screen.title.string.contains("INFINIBAG")) openedScrollMenu = false
 
         if (screen.title.string.contains("ISLAND REWARDS")) {
@@ -307,11 +307,11 @@ object AverageIncome : Feature {
         val totalClaims = claimsMatch["total"]?.value?.toIntOrNull() ?: return
 
         components[index] = components[index].copy()
-            .append(Component.literal(" [").withColor(ChatFormatting.DARK_GRAY.color!!))
+            .append(Component.literal(" [").withColor(TextColor.DARK_GRAY.value))
             .append(Component.literal("~" + "%,d".format(averageIncome.toInt() * (totalClaims - completedClaims))).withColor(0xFFFFFF))
             .append(Glyphs.getGlyphComponent("_fonts/icon/coin_small.png"))
-            .append(Component.literal(" remaining").withColor(ChatFormatting.GRAY.color!!))
-            .append(Component.literal("]").withColor(ChatFormatting.DARK_GRAY.color!!))
+            .append(Component.literal(" remaining").withColor(TextColor.GRAY.value))
+            .append(Component.literal("]").withColor(TextColor.DARK_GRAY.value))
     }
 
     fun handleWeeklyVaultIncomeTooltip(components: MutableList<Component>) {

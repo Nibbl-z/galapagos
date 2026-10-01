@@ -17,6 +17,7 @@ import kotlinx.datetime.toLocalDateTime
 import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.Style
+import net.minecraft.network.chat.TextColor
 import net.minecraft.resources.Identifier
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
@@ -87,10 +88,10 @@ class SkyBattleSoloHistory : BaseHistory() {
             leftContent.child(UIComponents.label(
                 Component.literal("Placed ")
                     .append(when(it.getPlacement()) {
-                        1 -> Component.literal("1st").withColor(ChatFormatting.YELLOW.color!!).withStyle(Style.EMPTY.withBold(true))
-                        2 -> Component.literal("2nd").withColor(ChatFormatting.GRAY.color!!)
+                        1 -> Component.literal("1st").withColor(TextColor.YELLOW.value).withStyle(Style.EMPTY.withBold(true))
+                        2 -> Component.literal("2nd").withColor(TextColor.GRAY.value)
                         3 -> Component.literal("3rd").withColor(0x9e5b39)
-                        else -> Component.literal("${it.getPlacement()}th").withColor(ChatFormatting.DARK_GRAY.color!!)
+                        else -> Component.literal("${it.getPlacement()}th").withColor(TextColor.DARK_GRAY.value)
                     })
                 ).shadow(true)
             )
@@ -117,7 +118,7 @@ class SkyBattleSoloHistory : BaseHistory() {
 
             leftContent.child(UIComponents.label(Component.literal(
                 "${date.month.name.lowercase().replaceFirstChar { char -> char.uppercase() }} ${date.day}, ${date.year}\n$time"
-            ).withColor(ChatFormatting.GRAY.color!!)).margins(Insets.top(10)))
+            ).withColor(TextColor.GRAY.value)).margins(Insets.top(10)))
 
             val rightContent = UIContainers.verticalFlow(Sizing.fill(65), Sizing.content())
             rightContent.padding(Insets.of(5))
@@ -132,7 +133,7 @@ class SkyBattleSoloHistory : BaseHistory() {
                         append(Glyphs.getGlyphComponent("_fonts/icon/kills.png"))
 
                         if (playerStats?.kills != 0) {
-                            append(Component.literal(" (").withColor(ChatFormatting.DARK_GRAY.color!!))
+                            append(Component.literal(" (").withColor(TextColor.DARK_GRAY.value))
 
                             var i = 1
                             gameKills.forEach { (cause, count) ->
@@ -141,7 +142,7 @@ class SkyBattleSoloHistory : BaseHistory() {
                                 i++
                             }
 
-                            append(Component.literal(")").withColor(ChatFormatting.DARK_GRAY.color!!))
+                            append(Component.literal(")").withColor(TextColor.DARK_GRAY.value))
                         }
 
                         append(Component.empty()) // ughhghghgh

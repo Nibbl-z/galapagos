@@ -15,6 +15,7 @@ import net.minecraft.client.gui.screens.inventory.ContainerScreen
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.FontDescription
 import net.minecraft.network.chat.Style
+import net.minecraft.network.chat.TextColor
 import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
 import net.minecraft.network.protocol.game.ServerboundContainerClosePacket
@@ -36,7 +37,7 @@ import xyz.nibblz.galapagos.events.ContainerSetSlotEvent
 import xyz.nibblz.galapagos.events.MCCServerEvent
 import xyz.nibblz.galapagos.events.MCCStatisticEvent
 import xyz.nibblz.galapagos.events.SlotClickEvent
-import xyz.nibblz.galapagos.mixin.GuiAccessor
+import xyz.nibblz.galapagos.mixin.HudAccessor
 import xyz.nibblz.galapagos.screens.history.BattleBoxArenaHistory
 import xyz.nibblz.galapagos.screens.history.BattleBoxHistory
 import xyz.nibblz.galapagos.screens.history.SkyBattleSoloHistory
@@ -197,7 +198,7 @@ object XPInfo : Feature {
 
             if (openScreenDelay == 0) {
                 openScreenDelay = 6
-                Minecraft.getInstance().setScreen((openedGame!!.historyScreen as KClass<*>).createInstance() as Screen?) // idk brahhh
+                Minecraft.getInstance().gui.setScreen((openedGame!!.historyScreen as KClass<*>).createInstance() as Screen?) // idk brahhh
                 openedGame = null
             }
         }
@@ -236,7 +237,7 @@ object XPInfo : Feature {
     }
 
     fun getXPBoost(): Double {
-        val actionBar = (Minecraft.getInstance().gui as GuiAccessor).`galapagos$getOverlayMesssageString`() ?: Component.empty()
+        val actionBar = (Minecraft.getInstance().gui as HudAccessor).`galapagos$getOverlayMesssageString`() ?: Component.empty()
 
         return when {
             actionBar.string.contains(Glyphs.getGlyph("_fonts/icon/xp_bonus_20.png")) -> 1.2
@@ -380,7 +381,7 @@ object XPInfo : Feature {
     }
 
     fun containerOpen(packet: ClientboundContainerSetContentPacket) {
-        val screen = Minecraft.getInstance().screen ?: return
+        val screen = Minecraft.getInstance().gui.screen() ?: return
 
         if (screen.title.string.contains("ISLAND REWARDS")) {
             val dailyMeterItem = packet.items[13]
@@ -405,7 +406,7 @@ object XPInfo : Feature {
     fun tooltipAdd(item: ItemStack, components: MutableList<Component>) {
         if (!enabled) return
 
-        val screen = Minecraft.getInstance().screen ?: return
+        val screen = Minecraft.getInstance().gui.screen() ?: return
         if (!screen.title.string.contains("NAVIGATOR")) return
 
         val game = XPSource.entries.find { it.label == item.itemName.string } ?: return
@@ -414,7 +415,7 @@ object XPInfo : Feature {
 
         if (Config.values::xpInfoNavigatorTodayXP.get()) {
             components.add(index,
-                Component.literal("Today's XP: ").withColor(ChatFormatting.AQUA.color!!)
+                Component.literal("Today's XP: ").withColor(TextColor.AQUA.value)
                     .append(Component.literal("%,d".format(dialog?.todayXP[game])).withColor(0xFFFFFF))
             )
             index++
@@ -423,18 +424,18 @@ object XPInfo : Feature {
         if (game != XPSource.PW_SOLO && game != XPSource.FISHING) { // doesn't make sense to have this line for these games
             if (dialog?.todayXPEntries[game]!! != 0 && Config.values::xpInfoNavigatorTodayAverageXP.get()) {
                 components.add(index,
-                    Component.literal("Average XP/Game: ").withColor(ChatFormatting.AQUA.color!!)
+                    Component.literal("Average XP/Game: ").withColor(TextColor.AQUA.value)
                         .append(Component.literal("%,d".format(dialog?.todayXP[game]!! / dialog?.todayXPEntries[game]!!)).withColor(0xFFFFFF))
-                        .append(Component.literal(" (Today)").withColor(ChatFormatting.GRAY.color!!))
+                        .append(Component.literal(" (Today)").withColor(TextColor.GRAY.value))
                 )
                 index++
             }
 
             if (Galapagos.save.gamesPlayed.getOrDefault(game, 0) != 0 && Config.values::xpInfoNavigatorAlltimeAverageXP.get()) {
                 components.add(index,
-                    Component.literal("Average XP/Game: ").withColor(ChatFormatting.AQUA.color!!)
+                    Component.literal("Average XP/Game: ").withColor(TextColor.AQUA.value)
                         .append(Component.literal("%,d".format(Galapagos.save.gameXP[game]!! / Galapagos.save.gamesPlayed[game]!!)).withColor(0xFFFFFF))
-                        .append(Component.literal(" (All-Time, Unmultiplied)").withColor(ChatFormatting.GRAY.color!!))
+                        .append(Component.literal(" (All-Time, Unmultiplied)").withColor(TextColor.GRAY.value))
                 )
                 index++
             }
@@ -457,7 +458,7 @@ object XPInfo : Feature {
                     .append(Glyphs.getGlyphComponent("_fonts/icon/click_action_shift.png"))
                     .append(Component.literal("+").withColor(0xecd584))
                     .append(Glyphs.getGlyphComponent("_fonts/icon/click_action_left.png"))
-                    .append(Component.literal(" > ").withColor(ChatFormatting.DARK_GRAY.color!!))
+                    .append(Component.literal(" > ").withColor(TextColor.DARK_GRAY.value))
                     .append(Component.literal("Shift-Click to ").withColor(0xecd584))
                     .append(Component.literal("View Past Games").withColor(0xfee761))
             )
@@ -465,7 +466,7 @@ object XPInfo : Feature {
             components.add(
                 endIndex, Component.empty()
                     .append(Glyphs.getGlyphComponent("_fonts/icon/warning_blue.png"))
-                    .append(Component.literal(" History for this game is coming Soon™!").withColor(ChatFormatting.AQUA.color!!))
+                    .append(Component.literal(" History for this game is coming Soon™!").withColor(TextColor.AQUA.value))
             )
 
             components.add(
@@ -475,14 +476,14 @@ object XPInfo : Feature {
             components.add(
                 endIndex, Component.empty()
                     .append(Glyphs.getGlyphComponent("_fonts/icon/warning_blue.png"))
-                    .append(Component.literal(" History for this game is coming Soon™!").withColor(ChatFormatting.AQUA.color!!))
+                    .append(Component.literal(" History for this game is coming Soon™!").withColor(TextColor.AQUA.value))
             )
         }
 
     }
 
     fun containerSetSlot(packet: ClientboundContainerSetSlotPacket) {
-        val screen = Minecraft.getInstance().screen ?: return
+        val screen = Minecraft.getInstance().gui.screen() ?: return
 
         if (packet.item.itemName.string == "Daily Meter" && screen.title.string.contains("ISLAND REWARDS")) updateDailyMeter(packet.item)
         if (packet.item.itemName.string == "Weekly Vault" && screen.title.string.contains("ISLAND REWARDS")) updateWeeklyVault(packet.item)
@@ -520,7 +521,7 @@ object XPInfo : Feature {
 
             graphics.text(
                 Minecraft.getInstance().font,
-                Component.literal("Projected XP: ").withColor(ChatFormatting.GRAY.color!!).withStyle(Style.EMPTY.withFont(font))
+                Component.literal("Projected XP: ").withColor(TextColor.GRAY.value).withStyle(Style.EMPTY.withFont(font))
                     .append(Component.literal("%,d".format(((GameStateHandler.currentState?.projectedXP()?.toDouble() ?: 0.0) * getXPBoost()).roundToInt())).withColor(0xFFFFFF)),
                 graphics.guiWidth() / 2 + 93, graphics.guiHeight() - 22,
                 ARGB.opaque(0xFFFFFF)

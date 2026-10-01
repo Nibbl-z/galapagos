@@ -3,12 +3,12 @@ package xyz.nibblz.galapagos.core
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry
-import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.renderer.RenderPipelines
 import net.minecraft.core.component.DataComponents
 import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.TextColor
 import net.minecraft.resources.Identifier
 import net.minecraft.util.ARGB
 import net.minecraft.world.inventory.Slot
@@ -29,7 +29,7 @@ object OOBE : CoreFeature {
             if (openIntroScreen) {
                 openIntroScreenDelay--
                 if (openIntroScreenDelay > 0) return@register
-                Minecraft.getInstance().setScreen(Intro())
+                Minecraft.getInstance().gui.setScreen(Intro())
                 openIntroScreen = false
             }
             ticks++
@@ -90,7 +90,7 @@ object OOBE : CoreFeature {
 
     fun containerOpen() {
         if (!active) return
-        val screen = Minecraft.getInstance().screen ?: return
+        val screen = Minecraft.getInstance().gui.screen() ?: return
 
         if (state == OOBEState.STYLE_PERKS) {
             state = OOBEState.NONE
@@ -138,7 +138,7 @@ object OOBE : CoreFeature {
         if (state == OOBEState.API_SETTINGS_GOOD && !hasAPIKey) {
             sendGalapagosChatMessage(
                 Component.literal("It may take a few minutes for API changes to go into effect. If an error occurs, run /galapagos api manualFetch after a few minutes!")
-                    .withColor(ChatFormatting.AQUA.color!!)
+                    .withColor(TextColor.AQUA.value)
             )
             PlayerData.fetchAPI()
             finishedApiSettings = true
@@ -171,13 +171,13 @@ object OOBE : CoreFeature {
         when (state) {
             OOBEState.POCKET_MENU -> {
                 graphics.text(Minecraft.getInstance().font, "Navigate to", x + 10, y - 53, ARGB.opaque(0xFFFFFF))
-                graphics.text(Minecraft.getInstance().font, "Settings...", x + 70, y - 53, ARGB.opaque(ChatFormatting.AQUA.color!!))
+                graphics.text(Minecraft.getInstance().font, "Settings...", x + 70, y - 53, ARGB.opaque(TextColor.AQUA.value))
             }
             OOBEState.SETTINGS -> {
                 graphics.text(Minecraft.getInstance().font, "Navigate to", x + 10, y - 53, ARGB.opaque(0xFFFFFF))
                 graphics.text(
                     Minecraft.getInstance().font, "API Settings...", x + 70, y - 53, ARGB.opaque(
-                        ChatFormatting.AQUA.color!!))
+                        TextColor.AQUA.value))
             }
             OOBEState.API_SETTINGS, OOBEState.API_SETTINGS_GOOD -> {
                 when {
@@ -192,7 +192,7 @@ object OOBE : CoreFeature {
                         graphics.text(Minecraft.getInstance().font, "Enable ", x + 10, y - 53, ARGB.opaque(0xFFFFFF))
                         graphics.text(
                             Minecraft.getInstance().font, "Infinibag and Statistics...", x + 47, y - 53, ARGB.opaque(
-                                ChatFormatting.AQUA.color!!))
+                                TextColor.AQUA.value))
                     }
 
                     //NYN
@@ -200,10 +200,10 @@ object OOBE : CoreFeature {
                         graphics.text(Minecraft.getInstance().font, "Enable ", x + 10, y - 53, ARGB.opaque(0xFFFFFF))
                         graphics.text(
                             Minecraft.getInstance().font, "Collections and ", x + 47, y - 53, ARGB.opaque(
-                                ChatFormatting.AQUA.color!!))
+                                TextColor.AQUA.value))
                         graphics.text(
                             Minecraft.getInstance().font, "Statistics...", x + 10, y - 43, ARGB.opaque(
-                                ChatFormatting.AQUA.color!!))
+                                TextColor.AQUA.value))
                     }
 
                     //NNY
@@ -211,10 +211,10 @@ object OOBE : CoreFeature {
                         graphics.text(Minecraft.getInstance().font, "Enable ", x + 10, y - 53, ARGB.opaque(0xFFFFFF))
                         graphics.text(
                             Minecraft.getInstance().font, "Collections and", x + 47, y - 53, ARGB.opaque(
-                                ChatFormatting.AQUA.color!!))
+                                TextColor.AQUA.value))
                         graphics.text(
                             Minecraft.getInstance().font, "Infinibag...", x + 10, y - 43, ARGB.opaque(
-                                ChatFormatting.AQUA.color!!))
+                                TextColor.AQUA.value))
                     }
 
                     //YNY
@@ -222,49 +222,49 @@ object OOBE : CoreFeature {
                         graphics.text(Minecraft.getInstance().font, "Enable ", x + 10, y - 53, ARGB.opaque(0xFFFFFF))
                         graphics.text(
                             Minecraft.getInstance().font, "Infinibag...", x + 47, y - 53, ARGB.opaque(
-                                ChatFormatting.AQUA.color!!))
+                                TextColor.AQUA.value))
                     }
                     //NYY
                     !collectionEnabled && infinibagEnabled && statisticsEnabled -> {
                         graphics.text(Minecraft.getInstance().font, "Enable ", x + 10, y - 53, ARGB.opaque(0xFFFFFF))
                         graphics.text(
                             Minecraft.getInstance().font, "Collections...", x + 47, y - 53, ARGB.opaque(
-                                ChatFormatting.AQUA.color!!))
+                                TextColor.AQUA.value))
                     }
                     //YYN
                     collectionEnabled && infinibagEnabled && !statisticsEnabled -> {
                         graphics.text(Minecraft.getInstance().font, "Enable ", x + 10, y - 53, ARGB.opaque(0xFFFFFF))
                         graphics.text(
                             Minecraft.getInstance().font, "Statistics...", x + 47, y - 53, ARGB.opaque(
-                                ChatFormatting.AQUA.color!!))
+                                TextColor.AQUA.value))
                     }
 
                     else -> {
                         graphics.text(Minecraft.getInstance().font, "Enable ", x + 10, y - 53, ARGB.opaque(0xFFFFFF))
                         graphics.text(
                             Minecraft.getInstance().font, "Collections,", x + 47, y - 53, ARGB.opaque(
-                                ChatFormatting.AQUA.color!!))
+                                TextColor.AQUA.value))
                         graphics.text(
                             Minecraft.getInstance().font, "Infinibag, and Statistics...", x + 10, y - 43, ARGB.opaque(
-                                ChatFormatting.AQUA.color!!))
+                                TextColor.AQUA.value))
                     }
                 }
             }
             OOBEState.POCKET_MENU_STYLE_PERKS -> {
                 graphics.text(Minecraft.getInstance().font, "Navigate to", x + 10, y - 53, ARGB.opaque(0xFFFFFF))
-                graphics.text(Minecraft.getInstance().font, "My Profile...", x + 70, y - 53, ARGB.opaque(ChatFormatting.AQUA.color!!))
+                graphics.text(Minecraft.getInstance().font, "My Profile...", x + 70, y - 53, ARGB.opaque(TextColor.AQUA.value))
             }
             OOBEState.PROFILE -> {
                 graphics.text(Minecraft.getInstance().font, "Navigate to", x + 10, y - 53, ARGB.opaque(0xFFFFFF))
-                graphics.text(Minecraft.getInstance().font, "Cosmetic Collection...", x + 70, y - 53, ARGB.opaque(ChatFormatting.AQUA.color!!))
+                graphics.text(Minecraft.getInstance().font, "Cosmetic Collection...", x + 70, y - 53, ARGB.opaque(TextColor.AQUA.value))
             }
             OOBEState.COSMETIC_COLLECTION -> {
                 graphics.text(Minecraft.getInstance().font, "Navigate to", x + 10, y - 53, ARGB.opaque(0xFFFFFF))
-                graphics.text(Minecraft.getInstance().font, "Style Perks...", x + 70, y - 53, ARGB.opaque(ChatFormatting.AQUA.color!!))
+                graphics.text(Minecraft.getInstance().font, "Style Perks...", x + 70, y - 53, ARGB.opaque(TextColor.AQUA.value))
             }
             OOBEState.STYLE_PERKS -> {
                 graphics.text(Minecraft.getInstance().font, "Everything is now set up!", x + 10, y - 53, ARGB.opaque(0xFFFFFF))
-                graphics.text(Minecraft.getInstance().font, "You're good to go!", x + 10, y - 43, ARGB.opaque(ChatFormatting.AQUA.color!!))
+                graphics.text(Minecraft.getInstance().font, "You're good to go!", x + 10, y - 43, ARGB.opaque(TextColor.AQUA.value))
             }
             else -> {}
         }
@@ -347,7 +347,7 @@ object OOBE : CoreFeature {
                     graphics.fill(10, 10, 340, 50, ARGB.color(0.5f, 0x000000))
                     graphics.text(Minecraft.getInstance().font, "Let's make sure you have the required API features enabled!", 20, 20, ARGB.opaque(0xFFFFFF))
                     graphics.text(Minecraft.getInstance().font, "Navigate to the ", 20, 35, ARGB.opaque(0xFFFFFF))
-                    graphics.text(Minecraft.getInstance().font, "Pocket Menu", 100, 35, ARGB.opaque(ChatFormatting.AQUA.color!!))
+                    graphics.text(Minecraft.getInstance().font, "Pocket Menu", 100, 35, ARGB.opaque(TextColor.AQUA.value))
                     graphics.text(Minecraft.getInstance().font, "in your hotbar.", 165, 35, ARGB.opaque(0xFFFFFF))
 
                     graphics.blit(
@@ -362,13 +362,13 @@ object OOBE : CoreFeature {
                     graphics.text(Minecraft.getInstance().font, "Next, set your API key by running", 20, 20, ARGB.opaque(0xFFFFFF))
                     graphics.text(
                         Minecraft.getInstance().font, "/galapagos api set <API_KEY>!", 20, 35, ARGB.opaque(
-                            ChatFormatting.AQUA.color!!))
+                            TextColor.AQUA.value))
                 }
                 OOBEState.JOIN_STYLE_PERKS -> {
                     graphics.fill(10, 10, 340, 50, ARGB.color(0.5f, 0x000000))
                     graphics.text(Minecraft.getInstance().font, "Next, Galapagos needs to know your Style Perk levels!", 20, 20, ARGB.opaque(0xFFFFFF))
                     graphics.text(Minecraft.getInstance().font, "Navigate to the ", 20, 35, ARGB.opaque(0xFFFFFF))
-                    graphics.text(Minecraft.getInstance().font, "Pocket Menu", 100, 35, ARGB.opaque(ChatFormatting.AQUA.color!!))
+                    graphics.text(Minecraft.getInstance().font, "Pocket Menu", 100, 35, ARGB.opaque(TextColor.AQUA.value))
                     graphics.text(Minecraft.getInstance().font, "in your hotbar.", 165, 35, ARGB.opaque(0xFFFFFF))
 
                     graphics.blit(

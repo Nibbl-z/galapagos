@@ -14,6 +14,7 @@ import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
 import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.TextColor
 import net.minecraft.resources.Identifier
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
@@ -77,10 +78,10 @@ class TrophyHistory : BaseOwoScreen<FlowLayout>() {
 
             if (dayBreakdown != null && dayHeader != null) {
                 dayHeader.text(Component.literal(
-                    "${date.month.name.lowercase().replaceFirstChar { char -> char.uppercase() }} ${date.day}, ${date.year} [").withColor(ChatFormatting.GRAY.color!!)
+                    "${date.month.name.lowercase().replaceFirstChar { char -> char.uppercase() }} ${date.day}, ${date.year} [").withColor(TextColor.GRAY.value)
                     .append(Component.literal("+${"%,d".format(dayPerCategory.values.sum())} ").withColor(0x32ff32))
                     .append(Glyphs.getGlyphComponent("_fonts/icon/trophy/yellow.png"))
-                    .append(Component.literal("]").withColor(ChatFormatting.GRAY.color!!))
+                    .append(Component.literal("]").withColor(TextColor.GRAY.value))
                 )
 
                 val totalSkill = dayPerCategory.entries.sumOf { (key, value) -> if (key.type == TrophyTracking.TrophyType.SKILL) value else 0 }
@@ -203,7 +204,7 @@ class TrophyHistory : BaseOwoScreen<FlowLayout>() {
                             .append(Glyphs.getGlyphComponent("_fonts/icon/trophy/${it.type.sprite}.png"))
                     ))
                     .child(UIComponents.label(titleComponent).horizontalSizing(Sizing.fill()))
-                    .child(UIComponents.label(Component.literal(time).withColor(ChatFormatting.GRAY.color!!)))
+                    .child(UIComponents.label(Component.literal(time).withColor(TextColor.GRAY.value)))
             )
 
             changeContainer.padding(Insets.of(4))

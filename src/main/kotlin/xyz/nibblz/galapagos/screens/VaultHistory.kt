@@ -9,6 +9,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.TextColor
 import net.minecraft.resources.Identifier
 import xyz.nibblz.galapagos.Galapagos
 import kotlin.time.Instant
@@ -33,12 +34,12 @@ class VaultHistory : BaseOwoScreen<FlowLayout>() {
 
             changeContainer.child(UIComponents.label(
                 Component.literal("Vault #$currentVault")
-                    .append(Component.literal(" (${it.claims}/${it.maxClaims})").withColor(ChatFormatting.GRAY.color!!))
+                    .append(Component.literal(" (${it.claims}/${it.maxClaims})").withColor(TextColor.GRAY.value))
             ))
 
             changeContainer.child(UIComponents.label(
                 Component.literal("Claimed ${date.month.name.lowercase().replaceFirstChar { char -> char.uppercase() }} ${date.day}, ${date.year}")
-                        .withColor(ChatFormatting.GRAY.color!!)
+                        .withColor(TextColor.GRAY.value)
             ))
 
             val rewardLayout = UIContainers.horizontalFlow(Sizing.fill(100), Sizing.content())

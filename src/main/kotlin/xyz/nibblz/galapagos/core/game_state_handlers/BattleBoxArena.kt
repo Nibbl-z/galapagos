@@ -93,7 +93,7 @@ object BattleBoxArena : Handler {
             40 to hashMapOf(41 to 61, 42 to 62, 43 to 63, 44 to 64),
         )
 
-        val tabList = (Minecraft.getInstance().gui.tabList as PlayerTabOverlayAccessor).`galapagos$getPlayerInfos`() ?: return
+        val tabList = (Minecraft.getInstance().gui.hud.tabList as PlayerTabOverlayAccessor).`galapagos$getPlayerInfos`() ?: return
 
         val players: MutableList<BattleBoxPlayerState> = mutableListOf()
 
@@ -133,7 +133,7 @@ object BattleBoxArena : Handler {
         }
 
         val rounds: MutableList<BattleBoxRound> = mutableListOf()
-        val tabListFooter = (Minecraft.getInstance().gui.tabList as PlayerTabOverlayAccessor).`galapagos$getFooter`() ?: return
+        val tabListFooter = (Minecraft.getInstance().gui.hud.tabList as PlayerTabOverlayAccessor).`galapagos$getFooter`() ?: return
 
         val roundsPlayed = roundsRegex.find(tabListFooter.string)?.groups?.get("rounds")?.value?.toIntOrNull() ?: 99 // better to have excess DRAW data than nothing ig idk blehhhhhhh
 

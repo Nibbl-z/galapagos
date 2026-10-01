@@ -3,11 +3,11 @@ package xyz.nibblz.galapagos.features
 import kotlinx.serialization.Serializable
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback
-import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.screens.inventory.ContainerScreen
 import net.minecraft.core.component.DataComponents
 import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.TextColor
 import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket
 import net.minecraft.network.protocol.game.ServerboundContainerClosePacket
@@ -42,7 +42,7 @@ object CoinTracking : Feature {
         Component.literal("- Scavenging"),
         Component.empty(),
         Component.literal("To view your coin history, click the ")
-            .append(Component.literal("Coins").withColor(ChatFormatting.YELLOW.color!!))
+            .append(Component.literal("Coins").withColor(TextColor.YELLOW.value))
             .append(Component.literal(" item in your Infinibag.")),
         Component.empty(),
         Component.literal("Note: Disabling this feature will NOT disable coin tracking, but will disable the coin history menu.")
@@ -60,7 +60,7 @@ object CoinTracking : Feature {
         ClientTickEvents.END_CLIENT_TICK.register {
             if (!openCoinHistory) return@register
             openCoinHistory = false
-            Minecraft.getInstance().setScreen(CoinHistory())
+            Minecraft.getInstance().gui.setScreen(CoinHistory())
         }
     }
 
@@ -84,7 +84,7 @@ object CoinTracking : Feature {
     }
 
     fun containerOpen(packet: ClientboundContainerSetContentPacket) {
-        val screen = Minecraft.getInstance().screen ?: return
+        val screen = Minecraft.getInstance().gui.screen() ?: return
 
         if (screen.title.string.contains("USING COINS?")) {
             handleCoinPurchase(packet)
@@ -336,7 +336,7 @@ object CoinTracking : Feature {
 
     fun tooltipAdd(stack: ItemStack, components: MutableList<Component>) {
         if (!enabled) return
-        val screen = Minecraft.getInstance().screen ?: return
+        val screen = Minecraft.getInstance().gui.screen() ?: return
         if (!screen.title.string.contains("INFINIBAG")) return
         if (stack.itemName.string != "Coins") return
 
@@ -347,7 +347,7 @@ object CoinTracking : Feature {
 
         components.add(index + 1, Component.empty()
             .append(Glyphs.getGlyphComponent("_fonts/icon/click_action_left.png"))
-            .append(Component.literal(" > ").withColor(ChatFormatting.DARK_GRAY.color!!))
+            .append(Component.literal(" > ").withColor(TextColor.DARK_GRAY.value))
             .append(Component.literal("Click to ").withColor(0xecd584))
             .append(Component.literal("View History").withColor(0xfee761)))
     }

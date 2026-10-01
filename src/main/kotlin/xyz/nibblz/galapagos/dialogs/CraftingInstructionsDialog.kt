@@ -4,11 +4,11 @@ import com.noxcrew.sheeplib.dialog.Dialog
 import com.noxcrew.sheeplib.dialog.title.TextTitleWidget
 import com.noxcrew.sheeplib.layout.linear
 import com.noxcrew.sheeplib.theme.Themed
-import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.components.StringWidget
 import net.minecraft.client.gui.layouts.LinearLayout
 import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.TextColor
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
 import xyz.nibblz.galapagos.data.*
@@ -144,7 +144,7 @@ class CraftingInstructionsDialog(x: Int, y: Int, val blueprint: CraftingInstruct
                 mcciTextureComponent(material.getSpriteLocation())
                     .append(Component.literal(" ${material.label}:").withColor(material.rarity.color))
                     .append(Component.literal(" [${materialStatus[material]!!.first}/${materialStatus[material]!!.second}]").withColor(
-                        ChatFormatting.GRAY.color!!)),
+                        TextColor.GRAY.value)),
                 font)
             instructions.forEach {
                 +StringWidget((Component.literal("• ")).append(it.getComponent()), font)
@@ -162,7 +162,7 @@ class CraftingInstructionsDialog(x: Int, y: Int, val blueprint: CraftingInstruct
                 Glyphs.getGlyphComponent("_fonts/icon/time.png")), font)
         }
         if (Galapagos.save.stylePerks[StylePerk.EFFICIENT_FUSION] == null) {
-            +StringWidget(Component.literal("(Please open the Style Perks menu for accurate crafting time!)").withColor(ChatFormatting.RED.color!!), font)
+            +StringWidget(Component.literal("(Please open the Style Perks menu for accurate crafting time!)").withColor(TextColor.RED.value), font)
         }
 
     }
@@ -181,7 +181,7 @@ class CraftingInstructionsDialog(x: Int, y: Int, val blueprint: CraftingInstruct
             mcciTextureComponent(stylePerk.sprite.dropLast(4)) // its like a damn 50% chance if you need the .png istg...
                 .append(Component.literal(" ${stylePerk.label}"))
                 .append(Component.literal(" (Level ${(Galapagos.save.stylePerks[stylePerk] ?: 0) + 1})")
-                    .withColor(ChatFormatting.GRAY.color!!))
+                    .withColor(TextColor.GRAY.value))
         )
     }
 }

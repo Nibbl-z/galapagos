@@ -27,7 +27,7 @@ object DataCollection : CoreFeature {
     }
 
     fun fetchBadgeSprites(packet: ClientboundContainerSetContentPacket) {
-        val screen = Minecraft.getInstance().screen ?: return
+        val screen = Minecraft.getInstance().gui.screen() ?: return
         if (!screen.title.string.contains("GAME PROGRESSION")) return
 
         packet.items.forEach {
@@ -39,7 +39,7 @@ object DataCollection : CoreFeature {
     }
 
     fun fetchFishSprites(packet: ClientboundContainerSetContentPacket) {
-        val screen = Minecraft.getInstance().screen ?: return
+        val screen = Minecraft.getInstance().gui.screen() ?: return
         if (!screen.title.string.contains("A.N.G.L.R. PANEL")) return
 
         packet.items.forEach {

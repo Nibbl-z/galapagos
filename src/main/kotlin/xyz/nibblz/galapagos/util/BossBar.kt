@@ -13,7 +13,7 @@ fun findBossbarLine(regex: Regex): MatchGroupCollection? {
 }
 
 fun getBossbarLines(): List<String> {
-    val bossOverlay = Minecraft.getInstance().gui.bossOverlay as BossOverlayAccessor
+    val bossOverlay = Minecraft.getInstance().gui.hud.bossOverlay as BossOverlayAccessor
     val events = bossOverlay.`galapagos$getEvents`().values
 
     val lines: MutableList<String> = mutableListOf()

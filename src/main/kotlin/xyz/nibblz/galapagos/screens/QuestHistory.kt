@@ -13,6 +13,7 @@ import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
 import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.TextColor
 import net.minecraft.resources.Identifier
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
@@ -34,7 +35,7 @@ class QuestHistory : BaseOwoScreen<FlowLayout>() {
 
             if (previousDay != newDayDate.day) {
                 content.child(UIComponents.spacer().verticalSizing(Sizing.fixed(10)))
-                content.child(UIComponents.label(Component.literal("${date.month.name.lowercase().replaceFirstChar { char -> char.uppercase() }} ${date.day}, ${date.year}").withColor(ChatFormatting.GRAY.color!!)))
+                content.child(UIComponents.label(Component.literal("${date.month.name.lowercase().replaceFirstChar { char -> char.uppercase() }} ${date.day}, ${date.year}").withColor(TextColor.GRAY.value)))
             }
 
             previousDay = newDayDate.day
@@ -67,7 +68,7 @@ class QuestHistory : BaseOwoScreen<FlowLayout>() {
             changeContainer.child(
                 UIContainers.verticalFlow(Sizing.fill(80), Sizing.content())
                     .child(UIComponents.label(Component.literal(it.getLabel()).withColor(it.rarity.color)).horizontalSizing(Sizing.fill()))
-                    .child(UIComponents.label(Component.literal(time).withColor(ChatFormatting.GRAY.color!!)))
+                    .child(UIComponents.label(Component.literal(time).withColor(TextColor.GRAY.value)))
             )
 
             changeContainer.padding(Insets.of(4))

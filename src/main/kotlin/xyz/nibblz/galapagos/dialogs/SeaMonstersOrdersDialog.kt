@@ -10,6 +10,7 @@ import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.components.StringWidget
 import net.minecraft.client.gui.layouts.LinearLayout
 import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.TextColor
 import xyz.nibblz.galapagos.data.Area
 import xyz.nibblz.galapagos.data.FISH_PER_AREA
 import xyz.nibblz.galapagos.features.EventFeatures
@@ -39,9 +40,9 @@ class SeaMonstersOrdersDialog(x: Int, y: Int) : Dialog(x, y), Themed by Galapago
                 val rarity = FISH_PER_AREA[area]!![fish]!! // !!!11!!111!!!!!
 
                 fishComponent = fishComponent
-                    .append(Component.literal("• ").withColor(ChatFormatting.DARK_GRAY.color!!))
+                    .append(Component.literal("• ").withColor(TextColor.DARK_GRAY.value))
                     .append(Component.literal("${EventFeatures.fishCounts[fish]}").withColor(
-                        if ((EventFeatures.fishCounts[fish] ?: 0) < count) ChatFormatting.RED.color!! else ChatFormatting.GREEN.color!!
+                        if ((EventFeatures.fishCounts[fish] ?: 0) < count) TextColor.RED.value else TextColor.GREEN.value
                     ))
                     .append(Component.literal("/$count "))
                     .append(Component.literal("[$fish] ").withColor(rarity.color))

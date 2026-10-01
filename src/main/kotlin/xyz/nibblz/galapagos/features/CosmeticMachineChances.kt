@@ -7,6 +7,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.screens.inventory.ContainerScreen
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.Style
+import net.minecraft.network.chat.TextColor
 import net.minecraft.world.inventory.Slot
 import net.minecraft.world.item.ItemStack
 import xyz.nibblz.galapagos.Galapagos
@@ -100,7 +101,7 @@ object CosmeticMachineChances : Feature {
     fun containerOpen() { updateItems() }
 
     fun updateItems() {
-        val screen = Minecraft.getInstance().screen ?: return
+        val screen = Minecraft.getInstance().gui.screen() ?: return
         if (screen.title.string.contains("COSMETIC MACHINE")) inCosmeticMachine = true
         if (!inCosmeticMachine) return
 
@@ -184,14 +185,14 @@ object CosmeticMachineChances : Feature {
         val fixedChance = Galapagos.decimalFormat.format(chance * (1.0 - exclusiveChance - arcaneChance) * 100.0)
         val fixedExclusiveChance = Galapagos.decimalFormat.format(chance * exclusiveChance * 100.0)
 
-        return Component.literal(" • ").withColor(ChatFormatting.DARK_GRAY.color!!)
-                .append(Component.literal("$fixedChance%").withColor(ChatFormatting.GRAY.color!!))
-                .append(Component.literal(" - ").withColor(ChatFormatting.DARK_GRAY.color!!))
+        return Component.literal(" • ").withColor(TextColor.DARK_GRAY.value)
+                .append(Component.literal("$fixedChance%").withColor(TextColor.GRAY.value))
+                .append(Component.literal(" - ").withColor(TextColor.DARK_GRAY.value))
                 .append(Component.literal(rarity.label).withColor(rarity.color)
-                .append(Component.literal(" [").withColor(ChatFormatting.DARK_GRAY.color!!))
-                .append(Component.literal("$fixedExclusiveChance% ").withColor(ChatFormatting.GRAY.color!!))
+                .append(Component.literal(" [").withColor(TextColor.DARK_GRAY.value))
+                .append(Component.literal("$fixedExclusiveChance% ").withColor(TextColor.GRAY.value))
                 .append(Component.literal("\uE000").withColor(0xFFFFFF).withStyle(Style.EMPTY.withFont(Galapagos.font)))
-                .append(Component.literal("]").withColor(ChatFormatting.DARK_GRAY.color!!)))
+                .append(Component.literal("]").withColor(TextColor.DARK_GRAY.value)))
     }
 
     fun tooltipAdd(item: ItemStack, list: MutableList<Component>) {
@@ -251,9 +252,9 @@ object CosmeticMachineChances : Feature {
                 list[6] = getModifiedChanceTooltip(Rarity.EPIC, true)
                 list[7] = getModifiedChanceTooltip(Rarity.LEGENDARY, true)
                 list[8] = getModifiedChanceTooltip(Rarity.MYTHIC, true)
-                list.add(9, Component.literal(" • ").withColor(ChatFormatting.DARK_GRAY.color!!)
-                    .append(Component.literal("0.03%").withColor(ChatFormatting.GRAY.color!!))
-                    .append(Component.literal(" - ").withColor(ChatFormatting.DARK_GRAY.color!!))
+                list.add(9, Component.literal(" • ").withColor(TextColor.DARK_GRAY.value)
+                    .append(Component.literal("0.03%").withColor(TextColor.GRAY.value))
+                    .append(Component.literal(" - ").withColor(TextColor.DARK_GRAY.value))
                     .append(Glyphs.getGlyphComponent("_fonts/icon/tooltips/arcane.png")))
 
                 list.removeAt(11)

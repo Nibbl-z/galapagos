@@ -40,8 +40,8 @@ public class AbstractContainerScreenMixin {
         if (containerInput == ContainerInput.PICKUP_ALL) return;
         // ^ for whatever reason, double clicking fast will run this function twice, and then AGAIN with pickup all. i dont want that. PMO!!!
 
-        ContainerScreen screen = Minecraft.getInstance().screen instanceof ContainerScreen s ? s : null;
-        AnvilScreen anvilScreen = Minecraft.getInstance().screen instanceof AnvilScreen s ? s : null;
+        ContainerScreen screen = Minecraft.getInstance().gui.screen() instanceof ContainerScreen s ? s : null;
+        AnvilScreen anvilScreen = Minecraft.getInstance().gui.screen() instanceof AnvilScreen s ? s : null;
 
         if (!UtilKt.onIsland()) return;
 
@@ -56,7 +56,7 @@ public class AbstractContainerScreenMixin {
 
     @Inject(method = "extractRenderState", at = @At("TAIL"))
     private void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a, CallbackInfo ci) {
-        ContainerScreen screen = Minecraft.getInstance().screen instanceof ContainerScreen s ? s : null;
+        ContainerScreen screen = Minecraft.getInstance().gui.screen() instanceof ContainerScreen s ? s : null;
         if (!UtilKt.onIsland()) return;
         if (screen == null) return;
 

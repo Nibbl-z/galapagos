@@ -88,7 +88,7 @@ object EventFeatures : Feature {
     }
 
     fun containerOpen(packet: ClientboundContainerSetContentPacket) {
-        val screen = Minecraft.getInstance().screen ?: return
+        val screen = Minecraft.getInstance().gui.screen() ?: return
 
         if (screen.title.string.contains("EVENT ORDERS")) {
             updateOrder(0, packet.items[22])
@@ -105,7 +105,7 @@ object EventFeatures : Feature {
     }
 
     fun containerSetSlot(packet: ClientboundContainerSetSlotPacket) {
-        val screen = Minecraft.getInstance().screen ?: return
+        val screen = Minecraft.getInstance().gui.screen() ?: return
 
         if (screen.title.string.contains("EVENT ORDERS")) {
             if (packet.slot in 22..24) updateOrder(packet.slot - 22, packet.item)

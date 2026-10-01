@@ -9,6 +9,7 @@ import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.ClickEvent
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.Style
+import net.minecraft.network.chat.TextColor
 import xyz.nibblz.galapagos.core.OOBE
 import java.net.URI
 
@@ -35,7 +36,7 @@ class Intro : BaseOwoScreen<FlowLayout>() {
             .child(UIComponents.label(Component.literal(
                 "First off: You'll need an API key! If you do not have one, you can generate one at ")
                 .append(Component.literal("https://gateway.noxcrew.com/").withStyle(Style.EMPTY
-                    .withColor(ChatFormatting.AQUA.color!!)
+                    .withColor(TextColor.AQUA.value)
                     .withUnderlined(true)
                     .withClickEvent(ClickEvent.OpenUrl(URI("https://gateway.noxcrew.com/")))))
                 .append(Component.literal(". If you can't generate an API key, that's okay! A custom endpoint will be used instead, however, uptime of this endpoint is not guaranteed!"))

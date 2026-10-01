@@ -1,10 +1,10 @@
 package xyz.nibblz.galapagos.data
 
-import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.Style
+import net.minecraft.network.chat.TextColor
 import net.minecraft.util.ARGB
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.util.Glyphs
@@ -88,38 +88,38 @@ fun BlueprintLootPreview.render(graphics: GuiGraphicsExtractor, x: Int, y: Int, 
 }
 
 fun BlueprintLootPreview.newCosmeticTooltip(): Component {
-    return Component.literal("New Cosmetic: ").withColor(ChatFormatting.GRAY.color!!)
-        .append(Component.literal("${Galapagos.decimalFormat.format(this.newCosmeticChance)}%").withColor(ChatFormatting.GREEN.color!!))
-        .append(Component.literal(" [").withColor(ChatFormatting.GRAY.color!!))
-        .append(Component.literal("${this.currentTrophies}/${this.totalTrophies} ").withColor(ChatFormatting.GREEN.color!!))
+    return Component.literal("New Cosmetic: ").withColor(TextColor.GRAY.value)
+        .append(Component.literal("${Galapagos.decimalFormat.format(this.newCosmeticChance)}%").withColor(TextColor.GREEN.value))
+        .append(Component.literal(" [").withColor(TextColor.GRAY.value))
+        .append(Component.literal("${this.currentTrophies}/${this.totalTrophies} ").withColor(TextColor.GREEN.value))
         .append(Glyphs.getGlyphComponent("_fonts/icon/trophy/purple.png"))
-        .append(Component.literal("]").withColor(ChatFormatting.GRAY.color!!))
+        .append(Component.literal("]").withColor(TextColor.GRAY.value))
 }
 
 fun BlueprintLootPreview.newRepTooltip(): Component {
-    return Component.literal("New Royal Rep: ").withColor(ChatFormatting.GRAY.color!!)
+    return Component.literal("New Royal Rep: ").withColor(TextColor.GRAY.value)
         .append(Component.literal("${Galapagos.decimalFormat.format(this.newRepChance)}%").withColor(0x9143f0))
-        .append(Component.literal(" [").withColor(ChatFormatting.GRAY.color!!))
+        .append(Component.literal(" [").withColor(TextColor.GRAY.value))
         .append(Component.literal("${this.currentRep}/${this.totalRep} ").withColor(0x9143f0))
         .append(Glyphs.getGlyphComponent("_fonts/icon/royal_reputation.png"))
-        .append(Component.literal("]").withColor(ChatFormatting.GRAY.color!!))
+        .append(Component.literal("]").withColor(TextColor.GRAY.value))
 }
 
 fun BlueprintLootPreview.trophiesPerRollTooltip(): Component {
-    return Component.literal("Average Trophies/Roll: ").withColor(ChatFormatting.GRAY.color!!)
-        .append(Component.literal(Galapagos.decimalFormat.format(this.trophiesPerRoll) + " ").withColor(ChatFormatting.GREEN.color!!))
+    return Component.literal("Average Trophies/Roll: ").withColor(TextColor.GRAY.value)
+        .append(Component.literal(Galapagos.decimalFormat.format(this.trophiesPerRoll) + " ").withColor(TextColor.GREEN.value))
         .append(Glyphs.getGlyphComponent("_fonts/icon/trophy/purple.png"))
 
 }
 
 fun BlueprintLootPreview.mythicCoresPerRollTooltip(): Component {
-    return Component.literal("Average Mythic Cores/Roll: ").withColor(ChatFormatting.GRAY.color!!)
-        .append(Component.literal(Galapagos.decimalFormat.format(this.mythicCoresPerRoll) + " ").withColor(ChatFormatting.RED.color!!))
+    return Component.literal("Average Mythic Cores/Roll: ").withColor(TextColor.GRAY.value)
+        .append(Component.literal(Galapagos.decimalFormat.format(this.mythicCoresPerRoll) + " ").withColor(TextColor.RED.value))
         .append(Component.literal("\uE003").withColor(0xffffff).withStyle(Style.EMPTY.withFont(Galapagos.font)))
 }
 
 fun BlueprintLootPreview.arcaneCoresPerRollTooltip(): Component {
-    return Component.literal("Average Arcane Cores/Roll: ").withColor(ChatFormatting.GRAY.color!!)
-        .append(Component.literal(Galapagos.decimalFormat.format(this.arcaneCoresPerRoll) + " ").withColor(ChatFormatting.LIGHT_PURPLE.color!!))
+    return Component.literal("Average Arcane Cores/Roll: ").withColor(TextColor.GRAY.value)
+        .append(Component.literal(Galapagos.decimalFormat.format(this.arcaneCoresPerRoll) + " ").withColor(TextColor.LIGHT_PURPLE.value))
         .append(Component.literal("\uE004").withColor(0xffffff).withStyle(Style.EMPTY.withFont(Galapagos.font)))
 }

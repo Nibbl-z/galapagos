@@ -1,11 +1,11 @@
 package xyz.nibblz.galapagos.features
 
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback
-import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.screens.inventory.ContainerScreen
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.Style
+import net.minecraft.network.chat.TextColor
 import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
 import net.minecraft.world.inventory.Slot
@@ -20,6 +20,7 @@ import xyz.nibblz.galapagos.util.Glyphs
 import xyz.nibblz.galapagos.util.findLore
 
 object ExchangeUnitPrice : Feature {
+
     override val id: String = "exchange_unit_price"
     override val name: String = "Island Exchange Unit Price"
     override val description: List<Component> = listOf(
@@ -41,11 +42,9 @@ object ExchangeUnitPrice : Feature {
     val listedPriceRegex = Regex("Listed Price: .(?<price>[\\d,]+)")
 
     fun containerOpen(packet: ClientboundContainerSetContentPacket) {
-        val screen = Minecraft.getInstance().screen ?: return
+        val screen = Minecraft.getInstance().gui.screen() ?: return
         if (!screen.title.string.contains("ISLAND EXCHANGE", false)) return
-
         perUnitPrices.clear()
-
         packet.items.forEach {
             //if (it.count == 1) return@forEach
             getData(it)
@@ -114,7 +113,7 @@ object ExchangeUnitPrice : Feature {
     }
 
     fun containerSetSlot(packet: ClientboundContainerSetSlotPacket) {
-        val screen = Minecraft.getInstance().screen ?: return
+        val screen = Minecraft.getInstance().gui.screen() ?: return
         if (!screen.title.string.contains("ISLAND EXCHANGE", false)) return
 
         val item = packet.item
@@ -143,7 +142,7 @@ object ExchangeUnitPrice : Feature {
 
     fun tooltipAdd(item: ItemStack, list: MutableList<Component>) {
         if (!enabled) return
-        val screen = Minecraft.getInstance().screen ?: return
+        val screen = Minecraft.getInstance().gui.screen() ?: return
         if (!screen.title.string.contains("ISLAND EXCHANGE", false)) return
 
         val listedPriceIndex = list.indexOfFirst {
@@ -153,7 +152,7 @@ object ExchangeUnitPrice : Feature {
 
         if (item.count != 1 && Config.values::exchangeShowUnitPrice.get()) {
             list.add(listedPriceIndex + 1,
-                Component.literal("Unit Price: ").withColor(ChatFormatting.GRAY.color!!)
+                Component.literal("Unit Price: ").withColor(TextColor.GRAY.value)
                     .append(Glyphs.getGlyphComponent("_fonts/icon/coin.png"))
                     .append(Component.literal("%,d".format(perUnitPrices[item])).withColor(0xffffff))
             )
@@ -163,7 +162,7 @@ object ExchangeUnitPrice : Feature {
             val soulUnitPrice = (perUnitPrices[item] ?: 1) / (soulEquivalent[item] ?: 1)
 
             list.add(listedPriceIndex + 1,
-                Component.literal("Soul Equivalent: ").withColor(ChatFormatting.GRAY.color!!)
+                Component.literal("Soul Equivalent: ").withColor(TextColor.GRAY.value)
                     .append(Component.literal("\uE001").withColor(0xffffff).withStyle(Style.EMPTY.withFont(Galapagos.font)))
                     .append(Component.literal((soulEquivalent[item] !! * item.count).toString()).withColor(0xffffff))
                     .append(Component.literal(", "))
@@ -176,7 +175,7 @@ object ExchangeUnitPrice : Feature {
             val wispUnitPrice = (perUnitPrices[item] ?: 1) / (wispEquivalent[item] ?: 1)
 
             list.add(listedPriceIndex + 1,
-                Component.literal("Wisp Equivalent: ").withColor(ChatFormatting.GRAY.color!!)
+                Component.literal("Wisp Equivalent: ").withColor(TextColor.GRAY.value)
                     .append(Component.literal("\uE002").withColor(0xffffff).withStyle(Style.EMPTY.withFont(Galapagos.font)))
                     .append(Component.literal((wispEquivalent[item]!! * item.count).toString()).withColor(0xffffff))
                     .append(Component.literal(", "))

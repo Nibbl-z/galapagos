@@ -7,6 +7,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.screens.inventory.ContainerScreen
 import net.minecraft.client.renderer.RenderPipelines
 import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.TextColor
 import net.minecraft.resources.Identifier
 import net.minecraft.world.inventory.Slot
 import net.minecraft.world.item.ItemStack
@@ -50,7 +51,7 @@ object CrateChances: Feature {
     }
 
     fun containerOpen() {
-        val screen = Minecraft.getInstance().screen ?: return
+        val screen = Minecraft.getInstance().gui.screen() ?: return
         if (!screen.title.string.contains("CRATE EMPORIUM", false)) return
 
         bestRepChance = Pair("", 0.0)
@@ -117,7 +118,7 @@ object CrateChances: Feature {
 
     fun tooltipAdd(stack: ItemStack, components: MutableList<Component>) {
         if (!enabled) return
-        val screen = Minecraft.getInstance().screen ?: return
+        val screen = Minecraft.getInstance().gui.screen() ?: return
         if (!screen.title.string.contains("CRATE EMPORIUM", false)) return
         if (!stack.itemName.string.contains("Crate")) return
         val itemName = stack.itemName.string
@@ -153,7 +154,7 @@ object CrateChances: Feature {
             bestCosmeticChance.first -> if (Config.values::highlightBestCosmeticChance.get()) Triple(
                 "Best Standard Cosmetic Chance",
                 "_fonts/icon/star.png",
-                ChatFormatting.YELLOW.color!!
+                TextColor.YELLOW.value
             ) else null
             bestRepChance.first -> if (Config.values::highlightBestRepChance.get()) Triple(
                 "Best Standard Rep Chance",
@@ -163,7 +164,7 @@ object CrateChances: Feature {
             bestExclusiveCosmeticChance.first -> if (Config.values::highlightBestCosmeticChance.get()) Triple(
                 "Best Exclusive Cosmetic Chance",
                 "_fonts/icon/star.png",
-                ChatFormatting.YELLOW.color!!
+                TextColor.YELLOW.value
             ) else null
             bestExclusiveRepChance.first -> if (Config.values::highlightBestRepChance.get()) Triple(
                 "Best Exclusive Rep Chance",
@@ -189,7 +190,7 @@ object CrateChances: Feature {
 
     fun slotRender(graphics: GuiGraphicsExtractor, slot: Slot) {
         if (!enabled) return
-        val screen = Minecraft.getInstance().screen ?: return
+        val screen = Minecraft.getInstance().gui.screen() ?: return
         if (!screen.title.string.contains("CRATE EMPORIUM", false)) return
         if (!slot.item.itemName.string.contains("Crate")) return
 

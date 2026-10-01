@@ -3,6 +3,7 @@ package xyz.nibblz.galapagos.features
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback
 import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.TextColor
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
 import xyz.nibblz.galapagos.data.Rarity
@@ -59,9 +60,9 @@ object RewardChances : Feature {
             val unboostedChance = chance * 100.0 - boostedChance - arcaneChance
 
             var newComponent = Component.empty()
-                .append(Component.literal(" • ").withColor(ChatFormatting.DARK_GRAY.color!!))
+                .append(Component.literal(" • ").withColor(TextColor.DARK_GRAY.value))
                 .append(Component.literal("[${rarity.label}]").withColor(rarity.color))
-                .append(Component.literal(" - ").withColor(ChatFormatting.DARK_GRAY.color!!))
+                .append(Component.literal(" - ").withColor(TextColor.DARK_GRAY.value))
                 .append(Component.literal("${Galapagos.decimalFormat.format(unboostedChance)}%"))
 
             if (boostedChance > 0) {
@@ -89,9 +90,9 @@ object RewardChances : Feature {
 
         if ((Galapagos.save.stylePerks[StylePerk.ARCANE_ANOMALY] ?: 0) > 0 && lastRarityIndex != -1) {
             components.add(lastRarityIndex + 1, Component.empty()
-                .append(Component.literal(" • ").withColor(ChatFormatting.DARK_GRAY.color!!))
+                .append(Component.literal(" • ").withColor(TextColor.DARK_GRAY.value))
                 .append(Component.literal("[Arcane Anomaly]").withColor(Rarity.MYTHIC.color))
-                .append(Component.literal(" - ").withColor(ChatFormatting.DARK_GRAY.color!!))
+                .append(Component.literal(" - ").withColor(TextColor.DARK_GRAY.value))
                 .append(Component.literal("${Galapagos.save.stylePerks[StylePerk.ARCANE_ANOMALY]!! * 0.005}%"))
             )
         }

@@ -7,6 +7,7 @@ import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.screens.inventory.ContainerScreen
 import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.TextColor
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket
 import net.minecraft.network.protocol.game.ServerboundContainerClosePacket
 import net.minecraft.world.inventory.Slot
@@ -45,7 +46,7 @@ object TrophyTracking : Feature {
         ClientTickEvents.END_CLIENT_TICK.register {
             if (!openTrophyHistory) return@register
             openTrophyHistory = false
-            Minecraft.getInstance().setScreen(TrophyHistory()) // A-A-AND I GET JUST WHAT I NEED !!!
+            Minecraft.getInstance().gui.setScreen(TrophyHistory()) // A-A-AND I GET JUST WHAT I NEED !!!
         }
     }
 
@@ -172,7 +173,7 @@ object TrophyTracking : Feature {
 
     fun tooltipAdd(stack: ItemStack, components: MutableList<Component>) {
         if (!enabled) return
-        val screen = Minecraft.getInstance().screen ?: return
+        val screen = Minecraft.getInstance().gui.screen() ?: return
         if (stack.itemName.string != "Crown Level") return
         if (!screen.title.string.contains("MY PROFILE")) return
 
@@ -183,7 +184,7 @@ object TrophyTracking : Feature {
 
         components.add(index + 1, Component.empty()
             .append(Glyphs.getGlyphComponent("_fonts/icon/click_action_left.png"))
-            .append(Component.literal(" > ").withColor(ChatFormatting.DARK_GRAY.color!!))
+            .append(Component.literal(" > ").withColor(TextColor.DARK_GRAY.value))
             .append(Component.literal("Click to ").withColor(0xecd584))
             .append(Component.literal("View Trophy History").withColor(0xfee761)))
     }

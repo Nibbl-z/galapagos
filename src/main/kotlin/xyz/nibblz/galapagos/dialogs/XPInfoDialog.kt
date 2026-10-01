@@ -8,11 +8,11 @@ import com.noxcrew.sheeplib.widget.TextWidgets
 import com.noxcrew.sheeplib.widget.ThemedButton
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.components.StringWidget
 import net.minecraft.client.gui.layouts.LinearLayout
 import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.TextColor
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
 import xyz.nibblz.galapagos.data.FACTION_XP_PER_LEVEL
@@ -49,18 +49,18 @@ class XPInfoDialog(x: Int, y: Int) : Dialog(x, y), Themed by GalapagosTheme {
             append(mcciTextureComponent(sprite))
             append(Component.literal(" "))
             if (!Config.values::xpInfoWindowCompact.get()) {
-                append(Component.literal("$name: ").withColor(ChatFormatting.GRAY.color!!))
+                append(Component.literal("$name: ").withColor(TextColor.GRAY.value))
             }
 
-            append(Component.literal("$completed").withColor(ChatFormatting.WHITE.color!!))
-            append(Component.literal("/$total, ").withColor(ChatFormatting.DARK_GRAY.color!!))
+            append(Component.literal("$completed").withColor(TextColor.WHITE.value))
+            append(Component.literal("/$total, ").withColor(TextColor.DARK_GRAY.value))
 
             val requiredXPText = if (!Config.values::xpInfoWindowCompact.get()) "%,d".format(requiredXP) else intToShortenedNumber(requiredXP)
-            append(Component.literal("%,d".format(currentXP)).withColor(ChatFormatting.WHITE.color!!))
-            append(Component.literal("/${requiredXPText}").withColor(ChatFormatting.DARK_GRAY.color!!))
+            append(Component.literal("%,d".format(currentXP)).withColor(TextColor.WHITE.value))
+            append(Component.literal("/${requiredXPText}").withColor(TextColor.DARK_GRAY.value))
 
             if (!Config.values::xpInfoWindowCompact.get()) {
-                append(Component.literal(" XP").withColor(ChatFormatting.GRAY.color!!))
+                append(Component.literal(" XP").withColor(TextColor.GRAY.value))
                 append(Component.literal("\n"))
             } else {
                 append(Component.literal(" "))
@@ -112,7 +112,7 @@ class XPInfoDialog(x: Int, y: Int) : Dialog(x, y), Themed by GalapagosTheme {
                         Component.empty()
                             .append(mcciTextureComponent(game.sprite))
                             .append(Component.literal(" ${game.label} XP: ${"%,d".format(xp)} "))
-                            .append(Component.literal("(${(xp.toDouble() / totalXPToday.toDouble() * 100.0).toInt()}%)${if (index != games.size - 1) "\n" else ""}").withColor(ChatFormatting.GRAY.color!!))
+                            .append(Component.literal("(${(xp.toDouble() / totalXPToday.toDouble() * 100.0).toInt()}%)${if (index != games.size - 1) "\n" else ""}").withColor(TextColor.GRAY.value))
                     )
                 }
 
@@ -168,10 +168,10 @@ class XPInfoDialog(x: Int, y: Int) : Dialog(x, y), Themed by GalapagosTheme {
                 append(Component.literal("${starLevel}, "))
 
                 val requiredXPText = if (!Config.values::xpInfoWindowCompact.get()) "%,d".format(3000) else intToShortenedNumber(3000)
-                append(Component.literal("%,d".format(currentXP)).withColor(ChatFormatting.WHITE.color!!))
-                append(Component.literal("/${requiredXPText}").withColor(ChatFormatting.DARK_GRAY.color!!))
+                append(Component.literal("%,d".format(currentXP)).withColor(TextColor.WHITE.value))
+                append(Component.literal("/${requiredXPText}").withColor(TextColor.DARK_GRAY.value))
 
-                append(Component.literal(if (!Config.values::xpInfoWindowCompact.get()) " XP\n" else " ").withColor(ChatFormatting.GRAY.color!!))
+                append(Component.literal(if (!Config.values::xpInfoWindowCompact.get()) " XP\n" else " ").withColor(TextColor.GRAY.value))
                 append(mcciProgressBar(currentXP.toDouble() / 3000.0, if (!Config.values::xpInfoWindowCompact.get()) 5 else 3))
                 append(Component.literal(" ${((currentXP.toDouble() / 3000.0 * 100.0).toInt())}%"))
             })
@@ -187,17 +187,17 @@ class XPInfoDialog(x: Int, y: Int) : Dialog(x, y), Themed by GalapagosTheme {
             +TextWidgets.multiLine(with(Component.empty()) {
                 append(Glyphs.getGlyphComponent(Galapagos.save.selectedFaction!!.getSprite(factionLevel)))
                 if (!Config.values::xpInfoWindowCompact.get()) {
-                    append(Component.literal(" ${Galapagos.save.selectedFaction!!.label}: Level").withColor(ChatFormatting.GRAY.color!!))
+                    append(Component.literal(" ${Galapagos.save.selectedFaction!!.label}: Level").withColor(TextColor.GRAY.value))
                 }
-                append(Component.literal(" ${factionLevel}, ").withColor(ChatFormatting.WHITE.color!!))
+                append(Component.literal(" ${factionLevel}, ").withColor(TextColor.WHITE.value))
 
                 val requiredXPText = if (!Config.values::xpInfoWindowCompact.get()) "%,d".format(factionRequiredXP) else intToShortenedNumber(factionRequiredXP)
 
-                append(Component.literal("%,d".format(factionProgress)).withColor(ChatFormatting.WHITE.color!!))
-                append(Component.literal("/$requiredXPText ").withColor(ChatFormatting.DARK_GRAY.color!!))
+                append(Component.literal("%,d".format(factionProgress)).withColor(TextColor.WHITE.value))
+                append(Component.literal("/$requiredXPText ").withColor(TextColor.DARK_GRAY.value))
 
                 if (!Config.values::xpInfoWindowCompact.get()) {
-                    append(Component.literal("XP\n").withColor(ChatFormatting.GRAY.color!!))
+                    append(Component.literal("XP\n").withColor(TextColor.GRAY.value))
                 }
 
                 append(mcciProgressBar(factionProgress.toDouble() / factionRequiredXP.toDouble(), if (!Config.values::xpInfoWindowCompact.get()) 5 else 3))

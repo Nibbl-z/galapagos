@@ -5,6 +5,7 @@ import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
 import net.minecraft.network.chat.Style
+import net.minecraft.network.chat.TextColor
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.util.mcciTextureComponent
 
@@ -205,9 +206,9 @@ val BATTLE_BOX_ARENA_MAP_DEFAULT_KITS: HashMap<String, HashMap<BattleBoxKit, Bat
 )
 
 enum class BattleBoxRound(val scoreboardLetter: Char, val color: Int) {
-    WIN('W', ChatFormatting.GREEN.color!!),
-    LOSS('L', ChatFormatting.RED.color!!),
-    DRAW('D', ChatFormatting.YELLOW.color!!)
+    WIN('W', TextColor.GREEN.value),
+    LOSS('L', TextColor.RED.value),
+    DRAW('D', TextColor.YELLOW.value)
 }
 
 @Serializable

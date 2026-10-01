@@ -11,6 +11,7 @@ import net.minecraft.client.gui.screens.Screen
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
 import net.minecraft.network.chat.Style
+import net.minecraft.network.chat.TextColor
 import net.minecraft.resources.Identifier
 import xyz.nibblz.galapagos.Galapagos
 import java.text.DecimalFormat
@@ -226,7 +227,7 @@ class Config {
                                     Component.literal("https://gateway.noxcrew.com/.").setStyle(
                                         Style.EMPTY
                                             .withUnderlined(true)
-                                            .withColor(ChatFormatting.AQUA.color!!)
+                                            .withColor(TextColor.AQUA.value)
                                     )
                                 ),
                                 Component.empty(),

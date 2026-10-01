@@ -14,6 +14,7 @@ import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
 import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.TextColor
 import net.minecraft.resources.Identifier
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
@@ -63,10 +64,10 @@ class CoinHistory : BaseOwoScreen<FlowLayout>() {
                 val total = dayGain - dayLoss
 
                 dayHeader.text(Component.literal(
-                    "${date.month.name.lowercase().replaceFirstChar { char -> char.uppercase() }} ${date.day}, ${date.year} [").withColor(ChatFormatting.GRAY.color!!)
+                    "${date.month.name.lowercase().replaceFirstChar { char -> char.uppercase() }} ${date.day}, ${date.year} [").withColor(TextColor.GRAY.value)
                     .append(Component.literal("${if (total > 0) "+" else ""}${"%,d".format(total)} ").withColor(if (total > 0) 0x32ff32 else 0xff3232))
                     .append(Glyphs.getGlyphComponent("_fonts/icon/coin.png"))
-                    .append(Component.literal("]").withColor(ChatFormatting.GRAY.color!!))
+                    .append(Component.literal("]").withColor(TextColor.GRAY.value))
                 )
 
                 dayLowerHeader.text(Component.literal("+${"%,d".format(dayGain)} ").withColor(0x32ff32)
@@ -111,7 +112,7 @@ class CoinHistory : BaseOwoScreen<FlowLayout>() {
                             .append(Glyphs.getGlyphComponent("_fonts/icon/coin.png"))
                     ))
                     .child(UIComponents.label(Component.literal(it.getSource())).horizontalSizing(Sizing.fill()))
-                    .child(UIComponents.label(Component.literal(time).withColor(ChatFormatting.GRAY.color!!)))
+                    .child(UIComponents.label(Component.literal(time).withColor(TextColor.GRAY.value)))
             )
 
             changeContainer.padding(Insets.of(4))

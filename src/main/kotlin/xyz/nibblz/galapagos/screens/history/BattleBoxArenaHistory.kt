@@ -17,6 +17,7 @@ import kotlinx.datetime.toLocalDateTime
 import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.Style
+import net.minecraft.network.chat.TextColor
 import net.minecraft.resources.Identifier
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
@@ -99,16 +100,16 @@ class BattleBoxArenaHistory : BaseHistory() {
 
             val scores = GameStateHandler.GameState.BattleBoxArena.getScores(it)
             val roundsComponent = Component.empty()
-                    .append(Component.literal("${scores.first}").withColor(if (scores.first == 5) ChatFormatting.GREEN.color!! else 0xFFFFFF))
+                    .append(Component.literal("${scores.first}").withColor(if (scores.first == 5) TextColor.GREEN.value else 0xFFFFFF))
                     .append(Component.literal(" - "))
-                    .append(Component.literal("${scores.second}").withColor(if (scores.second == 5) ChatFormatting.RED.color!! else 0xFFFFFF))
-                    .append(Component.literal(" - ").withColor(ChatFormatting.DARK_GRAY.color!!))
+                    .append(Component.literal("${scores.second}").withColor(if (scores.second == 5) TextColor.RED.value else 0xFFFFFF))
+                    .append(Component.literal(" - ").withColor(TextColor.DARK_GRAY.value))
                     .append(
                         if (it.rankPoints != 0) Component.literal("${if (it.rankPoints > 0) "+" else ""}${it.rankPoints}")
-                            .withColor(if (it.rankPoints > 0) ChatFormatting.GREEN.color!! else ChatFormatting.RED.color!!)
-                        else Component.literal("?").withColor(ChatFormatting.GRAY.color!!)
+                            .withColor(if (it.rankPoints > 0) TextColor.GREEN.value else TextColor.RED.value)
+                        else Component.literal("?").withColor(TextColor.GRAY.value)
                     )
-                    .append(Component.literal(" RP").withColor(ChatFormatting.GRAY.color!!))
+                    .append(Component.literal(" RP").withColor(TextColor.GRAY.value))
 
 
             leftContent.child(UIComponents.label(roundsComponent).shadow(true))
@@ -131,7 +132,7 @@ class BattleBoxArenaHistory : BaseHistory() {
 
             leftContent.child(UIComponents.label(Component.literal(
                 "${date.month.name.lowercase().replaceFirstChar { char -> char.uppercase() }} ${date.day}, ${date.year}\n$time"
-            ).withColor(ChatFormatting.GRAY.color!!)).margins(Insets.top(10)))
+            ).withColor(TextColor.GRAY.value)).margins(Insets.top(10)))
 
             val rightContent = UIContainers.verticalFlow(Sizing.fill(65), Sizing.content())
             rightContent.padding(Insets.of(5))
@@ -186,12 +187,12 @@ class BattleBoxArenaHistory : BaseHistory() {
                 UIComponents.label(
                     Component.literal("${playerStats?.score} ")
                         .append(Glyphs.getGlyphComponent("_fonts/icon/score_point.png"))
-                        .append(Component.literal(" - ").withColor(ChatFormatting.DARK_GRAY.color!!))
+                        .append(Component.literal(" - ").withColor(TextColor.DARK_GRAY.value))
                         .append(when(indivPlacement) {
-                            1 -> Component.literal("1st").withColor(ChatFormatting.YELLOW.color!!).withStyle(Style.EMPTY.withBold(true))
+                            1 -> Component.literal("1st").withColor(TextColor.YELLOW.value).withStyle(Style.EMPTY.withBold(true))
                             2 -> Component.literal("2nd").withColor(0x95879c).withStyle(Style.EMPTY.withBold(true))
                             3 -> Component.literal("3rd").withColor(0xe69840).withStyle(Style.EMPTY.withBold(true))
-                            else -> Component.literal("${indivPlacement}th").withColor(ChatFormatting.WHITE.color!!)
+                            else -> Component.literal("${indivPlacement}th").withColor(TextColor.WHITE.value)
                         })
                 )
             )

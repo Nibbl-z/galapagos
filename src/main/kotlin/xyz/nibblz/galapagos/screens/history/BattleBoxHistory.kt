@@ -17,6 +17,7 @@ import kotlinx.datetime.toLocalDateTime
 import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.Style
+import net.minecraft.network.chat.TextColor
 import net.minecraft.resources.Identifier
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
@@ -112,19 +113,19 @@ class BattleBoxHistory : BaseHistory() {
                 val round = it.rounds.getOrNull(i)
 
                 roundsComponent = roundsComponent
-                    .append(Component.literal("[").withColor(ChatFormatting.DARK_GRAY.color!!))
-                    .append(Component.literal(round?.scoreboardLetter?.toString() ?: "?").withColor(round?.color ?: ChatFormatting.GRAY.color!!))
-                    .append(Component.literal("] ").withColor(ChatFormatting.DARK_GRAY.color!!))
+                    .append(Component.literal("[").withColor(TextColor.DARK_GRAY.value))
+                    .append(Component.literal(round?.scoreboardLetter?.toString() ?: "?").withColor(round?.color ?: TextColor.GRAY.value))
+                    .append(Component.literal("] ").withColor(TextColor.DARK_GRAY.value))
             }
 
             val teamPlacement = GameStateHandler.GameState.BattleBox.teamPlacement(it)
-            roundsComponent = roundsComponent.append(Component.literal("- ").withColor(ChatFormatting.DARK_GRAY.color!!))
+            roundsComponent = roundsComponent.append(Component.literal("- ").withColor(TextColor.DARK_GRAY.value))
             roundsComponent = roundsComponent.append(when(teamPlacement) {
-                1 -> Component.literal("1st").withColor(ChatFormatting.YELLOW.color!!).withStyle(Style.EMPTY.withBold(true))
-                2 -> Component.literal("2nd").withColor(ChatFormatting.GRAY.color!!)
+                1 -> Component.literal("1st").withColor(TextColor.YELLOW.value).withStyle(Style.EMPTY.withBold(true))
+                2 -> Component.literal("2nd").withColor(TextColor.GRAY.value)
                 3 -> Component.literal("3rd").withColor(0x9e5b39)
-                4 -> Component.literal("4th").withColor(ChatFormatting.DARK_GRAY.color!!)
-                else -> Component.literal("?th").withColor(ChatFormatting.DARK_GRAY.color!!)
+                4 -> Component.literal("4th").withColor(TextColor.DARK_GRAY.value)
+                else -> Component.literal("?th").withColor(TextColor.DARK_GRAY.value)
             })
 
             leftContent.child(UIComponents.label(roundsComponent)
@@ -149,7 +150,7 @@ class BattleBoxHistory : BaseHistory() {
 
             leftContent.child(UIComponents.label(Component.literal(
                 "${date.month.name.lowercase().replaceFirstChar { char -> char.uppercase() }} ${date.day}, ${date.year}\n$time"
-            ).withColor(ChatFormatting.GRAY.color!!)).margins(Insets.top(10)))
+            ).withColor(TextColor.GRAY.value)).margins(Insets.top(10)))
 
             val rightContent = UIContainers.verticalFlow(Sizing.fill(50), Sizing.content())
             rightContent.padding(Insets.of(5))
@@ -184,12 +185,12 @@ class BattleBoxHistory : BaseHistory() {
                 UIComponents.label(
                     Component.literal("${playerStats?.score} ")
                         .append(Glyphs.getGlyphComponent("_fonts/icon/score_point.png"))
-                        .append(Component.literal(" - ").withColor(ChatFormatting.DARK_GRAY.color!!))
+                        .append(Component.literal(" - ").withColor(TextColor.DARK_GRAY.value))
                         .append(when(indivPlacement) {
-                            1 -> Component.literal("1st").withColor(ChatFormatting.YELLOW.color!!).withStyle(Style.EMPTY.withBold(true))
+                            1 -> Component.literal("1st").withColor(TextColor.YELLOW.value).withStyle(Style.EMPTY.withBold(true))
                             2 -> Component.literal("2nd").withColor(0x95879c).withStyle(Style.EMPTY.withBold(true))
                             3 -> Component.literal("3rd").withColor(0xe69840).withStyle(Style.EMPTY.withBold(true))
-                            else -> Component.literal("${indivPlacement}th").withColor(ChatFormatting.WHITE.color!!)
+                            else -> Component.literal("${indivPlacement}th").withColor(TextColor.WHITE.value)
                         })
                 )
             )

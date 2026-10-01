@@ -65,7 +65,7 @@ object BlueprintAssemblerInfo : Feature {
     var displayData = false
 
     fun containerOpen(packet: ClientboundContainerSetContentPacket) {
-        val screen = Minecraft.getInstance().screen ?: return
+        val screen = Minecraft.getInstance().gui.screen() ?: return
 
         if (!screen.title.string.contains("BLUEPRINT ASSEMBLER") && !screen.title.string.contains("INFINIBAG")) displayData = false
 

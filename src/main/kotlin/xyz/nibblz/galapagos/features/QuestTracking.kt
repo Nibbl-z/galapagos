@@ -8,6 +8,7 @@ import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.screens.inventory.ContainerScreen
 import net.minecraft.core.component.DataComponents
 import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.TextColor
 import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket
 import net.minecraft.network.protocol.game.ServerboundContainerClosePacket
@@ -50,13 +51,13 @@ object QuestTracking : Feature {
             if (openQuestHistory) {
                 openQuestHistory = false
                 // im getting sick of it plain old disease
-                Minecraft.getInstance().setScreen(QuestHistory())
+                Minecraft.getInstance().gui.setScreen(QuestHistory())
             }
 
             if (openVaultHistory) {
                 openVaultHistory = false
                 // its not my life but i will live it how i please
-                Minecraft.getInstance().setScreen(VaultHistory())
+                Minecraft.getInstance().gui.setScreen(VaultHistory())
             }
         }
     }
@@ -138,7 +139,7 @@ object QuestTracking : Feature {
     var openVaultHistory = false
 
     fun containerOpen(packet: ClientboundContainerSetContentPacket) {
-        val screen = Minecraft.getInstance().screen ?: return
+        val screen = Minecraft.getInstance().gui.screen() ?: return
 
         if (checkWeeklyVault && screen.title.string.contains("SUMMARY")) {
             checkWeeklyVault = false
@@ -249,7 +250,7 @@ object QuestTracking : Feature {
 
     fun tooltipAdd(stack: ItemStack, components: MutableList<Component>) {
         if (!enabled) return
-        val screen = Minecraft.getInstance().screen ?: return
+        val screen = Minecraft.getInstance().gui.screen() ?: return
         if (!screen.title.string.contains("JOURNAL")) return
 
         if (stack.itemName.string == "Island Rewards" && stack.get(DataComponents.ITEM_MODEL)?.path?.contains("blank") == true) {
@@ -260,7 +261,7 @@ object QuestTracking : Feature {
 
             components.add(index + 1, Component.empty()
                 .append(Glyphs.getGlyphComponent("_fonts/icon/click_action_left.png"))
-                .append(Component.literal(" > ").withColor(ChatFormatting.DARK_GRAY.color!!))
+                .append(Component.literal(" > ").withColor(TextColor.DARK_GRAY.value))
                 .append(Component.literal("Click to ").withColor(0xecd584))
                 .append(Component.literal("View Quest History").withColor(0xfee761)))
         }
@@ -273,7 +274,7 @@ object QuestTracking : Feature {
 
             components.add(index + 1, Component.empty()
                 .append(Glyphs.getGlyphComponent("_fonts/icon/click_action_left.png"))
-                .append(Component.literal(" > ").withColor(ChatFormatting.DARK_GRAY.color!!))
+                .append(Component.literal(" > ").withColor(TextColor.DARK_GRAY.value))
                 .append(Component.literal("Click to ").withColor(0xecd584))
                 .append(Component.literal("View Vault History").withColor(0xfee761)))
         }

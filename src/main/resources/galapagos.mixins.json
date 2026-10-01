@@ -17,8 +17,8 @@
   "client": [
     "BossOverlayAccessor",
     "ClientHandshakePacketListenerImplMixin",
-    "GuiAccessor",
-    "GuiMixin",
+    "HudAccessor",
+    "HudMixin",
     "PlayerTabOverlayAccessor"
   ]
 }

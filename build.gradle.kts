@@ -3,8 +3,8 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
 	id("net.fabricmc.fabric-loom")
 	`maven-publish`
-	id("org.jetbrains.kotlin.jvm") version "2.4.0"
-	kotlin("plugin.serialization") version "2.0.0"
+	id("org.jetbrains.kotlin.jvm") version "2.4.10"
+	kotlin("plugin.serialization") version "2.4.10"
 }
 
 version = providers.gradleProperty("mod_version").get()
@@ -57,13 +57,13 @@ dependencies {
 
 	runtimeOnly("me.djtheredstoner:DevAuth-fabric:1.2.2")
 
-	implementation("com.noxcrew.noxesium:fabric:3.1.0")
-	implementation("com.noxcrew.sheeplib:api:1.5.2+26.1.2")
+	implementation("com.noxcrew.noxesium:fabric:3.2.4")
+	implementation("com.noxcrew.sheeplib:api:1.5.3+26.2")
 
-	implementation("io.wispforest:owo-lib:0.13.0+26.1")
+	implementation("io.wispforest:owo-lib:0.13.1+26.2")
 
-	implementation("dev.isxander:yet-another-config-lib:3.9.4+26.1-fabric")
-	implementation("com.terraformersmc:modmenu:18.0.0-beta.1")
+	implementation("dev.isxander:yet-another-config-lib:3.9.6+26.2-fabric")
+	implementation("com.terraformersmc:modmenu:20.0.2")
 }
 
 loom {

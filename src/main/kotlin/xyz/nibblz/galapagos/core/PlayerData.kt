@@ -6,10 +6,10 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.screens.inventory.ContainerScreen
 import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.TextColor
 import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket
@@ -162,7 +162,7 @@ object PlayerData : CoreFeature {
         } catch(exception: Exception) {
             sendGalapagosChatMessage(
                 Component.literal("${if (Config.values::usePersonalApiKey.get()) "MCCI's API" else "Custom API endpoint"} appears to be down. Try again later, and check logs for more information.")
-                    .withColor(ChatFormatting.RED.color!!)
+                    .withColor(TextColor.RED.value)
             )
             Galapagos.logger.error("API request error: ${exception.message}, ${exception.cause}")
             return false
@@ -173,7 +173,7 @@ object PlayerData : CoreFeature {
         } catch(exception: Exception) {
             sendGalapagosChatMessage(
                 Component.literal("${if (Config.values::usePersonalApiKey.get()) "MCCI's API" else "Custom API endpoint"} appears to be down. Try again later, and check logs for more information.")
-                    .withColor(ChatFormatting.RED.color!!)
+                    .withColor(TextColor.RED.value)
             )
             Galapagos.logger.error("API request error: ${exception.message}, ${exception.cause}")
             return false
@@ -185,17 +185,17 @@ object PlayerData : CoreFeature {
             if (!Config.values::usePersonalApiKey.get()) {
                 sendGalapagosChatMessage(
                     Component.literal("Something went wrong when fetching the custom endpoint. Please report this issue to the developers!")
-                        .withColor(ChatFormatting.RED.color!!)
+                        .withColor(TextColor.RED.value)
                 )
             } else if (Galapagos.save.apiKey.isEmpty()) {
                 sendGalapagosChatMessage(
                     Component.literal("You do not have an API key set! Please set one using /galapagos api set <API_KEY>")
-                        .withColor(ChatFormatting.RED.color!!)
+                        .withColor(TextColor.RED.value)
                 )
             } else {
                 sendGalapagosChatMessage(
                     Component.literal("Your API key is invalid! Please set a valid API key using /galapagos api set <API_KEY>")
-                        .withColor(ChatFormatting.RED.color!!)
+                        .withColor(TextColor.RED.value)
                 )
             }
 
@@ -205,7 +205,7 @@ object PlayerData : CoreFeature {
         if (jsonElement["errors"] != null) {
             sendGalapagosChatMessage(
                 Component.literal("Something went wrong when fetching the MCC Island API. Check log for more information.")
-                    .withColor(ChatFormatting.RED.color!!)
+                    .withColor(TextColor.RED.value)
             )
             Galapagos.logger.error("MCC Island API error: ${response.body()}")
             return false
@@ -214,7 +214,7 @@ object PlayerData : CoreFeature {
         if (jsonElement["data"]?.jsonObject["player"]?.jsonObject["collections"] == null) {
             sendGalapagosChatMessage(
                 Component.literal("You have Collections disabled in your API settings! Please navigate to Pocket Menu -> Settings -> API Settings, and enable Collections. This may take a few minute to update!")
-                    .withColor(ChatFormatting.RED.color!!)
+                    .withColor(TextColor.RED.value)
             )
             return false
         }
@@ -222,7 +222,7 @@ object PlayerData : CoreFeature {
         if (jsonElement["data"]?.jsonObject["player"]?.jsonObject["infinibag"] == null || jsonElement["data"]?.jsonObject["player"]?.jsonObject["infinivault"] == null) {
             sendGalapagosChatMessage(
                 Component.literal("You have Infinibag disabled in your API settings! Please navigate to Pocket Menu -> Settings -> API Settings, and enable Infinibag. This may take a few minute to update!")
-                    .withColor(ChatFormatting.RED.color!!)
+                    .withColor(TextColor.RED.value)
             )
             return false
         }
@@ -230,7 +230,7 @@ object PlayerData : CoreFeature {
         if (jsonElement["data"]?.jsonObject["player"]?.jsonObject["statistics"] == null) {
             sendGalapagosChatMessage(
                 Component.literal("You have Statistics disabled in your API settings! Please navigate to Pocket Menu -> Settings -> API Settings, and enable Statistics. This may take a few minute to update!")
-                    .withColor(ChatFormatting.RED.color!!)
+                    .withColor(TextColor.RED.value)
             )
             return false
         }
@@ -389,7 +389,7 @@ object PlayerData : CoreFeature {
     }
 
     fun containerOpen(packet: ClientboundContainerSetContentPacket) {
-        val screen = Minecraft.getInstance().screen ?: return
+        val screen = Minecraft.getInstance().gui.screen() ?: return
 
         packet.items.forEach {
             updateItemState(it)
@@ -484,7 +484,7 @@ object PlayerData : CoreFeature {
     }
 
     fun updateItemState(item: ItemStack) {
-        val screen = Minecraft.getInstance().screen ?: return
+        val screen = Minecraft.getInstance().gui.screen() ?: return
 
         val location = (if (screen.title.string.contains("INFINIBAG"))
             Galapagos.save.infinibag
