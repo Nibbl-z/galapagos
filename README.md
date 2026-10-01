@@ -10,11 +10,11 @@ WIP builds can also be downloaded from the Actions tab, but beware, these can be
 
 ## Requirements
 You'll need...
-- Minecraft 26.1.2
+- Minecraft 26.2
 - [YetAnotherConfigLib](https://modrinth.com/mod/yacl)
 - [Fabric Language Kotlin](https://modrinth.com/mod/fabric-language-kotlin)
 - [owo-lib](https://modrinth.com/mod/owo-lib)
-- [Noxesium 3.1.0 or later](https://modrinth.com/mod/noxesium)
+- [Noxesium 3.2.4 or later](https://modrinth.com/mod/noxesium)
 
 ## Features
 
