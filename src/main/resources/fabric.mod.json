@@ -44,13 +44,13 @@
 		}
 	},
 	"depends": {
-		"fabricloader": ">=0.19.3",
-		"minecraft": "~26.2",
+		"fabricloader": ">=0.19.5",
+		"minecraft": "~26.3",
 		"java": ">=25",
 		"fabric-api": "*",
 		"fabric-language-kotlin": "*",
-		"yet_another_config_lib_v3": ">=3.9.6",
+		"yet_another_config_lib_v3": ">=3.9.7",
 		"owo": ">=0.13.1",
-		"noxesium": ">=3.2.4"
+		"noxesium": ">=3.3.0"
 	}
 }
