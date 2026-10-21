@@ -19,7 +19,6 @@ repositories {
 	mavenCentral()
 	maven("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1")
 	maven("https://maven.noxcrew.com/public")
-	maven("https://maven.wispforest.io/releases/")
 	maven("https://jitpack.io")
 
 	maven("https://maven.isxander.dev/releases") {
@@ -59,8 +58,6 @@ dependencies {
 
 	implementation("com.noxcrew.noxesium:fabric:3.3.0")
 	implementation("com.noxcrew.sheeplib:api:1.5.4+26.3")
-
-	implementation("io.wispforest:owo-lib:0.13.1+26.2")
 
 	implementation("dev.isxander:yet-another-config-lib:3.9.7+26.3-fabric")
 	implementation("com.terraformersmc:modmenu:21.0.0")

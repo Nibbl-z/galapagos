@@ -1,20 +1,11 @@
 package xyz.nibblz.galapagos.screens.history
 
-import io.wispforest.owo.ui.component.UIComponents
-import io.wispforest.owo.ui.container.FlowLayout
-import io.wispforest.owo.ui.container.UIContainers
-import io.wispforest.owo.ui.core.Insets
-import io.wispforest.owo.ui.core.Positioning
-import io.wispforest.owo.ui.core.Sizing
-import io.wispforest.owo.ui.core.Surface
-import io.wispforest.owo.ui.core.VerticalAlignment
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
 import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
-import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.Style
 import net.minecraft.network.chat.TextColor
@@ -23,6 +14,7 @@ import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
 import xyz.nibblz.galapagos.data.game.DeathCause
 import xyz.nibblz.galapagos.features.XPInfo
+import xyz.nibblz.galapagos.ui.*
 import xyz.nibblz.galapagos.util.Glyphs
 import xyz.nibblz.galapagos.util.percentageToColor
 import xyz.nibblz.galapagos.util.secondsToTimeString
@@ -41,7 +33,7 @@ class SkyBattleSoloHistory : BaseHistory() {
     val kills: HashMap<DeathCause, Int> = hashMapOf()
     val deaths: HashMap<DeathCause, Int> = hashMapOf()
 
-    override fun fillHistory(historyContainer: FlowLayout) {
+    override fun fillHistory(historyContainer: Flow) {
         Galapagos.save.skyBattleSoloHistory.sortedByDescending { it.timestamp }.forEach {
             val dataPoint = DataPoint(
                 it.getPlacement(),
@@ -60,11 +52,11 @@ class SkyBattleSoloHistory : BaseHistory() {
             }
             if (it.deathCause != DeathCause.UNKNOWN) deaths[it.deathCause] = (deaths[it.deathCause] ?: 0) + 1
 
-            val container = UIContainers.horizontalFlow(Sizing.fill(100), Sizing.content())
+            val container = Flow.horizontal(Sizing.fill(100), Sizing.content())
             container.gap(5)
-            container.verticalAlignment(VerticalAlignment.CENTER)
+            container.verticalAlignment(Alignment.CENTER)
 
-            container.child(UIComponents.texture(Identifier.fromNamespaceAndPath(Galapagos.MOD_ID, "textures/sky_battle_solos/${when(it.map) {
+            container.child(Texture(Identifier.fromNamespaceAndPath(Galapagos.MOD_ID, "textures/sky_battle_solos/${when(it.map) {
                 "Air Port" -> "air_port"
                 "Candy Land Solos" -> "candy_land_solos"
                 "Grasslands Solos" -> "grasslands_solos"
@@ -75,17 +67,17 @@ class SkyBattleSoloHistory : BaseHistory() {
                 else -> "roundabout"
             }}.png"),
                 0, 0, 200, 60, 200, 60
-            ).blend(true).positioning(Positioning.absolute(0,0)))
+            ).positioning(Positioning.absolute(0,0)))
 
-            val leftContent = UIContainers.verticalFlow(Sizing.fill(35), Sizing.content())
-            leftContent.padding(Insets.of(5))
+            val leftContent = Flow.vertical(Sizing.fill(35), Sizing.content())
+            leftContent.padding(Insets.all(5))
             container.child(leftContent)
 
-            leftContent.child(UIComponents.label(Component.literal(it.map))
+            leftContent.child(Label(Component.literal(it.map))
                 .shadow(true)
             )
 
-            leftContent.child(UIComponents.label(
+            leftContent.child(Label(
                 Component.literal("Placed ")
                     .append(when(it.getPlacement()) {
                         1 -> Component.literal("1st").withColor(TextColor.YELLOW.value).withStyle(Style.EMPTY.withBold(true))
@@ -96,7 +88,7 @@ class SkyBattleSoloHistory : BaseHistory() {
                 ).shadow(true)
             )
 
-            leftContent.child(UIComponents.label(
+            leftContent.child(Label(
                 Component.literal("Survived ${secondsToTimeString(it.timeSurvived)}")
             ))
 
@@ -116,18 +108,18 @@ class SkyBattleSoloHistory : BaseHistory() {
                 date.time.toString()
             }
 
-            leftContent.child(UIComponents.label(Component.literal(
+            leftContent.child(Label(Component.literal(
                 "${date.month.name.lowercase().replaceFirstChar { char -> char.uppercase() }} ${date.day}, ${date.year}\n$time"
             ).withColor(TextColor.GRAY.value)).margins(Insets.top(10)))
 
-            val rightContent = UIContainers.verticalFlow(Sizing.fill(65), Sizing.content())
-            rightContent.padding(Insets.of(5))
+            val rightContent = Flow.vertical(Sizing.fill(65), Sizing.content())
+            rightContent.padding(Insets.all(5))
             container.child(rightContent)
 
             val playerStats = it.getPlayer()
 
             rightContent.child(
-                UIComponents.label(
+                Label(
                     with(Component.empty()) {
                         append(Component.literal("${playerStats?.kills} "))
                         append(Glyphs.getGlyphComponent("_fonts/icon/kills.png"))
@@ -152,7 +144,7 @@ class SkyBattleSoloHistory : BaseHistory() {
 
             if (it.deathCause != DeathCause.UNKNOWN) {
                 rightContent.child(
-                    UIComponents.label(Component.literal("Died from ").append(it.deathCause.createIconAndLabelComponent()))
+                    Label(Component.literal("Died from ").append(it.deathCause.createIconAndLabelComponent()))
                 )
             }
 
@@ -162,7 +154,7 @@ class SkyBattleSoloHistory : BaseHistory() {
         }
     }
 
-    override fun fillOverview(overview: FlowLayout) {
+    override fun fillOverview(overview: Flow) {
         val mapWinRates: HashMap<String, Double> = hashMapOf()
         val mapsByWinRate = mapData.keys.sortedBy {
             val data = mapData[it]!!
@@ -191,7 +183,7 @@ class SkyBattleSoloHistory : BaseHistory() {
 
         if (!mapsByWinRate.isEmpty()) {
             overview.child(
-                UIComponents.label(
+                Label(
                     Component.literal("Best Map (By WLR): ")
                         .append(Component.literal(mapsByWinRate.last()).withStyle(Style.EMPTY.withBold(true)))
                         .append(Component.literal(" - "))
@@ -205,7 +197,7 @@ class SkyBattleSoloHistory : BaseHistory() {
             )
 
             overview.child(
-                UIComponents.label(
+                Label(
                     Component.literal("Best Map (By KDR): ")
                         .append(Component.literal(mapsByKDR.last()).withStyle(Style.EMPTY.withBold(true)))
                         .append(Component.literal(" - "))

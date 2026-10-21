@@ -1,30 +1,21 @@
 package xyz.nibblz.galapagos.screens
 
-import io.wispforest.owo.ui.base.BaseOwoScreen
-import io.wispforest.owo.ui.component.UIComponents
-import io.wispforest.owo.ui.container.FlowLayout
-import io.wispforest.owo.ui.container.UIContainers
-import io.wispforest.owo.ui.core.*
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
 import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
-import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.TextColor
 import net.minecraft.resources.Identifier
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
+import xyz.nibblz.galapagos.ui.*
 import kotlin.time.Instant
 
-class QuestHistory : BaseOwoScreen<FlowLayout>() {
-    override fun createAdapter(): OwoUIAdapter<FlowLayout?> {
-        return OwoUIAdapter.create(this, UIContainers::verticalFlow)
-    }
-
-    fun updateContent(content: FlowLayout) {
+class QuestHistory : LayoutScreen() {
+    fun updateContent(content: Flow) {
         val sortedQuests = Galapagos.save.questHistory.sortedByDescending { it.timestamp }
         var previousDay = -1
 
@@ -34,18 +25,18 @@ class QuestHistory : BaseOwoScreen<FlowLayout>() {
                 Instant.fromEpochSeconds(it.timestamp + (60 * 60 * 10)).toLocalDateTime(TimeZone.UTC) else date
 
             if (previousDay != newDayDate.day) {
-                content.child(UIComponents.spacer().verticalSizing(Sizing.fixed(10)))
-                content.child(UIComponents.label(Component.literal("${date.month.name.lowercase().replaceFirstChar { char -> char.uppercase() }} ${date.day}, ${date.year}").withColor(TextColor.GRAY.value)))
+                content.child(Spacer(vertical = Sizing.fixed(10)))
+                content.child(Label(Component.literal("${date.month.name.lowercase().replaceFirstChar { char -> char.uppercase() }} ${date.day}, ${date.year}").withColor(TextColor.GRAY.value)))
             }
 
             previousDay = newDayDate.day
 
-            val changeContainer = UIContainers.horizontalFlow(Sizing.fill(100), Sizing.content())
+            val changeContainer = Flow.horizontal(Sizing.fill(100), Sizing.content())
             changeContainer.gap(5)
-            changeContainer.verticalAlignment(VerticalAlignment.CENTER)
+            changeContainer.verticalAlignment(Alignment.CENTER)
 
             changeContainer.child(
-                UIComponents.texture(
+                Texture(
                     Identifier.fromNamespaceAndPath("mcc", "textures/${it.getIcon()}"),
                     0, 0, 16, 16, 16, 16
                 )
@@ -66,28 +57,27 @@ class QuestHistory : BaseOwoScreen<FlowLayout>() {
             }
 
             changeContainer.child(
-                UIContainers.verticalFlow(Sizing.fill(80), Sizing.content())
-                    .child(UIComponents.label(Component.literal(it.getLabel()).withColor(it.rarity.color)).horizontalSizing(Sizing.fill()))
-                    .child(UIComponents.label(Component.literal(time).withColor(TextColor.GRAY.value)))
+                Flow.vertical(Sizing.fill(80), Sizing.content())
+                    .child(Label(Component.literal(it.getLabel()).withColor(it.rarity.color)).horizontalSizing(Sizing.fill()))
+                    .child(Label(Component.literal(time).withColor(TextColor.GRAY.value)))
             )
 
-            changeContainer.padding(Insets.of(4))
+            changeContainer.padding(Insets.all(4))
             changeContainer.surface(Surface.VANILLA_TRANSLUCENT)
 
             content.child(changeContainer)
         }
 
-        content.child(UIComponents.spacer().verticalSizing(Sizing.fixed(10)))
+        content.child(Spacer(vertical = Sizing.fixed(10)))
     }
 
-    override fun build(rootComponent: FlowLayout) {
+    override fun build(rootComponent: Flow) {
         rootComponent
-            .surface(Surface.VANILLA_TRANSLUCENT)
-            .horizontalAlignment(HorizontalAlignment.CENTER)
-            .verticalAlignment(VerticalAlignment.CENTER)
+            .horizontalAlignment(Alignment.CENTER)
+            .verticalAlignment(Alignment.CENTER)
 
-        val content = UIContainers.verticalFlow(Sizing.content(), Sizing.content())
-        content.padding(Insets.of(5))
+        val content = Flow.vertical(Sizing.content(), Sizing.content())
+        content.padding(Insets.all(5))
         content.gap(3)
 
         updateContent(content)

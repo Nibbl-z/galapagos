@@ -1,18 +1,13 @@
 package xyz.nibblz.galapagos.screens
 
-import io.wispforest.owo.ui.base.BaseOwoScreen
-import io.wispforest.owo.ui.component.LabelComponent
-import io.wispforest.owo.ui.component.UIComponents
-import io.wispforest.owo.ui.container.FlowLayout
-import io.wispforest.owo.ui.container.UIContainers
-import io.wispforest.owo.ui.core.*
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
 import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
-import net.minecraft.ChatFormatting
+import net.minecraft.client.gui.components.Button
+import net.minecraft.client.gui.components.Checkbox
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.TextColor
 import net.minecraft.resources.Identifier
@@ -21,21 +16,18 @@ import xyz.nibblz.galapagos.config.Config
 import xyz.nibblz.galapagos.features.CoinTracking
 import xyz.nibblz.galapagos.features.CoinTracking.getIcon
 import xyz.nibblz.galapagos.features.CoinTracking.getSource
+import xyz.nibblz.galapagos.ui.*
 import xyz.nibblz.galapagos.util.Glyphs
 import kotlin.time.Instant
 
-class CoinHistory : BaseOwoScreen<FlowLayout>() {
-    override fun createAdapter(): OwoUIAdapter<FlowLayout?> {
-        return OwoUIAdapter.create(this, UIContainers::verticalFlow)
-    }
-
-    fun updateContent(content: FlowLayout) {
+class CoinHistory : LayoutScreen() {
+    fun updateContent(content: Flow) {
         val sortedChanges = Galapagos.save.coinChanges.sortedByDescending { it.timestamp }
         var previousDay = -1
         var dayGain = 0
         var dayLoss = 0
-        var dayHeader: LabelComponent? = null
-        var dayLowerHeader: LabelComponent? = null
+        var dayHeader: Label? = null
+        var dayLowerHeader: Label? = null
 
         sortedChanges.forEach {
             if (it.amount == 0) return@forEach
@@ -49,10 +41,10 @@ class CoinHistory : BaseOwoScreen<FlowLayout>() {
             if (previousDay != newDayDate.day) {
                 dayGain = 0
                 dayLoss = 0
-                dayHeader = UIComponents.label(Component.empty())
-                dayLowerHeader = UIComponents.label(Component.empty())
+                dayHeader = Label(Component.empty())
+                dayLowerHeader = Label(Component.empty())
 
-                content.child(UIComponents.spacer().verticalSizing(Sizing.fixed(10)))
+                content.child(Spacer(vertical = Sizing.fixed(10)))
                 content.child(dayHeader)
                 content.child(dayLowerHeader)
             }
@@ -79,12 +71,12 @@ class CoinHistory : BaseOwoScreen<FlowLayout>() {
 
             previousDay = newDayDate.day
 
-            val changeContainer = UIContainers.horizontalFlow(Sizing.fill(100), Sizing.content())
+            val changeContainer = Flow.horizontal(Sizing.fill(100), Sizing.content())
             changeContainer.gap(5)
-            changeContainer.verticalAlignment(VerticalAlignment.CENTER)
+            changeContainer.verticalAlignment(Alignment.CENTER)
 
             changeContainer.child(
-                UIComponents.texture(
+                Texture(
                     Identifier.fromNamespaceAndPath("mcc", "textures/${it.getIcon()}"),
                     0, 0, 16, 16, 16, 16
                 )
@@ -105,53 +97,63 @@ class CoinHistory : BaseOwoScreen<FlowLayout>() {
             }
 
             changeContainer.child(
-                UIContainers.verticalFlow(Sizing.fill(80), Sizing.content())
-                    .child(UIComponents.label(
+                Flow.vertical(Sizing.fill(80), Sizing.content())
+                    .child(Label(
                         Component.literal("${if (it.amount > 0) "+" else ""}${"%,d".format(it.amount)} ")
                             .withColor(if (it.amount > 0) 0x32ff32 else 0xff3232)
                             .append(Glyphs.getGlyphComponent("_fonts/icon/coin.png"))
                     ))
-                    .child(UIComponents.label(Component.literal(it.getSource())).horizontalSizing(Sizing.fill()))
-                    .child(UIComponents.label(Component.literal(time).withColor(TextColor.GRAY.value)))
+                    .child(Label(Component.literal(it.getSource())).horizontalSizing(Sizing.fill()))
+                    .child(Label(Component.literal(time).withColor(TextColor.GRAY.value)))
             )
 
-            changeContainer.padding(Insets.of(4))
+            changeContainer.padding(Insets.all(4))
             changeContainer.surface(Surface.VANILLA_TRANSLUCENT)
 
             content.child(changeContainer)
         }
-        content.child(UIComponents.spacer().verticalSizing(Sizing.fixed(10)))
+        content.child(Spacer(vertical = Sizing.fixed(10)))
     }
 
-    override fun build(rootComponent: FlowLayout) {
+    override fun build(rootComponent: Flow) {
         rootComponent
-            .surface(Surface.VANILLA_TRANSLUCENT)
-            .horizontalAlignment(HorizontalAlignment.CENTER)
-            .verticalAlignment(VerticalAlignment.CENTER)
+            .horizontalAlignment(Alignment.CENTER)
+            .verticalAlignment(Alignment.CENTER)
 
-        val content = UIContainers.verticalFlow(Sizing.content(), Sizing.content())
-        content.padding(Insets.of(5))
+        val content = Flow.vertical(Sizing.content(), Sizing.content())
+        content.padding(Insets.all(5))
         content.gap(3)
 
         updateContent(content)
 
         setupMcciScreen(rootComponent, content, "COIN HISTORY", "textures/island_items/currency/non_premium.png")
 
-        val filter = UIComponents.dropdown(Sizing.fixed(50))
-            .nested(Component.literal("Filter"), Sizing.content()) { submenu ->
-                CoinTracking.CoinChangeCategory.entries.forEach {
-                    if (it.hide) return@forEach
-                    submenu.checkbox(Component.literal(it.label), CoinTracking.filter[it] ?: true) { toggle ->
+        val filterPanel = Flow.vertical()
+            .padding(Insets.all(4))
+            .gap(2)
+            .surface(Surface.VANILLA_TRANSLUCENT)
+            .positioning(Positioning.absolute(10, 32))
+            .apply { visible = false }
+
+        CoinTracking.CoinChangeCategory.entries.filter { !it.hide }.forEach {
+            filterPanel.child(WidgetElement(
+                Checkbox.builder(Component.literal(it.label), font)
+                    .selected(CoinTracking.filter[it] ?: true)
+                    .onValueChange { _, toggle ->
                         CoinTracking.filter[it] = toggle
                         content.clearChildren()
                         updateContent(content)
+                        layout()
                     }
-                }
-            }
+                    .build()
+            ))
+        }
 
-            .closeWhenNotHovered(false)
-            .positioning(Positioning.absolute(10, 10))
+        val filterButton = Button.builder(Component.literal("Filter")) {
+            filterPanel.visible = !filterPanel.visible
+        }.width(50).build()
 
-        rootComponent.child(filter)
+        rootComponent.child(WidgetElement(filterButton).positioning(Positioning.absolute(10, 10)))
+        rootComponent.child(filterPanel)
     }
 }
