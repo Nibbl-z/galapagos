@@ -3,8 +3,8 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
 	id("net.fabricmc.fabric-loom")
 	`maven-publish`
-	id("org.jetbrains.kotlin.jvm") version "2.4.10"
-	kotlin("plugin.serialization") version "2.4.10"
+	id("org.jetbrains.kotlin.jvm") version "2.4.21"
+	kotlin("plugin.serialization") version "2.4.21"
 }
 
 version = providers.gradleProperty("mod_version").get()
@@ -19,7 +19,6 @@ repositories {
 	mavenCentral()
 	maven("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1")
 	maven("https://maven.noxcrew.com/public")
-	maven("https://maven.wispforest.io/releases/")
 	maven("https://jitpack.io")
 
 	maven("https://maven.isxander.dev/releases") {
@@ -57,13 +56,11 @@ dependencies {
 
 	runtimeOnly("me.djtheredstoner:DevAuth-fabric:1.2.2")
 
-	implementation("com.noxcrew.noxesium:fabric:3.2.4")
-	implementation("com.noxcrew.sheeplib:api:1.5.3+26.2")
+	implementation("com.noxcrew.noxesium:fabric:3.3.0")
+	implementation("com.noxcrew.sheeplib:api:1.5.4+26.3")
 
-	implementation("io.wispforest:owo-lib:0.13.1+26.2")
-
-	implementation("dev.isxander:yet-another-config-lib:3.9.6+26.2-fabric")
-	implementation("com.terraformersmc:modmenu:20.0.2")
+	implementation("dev.isxander:yet-another-config-lib:3.9.7+26.3-fabric")
+	implementation("com.terraformersmc:modmenu:21.0.0")
 }
 
 loom {

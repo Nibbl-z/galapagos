@@ -1,43 +1,34 @@
 package xyz.nibblz.galapagos.screens
 
-import io.wispforest.owo.ui.base.BaseOwoScreen
-import io.wispforest.owo.ui.component.LabelComponent
-import io.wispforest.owo.ui.component.UIComponents
-import io.wispforest.owo.ui.container.FlowLayout
-import io.wispforest.owo.ui.container.UIContainers
-import io.wispforest.owo.ui.core.*
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
 import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
-import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.TextColor
 import net.minecraft.resources.Identifier
+import net.minecraft.util.ARGB
 import xyz.nibblz.galapagos.Galapagos
 import xyz.nibblz.galapagos.config.Config
 import xyz.nibblz.galapagos.features.TrophyTracking
+import xyz.nibblz.galapagos.ui.*
 import xyz.nibblz.galapagos.util.Glyphs
 import xyz.nibblz.galapagos.util.mcciTextureComponent
 import java.util.*
 import kotlin.time.Instant
 
-class TrophyHistory : BaseOwoScreen<FlowLayout>() {
-    override fun createAdapter(): OwoUIAdapter<FlowLayout?> {
-        return OwoUIAdapter.create(this, UIContainers::verticalFlow)
-    }
-
-    fun updateContent(content: FlowLayout) {
+class TrophyHistory : LayoutScreen() {
+    fun updateContent(content: Flow) {
         val sortedTrophyGains = Galapagos.save.trophyHistory.sortedByDescending { it.timestamp }
         var previousDay = -1
         var dayPerCategory = EnumMap<TrophyTracking.TrophySource, Int>(TrophyTracking.TrophySource::class.java)
 
-        var dayHeader: LabelComponent? = null
-        var dayBreakdown: FlowLayout? = null
-        var typeBreakdown: LabelComponent? = null
-        var categoryBreakdown: LabelComponent? = null
+        var dayHeader: Label? = null
+        var dayBreakdown: Flow? = null
+        var typeBreakdown: Label? = null
+        var categoryBreakdown: Label? = null
 
         sortedTrophyGains.forEach {
             if (it.trophies == 0) return@forEach
@@ -49,25 +40,24 @@ class TrophyHistory : BaseOwoScreen<FlowLayout>() {
             if (previousDay != newDayDate.day) {
                 dayPerCategory = TrophyTracking.TrophySource.entries.associateWithTo(EnumMap(TrophyTracking.TrophySource::class.java)) { 0 }
 
-                dayHeader = UIComponents.label(Component.empty())
-                dayBreakdown = UIContainers.verticalFlow(Sizing.fill(), Sizing.fixed(80)).gap(3)
-                typeBreakdown = UIComponents.label(Component.empty())
-                categoryBreakdown = UIComponents.label(Component.empty())
+                dayHeader = Label(Component.empty())
+                dayBreakdown = Flow.vertical(Sizing.fill(), Sizing.fixed(80)).gap(3)
+                typeBreakdown = Label(Component.empty())
+                categoryBreakdown = Label(Component.empty())
 
                 if (Config.values::trophyTrackingShowTypeBreakdown.get()) {
                     dayBreakdown.child(typeBreakdown.horizontalSizing(Sizing.fill()))
                 }
 
                 if (Config.values::trophyTrackingShowTypeBreakdown.get() && Config.values::trophyTrackingShowCategoryBreakdown.get()) {
-                    dayBreakdown.child(UIComponents.box(Sizing.fill(), Sizing.fixed(1))
-                        .color(Color(0.0f, 0.0f, 0.0f, 0.2f)))
+                    dayBreakdown.child(Box(Sizing.fill(), Sizing.fixed(1), ARGB.color(0.2f, 0x000000)))
                 }
 
                 if (Config.values::trophyTrackingShowCategoryBreakdown.get()) {
                     dayBreakdown.child(categoryBreakdown.horizontalSizing(Sizing.fill()))
                 }
 
-                content.child(UIComponents.spacer().verticalSizing(Sizing.fixed(10)))
+                content.child(Spacer(vertical = Sizing.fixed(10)))
                 content.child(dayHeader)
                 content.child(dayBreakdown)
             }
@@ -136,12 +126,12 @@ class TrophyHistory : BaseOwoScreen<FlowLayout>() {
                 dayBreakdown.verticalSizing(Sizing.content())
             }
 
-            val changeContainer = UIContainers.horizontalFlow(Sizing.fill(100), Sizing.content())
+            val changeContainer = Flow.horizontal(Sizing.fill(100), Sizing.content())
             changeContainer.gap(5)
-            changeContainer.verticalAlignment(VerticalAlignment.CENTER)
+            changeContainer.verticalAlignment(Alignment.CENTER)
 
-            val sprite = UIContainers.verticalFlow(Sizing.content(), Sizing.content())
-                .child(UIComponents.texture(
+            val sprite = Flow.vertical(Sizing.content(), Sizing.content())
+                .child(Texture(
                     Identifier.fromNamespaceAndPath("mcc", "textures/${it.getIcon()}.png"),
                     0, 0, 16, 16, 16, 16
                 ))
@@ -149,7 +139,7 @@ class TrophyHistory : BaseOwoScreen<FlowLayout>() {
             var titleComponent = Component.literal(it.getLabel())
 
             if (it.type == TrophyTracking.TrophyType.SKILL) {
-                sprite.child(UIComponents.texture(
+                sprite.child(Texture(
                     Identifier.fromNamespaceAndPath("mcc", "textures/island_interface/badges/border.png"),
                     0, 0, 16, 16, 16, 16
                 ).positioning(Positioning.absolute(0, 0)))
@@ -164,7 +154,7 @@ class TrophyHistory : BaseOwoScreen<FlowLayout>() {
                     else -> "average_bubble"
                 }}.png"
 
-                sprite.child(UIComponents.label(Glyphs.getGlyphComponent(starSprite))
+                sprite.child(Label(Glyphs.getGlyphComponent(starSprite))
                     .positioning(Positioning.absolute(8, 8))
                 )
 
@@ -198,32 +188,31 @@ class TrophyHistory : BaseOwoScreen<FlowLayout>() {
             }
 
             changeContainer.child(
-                UIContainers.verticalFlow(Sizing.fill(80), Sizing.content())
-                    .child(UIComponents.label(
+                Flow.vertical(Sizing.fill(80), Sizing.content())
+                    .child(Label(
                         Component.literal("+${it.trophies} ").withColor(it.type.color)
                             .append(Glyphs.getGlyphComponent("_fonts/icon/trophy/${it.type.sprite}.png"))
                     ))
-                    .child(UIComponents.label(titleComponent).horizontalSizing(Sizing.fill()))
-                    .child(UIComponents.label(Component.literal(time).withColor(TextColor.GRAY.value)))
+                    .child(Label(titleComponent).horizontalSizing(Sizing.fill()))
+                    .child(Label(Component.literal(time).withColor(TextColor.GRAY.value)))
             )
 
-            changeContainer.padding(Insets.of(4))
+            changeContainer.padding(Insets.all(4))
             changeContainer.surface(Surface.VANILLA_TRANSLUCENT)
 
             content.child(changeContainer)
         }
 
-        content.child(UIComponents.spacer().verticalSizing(Sizing.fixed(10)))
+        content.child(Spacer(vertical = Sizing.fixed(10)))
     }
 
-    override fun build(rootComponent: FlowLayout) {
+    override fun build(rootComponent: Flow) {
         rootComponent
-            .surface(Surface.VANILLA_TRANSLUCENT)
-            .horizontalAlignment(HorizontalAlignment.CENTER)
-            .verticalAlignment(VerticalAlignment.CENTER)
+            .horizontalAlignment(Alignment.CENTER)
+            .verticalAlignment(Alignment.CENTER)
 
-        val content = UIContainers.verticalFlow(Sizing.content(), Sizing.content())
-        content.padding(Insets.of(5))
+        val content = Flow.vertical(Sizing.content(), Sizing.content())
+        content.padding(Insets.all(5))
         content.gap(3)
 
         updateContent(content)

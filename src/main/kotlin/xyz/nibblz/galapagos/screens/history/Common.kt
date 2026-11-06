@@ -1,14 +1,11 @@
 package xyz.nibblz.galapagos.screens.history
 
-import io.wispforest.owo.ui.component.UIComponents
-import io.wispforest.owo.ui.container.FlowLayout
-import io.wispforest.owo.ui.container.UIContainers
-import io.wispforest.owo.ui.core.Color
-import io.wispforest.owo.ui.core.Sizing
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.HoverEvent
 import net.minecraft.network.chat.Style
+import net.minecraft.util.ARGB
 import xyz.nibblz.galapagos.data.game.DeathCause
+import xyz.nibblz.galapagos.ui.*
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
@@ -32,7 +29,7 @@ val graphColors: List<Int> = listOf(
     0x0b1707
 )
 
-fun createCauseGraph(data: HashMap<DeathCause, Int>, label: String): FlowLayout {
+fun createCauseGraph(data: HashMap<DeathCause, Int>, label: String): Flow {
     val percents: HashMap<DeathCause, Double> = hashMapOf()
     val sum = data.values.sumOf { it }
 
@@ -43,12 +40,10 @@ fun createCauseGraph(data: HashMap<DeathCause, Int>, label: String): FlowLayout 
     val sorted = percents.entries.sortedByDescending { it.value }
     val mult = graphColors.size / sorted.size
 
-    val graph = UIContainers.horizontalFlow(Sizing.expand(), Sizing.fixed(10))
+    val graph = Flow.horizontal(Sizing.expand(), Sizing.fixed(10))
     sorted.forEachIndexed { index, (_, percent) ->
         graph.child(
-            UIComponents.box(Sizing.fill((percent * 100).toInt()), Sizing.fill())
-                .fill(true)
-                .color(Color.ofRgb(graphColors.getOrNull(index * mult) ?: 0xFFFFFF))
+            Box(Sizing.fill((percent * 100).toInt()), Sizing.fill(), ARGB.opaque(graphColors.getOrNull(index * mult) ?: 0xFFFFFF))
         )
     }
 
@@ -63,11 +58,11 @@ fun createCauseGraph(data: HashMap<DeathCause, Int>, label: String): FlowLayout 
         append(Component.empty()) // goog
     }
 
-    val root = UIContainers.verticalFlow(Sizing.fill(), Sizing.content())
-        .child(UIContainers.horizontalFlow(Sizing.fill(), Sizing.fixed(10))
-            .child(UIComponents.label(Component.literal(label)).shadow(true).horizontalSizing(Sizing.fill(15)))
+    val root = Flow.vertical(Sizing.fill(), Sizing.content())
+        .child(Flow.horizontal(Sizing.fill(), Sizing.fixed(10))
+            .child(Label(Component.literal(label)).shadow(true).horizontalSizing(Sizing.fill(15)))
             .child(graph))
-        .child(UIComponents.label(breakdownComponent).shadow(true))
+        .child(Label(breakdownComponent).shadow(true))
         .gap(2)
 
 

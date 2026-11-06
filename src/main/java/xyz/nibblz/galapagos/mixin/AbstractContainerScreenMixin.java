@@ -35,7 +35,7 @@ public class AbstractContainerScreenMixin {
     @Shadow
     protected int imageHeight;
 
-    @Inject(method = "slotClicked", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "slotClicked(Lnet/minecraft/world/inventory/Slot;IILnet/minecraft/world/inventory/ContainerInput;)V", at = @At("HEAD"), cancellable = true)
     private void slotClicked(Slot slot, int slotId, int buttonNum, ContainerInput containerInput, CallbackInfo ci) {
         if (containerInput == ContainerInput.PICKUP_ALL) return;
         // ^ for whatever reason, double clicking fast will run this function twice, and then AGAIN with pickup all. i dont want that. PMO!!!

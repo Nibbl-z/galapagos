@@ -1,20 +1,11 @@
 package xyz.nibblz.galapagos.screens.history
 
-import io.wispforest.owo.ui.component.UIComponents
-import io.wispforest.owo.ui.container.FlowLayout
-import io.wispforest.owo.ui.container.UIContainers
-import io.wispforest.owo.ui.core.Insets
-import io.wispforest.owo.ui.core.Positioning
-import io.wispforest.owo.ui.core.Sizing
-import io.wispforest.owo.ui.core.Surface
-import io.wispforest.owo.ui.core.VerticalAlignment
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
 import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
-import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.Style
 import net.minecraft.network.chat.TextColor
@@ -25,6 +16,7 @@ import xyz.nibblz.galapagos.core.GameStateHandler
 import xyz.nibblz.galapagos.data.game.BattleBoxKit
 import xyz.nibblz.galapagos.data.game.DeathCause
 import xyz.nibblz.galapagos.features.XPInfo
+import xyz.nibblz.galapagos.ui.*
 import xyz.nibblz.galapagos.util.Glyphs
 import xyz.nibblz.galapagos.util.mcciTextureComponent
 import xyz.nibblz.galapagos.util.percentageToColor
@@ -46,7 +38,7 @@ class BattleBoxHistory : BaseHistory() {
 
     override val game = XPInfo.XPSource.BATTLE_BOX_QUADS
 
-    override fun fillHistory(historyContainer: FlowLayout) {
+    override fun fillHistory(historyContainer: Flow) {
         Galapagos.save.battleBoxHistory.sortedByDescending { it.timestamp }.forEach {
             val dataPoint = DataPoint(
                 GameStateHandler.GameState.BattleBox.teamPlacement(it),
@@ -65,11 +57,11 @@ class BattleBoxHistory : BaseHistory() {
             it.killCauses.forEach { cause -> kills[cause] = (kills[cause] ?: 0) + 1 }
             it.deathCauses.forEach { cause -> deaths[cause] = (deaths[cause] ?: 0) + 1 }
 
-            val container = UIContainers.horizontalFlow(Sizing.fill(100), Sizing.content())
+            val container = Flow.horizontal(Sizing.fill(100), Sizing.content())
             container.gap(5)
-            container.verticalAlignment(VerticalAlignment.CENTER)
+            container.verticalAlignment(Alignment.CENTER)
 
-            container.child(UIComponents.texture(Identifier.fromNamespaceAndPath(Galapagos.MOD_ID, "textures/battle_box/${when(it.map) {
+            container.child(Texture(Identifier.fromNamespaceAndPath(Galapagos.MOD_ID, "textures/battle_box/${when(it.map) {
                 "Canal" -> "canal"
                 "Paint Factory" -> "paint_factory"
                 "Train Station" -> "train_station"
@@ -97,13 +89,13 @@ class BattleBoxHistory : BaseHistory() {
                 else -> "canal"
             }}.png"),
                 0, 0, 200, 60, 200, 60
-            ).blend(true).positioning(Positioning.absolute(0,0)))
+            ).positioning(Positioning.absolute(0,0)))
 
-            val leftContent = UIContainers.verticalFlow(Sizing.fill(50), Sizing.content())
-            leftContent.padding(Insets.of(5))
+            val leftContent = Flow.vertical(Sizing.fill(50), Sizing.content())
+            leftContent.padding(Insets.all(5))
             container.child(leftContent)
 
-            leftContent.child(UIComponents.label(Component.literal(it.map))
+            leftContent.child(Label(Component.literal(it.map))
                 .shadow(true)
             )
 
@@ -128,7 +120,7 @@ class BattleBoxHistory : BaseHistory() {
                 else -> Component.literal("?th").withColor(TextColor.DARK_GRAY.value)
             })
 
-            leftContent.child(UIComponents.label(roundsComponent)
+            leftContent.child(Label(roundsComponent)
                 .shadow(true)
             )
 
@@ -148,16 +140,16 @@ class BattleBoxHistory : BaseHistory() {
                 date.time.toString()
             }
 
-            leftContent.child(UIComponents.label(Component.literal(
+            leftContent.child(Label(Component.literal(
                 "${date.month.name.lowercase().replaceFirstChar { char -> char.uppercase() }} ${date.day}, ${date.year}\n$time"
             ).withColor(TextColor.GRAY.value)).margins(Insets.top(10)))
 
-            val rightContent = UIContainers.verticalFlow(Sizing.fill(50), Sizing.content())
-            rightContent.padding(Insets.of(5))
+            val rightContent = Flow.vertical(Sizing.fill(50), Sizing.content())
+            rightContent.padding(Insets.all(5))
             container.child(rightContent)
 
             rightContent.child(
-                UIComponents.label(
+                Label(
                     Component.literal("Kit: ")
                         .append(mcciTextureComponent(it.kit?.bbSprite() ?: ""))
                         .append(Component.literal(" ${it.kit?.label}")
@@ -169,7 +161,7 @@ class BattleBoxHistory : BaseHistory() {
             val playerStats = it.getPlayer()
 
             rightContent.child(
-                UIComponents.label(
+                Label(
                     Component.literal("${playerStats?.kills} ")
                         .append(Glyphs.getGlyphComponent("_fonts/icon/kills.png"))
                         .append(Component.literal(" ${playerStats?.deaths} "))
@@ -182,7 +174,7 @@ class BattleBoxHistory : BaseHistory() {
             val indivPlacement = it.getPlacement(true)
 
             rightContent.child(
-                UIComponents.label(
+                Label(
                     Component.literal("${playerStats?.score} ")
                         .append(Glyphs.getGlyphComponent("_fonts/icon/score_point.png"))
                         .append(Component.literal(" - ").withColor(TextColor.DARK_GRAY.value))
@@ -201,7 +193,7 @@ class BattleBoxHistory : BaseHistory() {
         }
     }
 
-    override fun fillOverview(overview: FlowLayout) {
+    override fun fillOverview(overview: Flow) {
         val mapWinRates: HashMap<String, Double> = hashMapOf()
         val mapsByWinRate = mapData.keys.sortedBy {
             val data = mapData[it]!!
@@ -256,7 +248,7 @@ class BattleBoxHistory : BaseHistory() {
 
         if (!mapsByWinRate.isEmpty()) {
             overview.child(
-                UIComponents.label(
+                Label(
                     Component.literal("Best Map (By WLR): ")
                         .append(Component.literal(mapsByWinRate.last()).withStyle(Style.EMPTY.withBold(true)))
                         .append(Component.literal(" - "))
@@ -268,7 +260,7 @@ class BattleBoxHistory : BaseHistory() {
             )
 
             overview.child(
-                UIComponents.label(
+                Label(
                     Component.literal("Best Map (By KDR): ")
                         .append(Component.literal(mapsByKDR.last()).withStyle(Style.EMPTY.withBold(true)))
                         .append(Component.literal(" - "))
@@ -279,7 +271,7 @@ class BattleBoxHistory : BaseHistory() {
 
         if (!kitsByWinRate.isEmpty()) {
             overview.child(
-                UIComponents.label(
+                Label(
                     Component.literal("Best Kit (By WLR): ")
                         .append(mcciTextureComponent(kitsByWinRate.last().bbSprite()))
                         .append(Component.literal(" ${kitsByWinRate.last().label}")
@@ -294,7 +286,7 @@ class BattleBoxHistory : BaseHistory() {
             )
 
             overview.child(
-                UIComponents.label(
+                Label(
                     Component.literal("Best Kit (By KDR): ")
                         .append(mcciTextureComponent(kitsByKDR.last().bbSprite()))
                         .append(Component.literal(" ${kitsByKDR.last().label}")
