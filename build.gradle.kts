@@ -58,6 +58,7 @@ dependencies {
 
 	implementation("com.noxcrew.noxesium:fabric:3.3.0")
 	implementation("com.noxcrew.sheeplib:api:1.5.4+26.3")
+	include("com.noxcrew.sheeplib:api:1.5.4+26.3")
 
 	implementation("dev.isxander:yet-another-config-lib:3.9.7+26.3-fabric")
 	implementation("com.terraformersmc:modmenu:21.0.0")
